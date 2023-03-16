@@ -1,0 +1,20 @@
+#CT-CODE
+
+[RACING-TRACK-LIST]
+
+# enable support for LE-CODE flags
+%LE-FLAGS  = 1
+
+# auto insert a Wiimm cup (4 special random slots)
+%WIIMM-CUP = 1
+
+# standard setup
+N N$SWAP | N$F_WII
+ 
+C "Mushroom" # 1
+T T42; T42; 0x00; "GCN Mushroom City"; "GCN Mushroom City";
+T T82; T82; 0x00; "Garden of Dreams"; "Garden of Dreams";
+T T42; T42; 0x04; "temp"; "Random";
+H T42; T42; 0x02; "Royal Rainbow 2"; "Royal Rainbow";
+H T42; T42; 0x02; "WP Wii Tanks 2"; "WP Wii Tanks";
+T T13; T13; 0x01; "Mushroom Valley"; "Mushroom Valley";

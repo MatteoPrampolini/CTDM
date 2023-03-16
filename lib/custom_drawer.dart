@@ -1,0 +1,83 @@
+import 'dart:io';
+
+import 'package:ctdm/drawer_options/rename_pack.dart';
+import 'package:flutter/material.dart';
+
+import 'main.dart';
+
+class CustomDrawer extends StatefulWidget {
+  final String packPath;
+  const CustomDrawer(this.packPath, {super.key});
+
+  @override
+  State<CustomDrawer> createState() => _CustomDrawerState();
+}
+
+class _CustomDrawerState extends State<CustomDrawer> {
+  void _onBackPressed(BuildContext context) {
+    if (widget.packPath.contains('tmp_pack_')) {
+      Directory(widget.packPath).deleteSync(recursive: true);
+    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MyApp(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+      // Important: Remove any padding from the ListView.
+      padding: EdgeInsets.zero,
+      children: [
+        SizedBox(
+          height: 89,
+          child: DrawerHeader(
+            decoration: const BoxDecoration(
+              color: Colors.amber,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                BackButton(
+                    onPressed: () => {_onBackPressed(context)},
+                    color: Colors.red.shade700),
+              ],
+            ),
+          ),
+        ),
+        ListTile(
+          title: const Text('Pack name'),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => RenamePack(widget.packPath)));
+          },
+        ),
+        ListTile(
+          title: const Text('Track config'),
+          onTap: () {
+            // Update the state of the app.
+            // ...
+          },
+        ),
+        ListTile(
+          title: const Text('Lpar'),
+          onTap: () {
+            // Update the state of the app.
+            // ...
+          },
+        ),
+        const Divider(),
+      ],
+    ));
+  }
+}
