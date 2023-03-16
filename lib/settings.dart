@@ -12,6 +12,7 @@ class _SettingsState extends State<Settings> {
   late SharedPreferences prefs;
   late String workspace = "";
   late int isoVersionNumber = 1;
+  // ignore: non_constant_identifier_names
   final List<String> VERSIONS = ["PAL", "USA", "JAP", "KOR"];
 
   @override

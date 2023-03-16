@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ctdm/custom_drawer.dart';
+import 'package:ctdm/patch_window.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
@@ -45,11 +46,6 @@ class _PackEditorState extends State<PackEditor> {
       });
     }
     setState(() {});
-  }
-
-  void patch() {
-    print("bip bop patching...");
-    //TODO
   }
 
   @override
@@ -155,7 +151,16 @@ class _PackEditorState extends State<PackEditor> {
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.amberAccent),
-                              onPressed: canPatch ? () => {patch()} : null,
+                              onPressed: canPatch
+                                  ? () => {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    PatchWindow(
+                                                        widget.packPath)))
+                                      }
+                                  : null,
                               child: Text("PATCH!",
                                   style: TextStyle(
                                       color: canPatch
