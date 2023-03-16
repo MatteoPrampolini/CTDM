@@ -42,9 +42,6 @@ class _PackSelectState extends State<PackSelect> {
 
     //sposta config.txt
     //sposta lecode-VER.bin
-    File configFile = File("assets/config.txt");
-    configFile.copy(path.join(tmp.path, 'config.txt'));
-
     //File()//.copySync
 
     setState(() {});

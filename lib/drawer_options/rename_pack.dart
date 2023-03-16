@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../main.dart';
+
 void saveAndRenamePack(
     String packPath, String chosenName, String chosenId, String isoVersion) {
   //1: se non esiste xml-> copia Pack.xml
@@ -29,8 +31,10 @@ void saveAndRenamePack(
       .where((element) => element.path.endsWith('.xml'));
   File xmlFile = xmlList.first;
   replaceParamsInXml(xmlFile, chosenName, chosenId, isoVersion);
-  //3 TODO
-  //4 TODO
+  //3
+  xmlFile.renameSync(path.join(packPath, "$chosenName.xml"));
+  //4
+  dir.renameSync(path.join(path.dirname(packPath), chosenName));
 }
 
 void createXmlFile(String xmlPath) {
@@ -44,7 +48,15 @@ void replaceParamsInXml(
   final versionRegex = RegExp(r'-[A-Z]+.bin');
 
   contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
-  //rimpiazza chosenName e chosenId
+  String oldName = contents.split(RegExp(r'<section name='))[1];
+  oldName =
+      oldName.replaceRange(oldName.indexOf('>'), null, '').replaceAll('"', '');
+  String oldId = contents.split(RegExp(r'patch id='))[1];
+
+  oldId = oldId.replaceRange(oldId.indexOf(r'/'), null, '').replaceAll('"', '');
+  contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
+  contents = contents.replaceAll(oldName, chosenName);
+  contents = contents.replaceAll(oldId, chosenId);
   xmlFile.writeAsStringSync(contents, mode: FileMode.write);
 }
 
@@ -91,12 +103,17 @@ class _RenamePackState extends State<RenamePack> {
     } else {
       packNameChosen = path.basename(widget.packPath);
       final String xmlPath = path.join(widget.packPath, '$packNameChosen.xml');
-      if (File(xmlPath).existsSync()) {
-        packIdChosen = 'valore letto da qualche file TODO';
+      File xmlFile = File(xmlPath);
+      if (xmlFile.existsSync()) {
       } else {
         createXmlFile(xmlPath);
       }
-      packIdChosen = 'valore letto da qualche file TODO';
+      String contents = xmlFile.readAsStringSync();
+      packIdChosen = contents.split(RegExp(r'patch id='))[1];
+
+      packIdChosen = packIdChosen
+          .replaceRange(packIdChosen.indexOf(r'/'), null, '')
+          .replaceAll('"', '');
     }
     _chosenNameController = TextEditingController.fromValue(
       TextEditingValue(
@@ -128,6 +145,10 @@ class _RenamePackState extends State<RenamePack> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          title: const Text(
+            "Pack name",
+            style: TextStyle(color: Colors.black),
+          ),
           backgroundColor: Colors.amber,
           iconTheme: IconThemeData(color: Colors.red.shade700),
         ),
@@ -235,7 +256,13 @@ class _RenamePackState extends State<RenamePack> {
                         onPressed: enableSaveBtn
                             ? () => {
                                   saveAndRenamePack(widget.packPath,
-                                      packNameChosen, packIdChosen, isoVersion)
+                                      packNameChosen, packIdChosen, isoVersion),
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const MyApp(),
+                                    ),
+                                  )
                                 }
                             : null,
                         child: const Text("SAVE")),

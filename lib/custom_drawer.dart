@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:ctdm/drawer_options/lpar_config.dart';
 import 'package:ctdm/drawer_options/rename_pack.dart';
+import 'package:ctdm/drawer_options/track_config.dart';
 import 'package:flutter/material.dart';
 
 import 'main.dart';
@@ -65,13 +67,19 @@ class _CustomDrawerState extends State<CustomDrawer> {
         ListTile(
           title: const Text('Track config'),
           onTap: () {
-            // Update the state of the app.
-            // ...
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TrackConfig(widget.packPath)));
           },
         ),
         ListTile(
           title: const Text('Lpar'),
           onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => LparConfig(widget.packPath)));
             // Update the state of the app.
             // ...
           },

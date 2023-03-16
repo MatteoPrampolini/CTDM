@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ctdm/custom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -11,23 +13,52 @@ class PackEditor extends StatefulWidget {
 }
 
 class _PackEditorState extends State<PackEditor> {
+  late bool checkResultVisibility = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late bool canPatch = false;
+  late List<bool> checks = [false, false, false, false, false, false];
+  final int optIndex = 3;
+  final List<String> steps = [
+    "valid pack name",
+    'track config',
+    'lpar config',
+    'gecko codes',
+    'custom character',
+    'online patch'
+  ];
+  void checkEverything() {
+    checks[0] = !widget.packPath.contains('tmp_pack_');
+    checks[1] = File(path.join(widget.packPath, 'config.txt')).existsSync();
+    checks[2] = File(path.join(widget.packPath, 'lpar.txt')).existsSync();
 
-  //late TextEditingController _noteController;
-  late bool validName = false;
+    canPatch = checks.take(optIndex).every((element) => element == true);
+    if (!checkResultVisibility && !canPatch) {
+      checkResultVisibility = true;
+      Future.delayed(const Duration(seconds: 5), () {
+        //asynchronous delay
+        if (mounted) {
+          //checks if widget is still active and not disposed
+//tells the widget builder to rebuild again because ui has updated
+          setState(() => {checkResultVisibility = false});
+          //update the variable declare this under your class so its accessible for both your widget build and initState which is located under widget build{}
+        }
+      });
+    }
+    setState(() {});
+  }
+
+  void patch() {
+    print("bip bop patching...");
+    //TODO
+  }
+
   @override
   void initState() {
     super.initState();
-    // _noteController = TextEditingController.fromValue(
-    //   TextEditingValue(
-    //     text: path.basename(widget.packPath),
-    //   ),
-    // );
   }
 
   @override
   void dispose() {
-    //_noteController.dispose();
     super.dispose();
   }
 
@@ -58,73 +89,37 @@ class _PackEditorState extends State<PackEditor> {
                       style: TextStyle(
                           fontSize:
                               Theme.of(context).textTheme.headline4?.fontSize)),
-                  CheckboxListTile(
-                    activeColor: Colors.amberAccent,
-                    value: validName,
-                    onChanged: (value) => {
-                      setState(() => {validName = value!})
-                    },
-                    title: const Text("valid name and id"),
-                    controlAffinity: ListTileControlAffinity.leading,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: GridView.count(
+                        crossAxisCount: 1,
+                        shrinkWrap: true,
+                        childAspectRatio: 1 / 0.08,
+                        children: <Widget>[
+                          for (var step in steps)
+                            ListTile(
+                              onTap: null,
+                              enabled: checks[steps.indexOf(step)],
+                              title: Text(step),
+                              trailing: steps.indexOf(step) >= optIndex
+                                  ? const Text(
+                                      "[opt]",
+                                      style: TextStyle(color: Colors.red),
+                                    )
+                                  : null,
+                              leading: Checkbox(
+                                splashRadius: 0,
+                                value: checks[steps.indexOf(step)],
+                                activeColor: Colors.amberAccent,
+                                fillColor: MaterialStateProperty.all(
+                                    Colors.amberAccent),
+                                side: const BorderSide(
+                                    color: Colors.white38, width: 2),
+                                onChanged: null,
+                              ),
+                            )
+                        ]),
                   ),
-                  CheckboxListTile(
-                    activeColor: Colors.amberAccent,
-                    value: validName,
-                    onChanged: (value) => {
-                      setState(() => {validName = value!})
-                    },
-                    title: const Text("tracks config"),
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-                  CheckboxListTile(
-                    activeColor: Colors.amberAccent,
-                    value: validName,
-                    onChanged: (value) => {
-                      setState(() => {validName = value!})
-                    },
-                    title: const Text("lpar"),
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-                  CheckboxListTile(
-                    activeColor: Colors.amberAccent,
-                    value: validName,
-                    onChanged: (value) => {
-                      setState(() => {validName = value!})
-                    },
-                    secondary: const Text(
-                      "[opt]",
-                      style: TextStyle(color: Colors.redAccent),
-                    ),
-                    title: const Text("gecko codes"),
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-                  CheckboxListTile(
-                    activeColor: Colors.amberAccent,
-                    value: validName,
-                    onChanged: (value) => {
-                      setState(() => {validName = value!})
-                    },
-                    secondary: const Text(
-                      "[opt]",
-                      style: TextStyle(color: Colors.redAccent),
-                    ),
-                    title: const Text("custom characters"),
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-                  CheckboxListTile(
-                    activeColor: Colors.amberAccent,
-                    value: validName,
-                    onChanged: (value) => {
-                      setState(() => {validName = value!})
-                    },
-                    secondary: const Text(
-                      "[opt]",
-                      style: TextStyle(color: Colors.redAccent),
-                    ),
-                    title: const Text("online patch"),
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
@@ -135,39 +130,50 @@ class _PackEditorState extends State<PackEditor> {
                           child: ElevatedButton(
                               onPressed: () => {
                                     //_scaffoldKey.currentState?.openDrawer(),
-                                    print("check")
+                                    checkEverything(),
+                                    if (!canPatch)
+                                      {
+                                        Future.delayed(
+                                            const Duration(seconds: 2), () {
+                                          //asynchronous delay
+                                          if (mounted) {
+                                            //checks if widget is still active and not disposed
+//tells the widget builder to rebuild again because ui has updated
+                                            _scaffoldKey.currentState
+                                                ?.openDrawer();
+                                            //update the variable declare this under your class so its accessible for both your widget build and initState which is located under widget build{}
+                                          }
+                                        })
+                                      }
                                   },
                               child: const Text("CHECK")),
                         ),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: ElevatedButton(
-                              onPressed: null, child: Text("PATCH!")),
-                        ),
+                            padding: const EdgeInsets.all(8.0),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.amberAccent),
+                              onPressed: canPatch ? () => {patch()} : null,
+                              child: Text("PATCH!",
+                                  style: TextStyle(
+                                      color: canPatch
+                                          ? Colors.black
+                                          : Colors.white)),
+                            )),
                       ),
                     ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: Visibility(
+                        visible: checkResultVisibility,
+                        child: const Text(
+                          "Failed: complete mandatory steps first.",
+                          style: TextStyle(color: Colors.white60),
+                        )),
                   )
-
-                  // SizedBox(
-                  //   width: MediaQuery.of(context).size.width / 2,
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Tooltip(
-                  //         message: "Pack name",
-                  //         child: TextField(
-                  //             decoration:
-                  //                 const InputDecoration(border: InputBorder.none),
-                  //             autofocus: false,
-                  //             keyboardType: TextInputType.multiline,
-                  //             maxLines: null,
-                  //             controller: _noteController),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
                 ],
               ),
             ),

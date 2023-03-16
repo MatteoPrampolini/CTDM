@@ -5,11 +5,11 @@
 	<options>
 		<section name="PACKNAME">
 		  <option name="Enable">
-			  <choice name="PACKNAME"><patch id="PACKID" /></choice>
+			  <choice name="PACKNAME"><patch id="PACKID"/></choice>
 		  </option>
 		</section>
 	  </options>
-	<patch id="Pack">
+	<patch id="PACKID">
 		<file disc="/rel/lecode-VER.bin" external="/PACKNAME/boot/lecode-VER.bin" create="true" />
 		<folder external="/PACKNAME/sys" recursive="false" />
 		<folder external="/PACKNAME/sys" disc="/" />

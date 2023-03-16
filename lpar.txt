@@ -1,0 +1,510 @@
+#LE-LPAR <<< The first 8 characters are the magic for a LE-CODE parameter file.
+#        <<< Don't remove them!
+#
+###############################################################################
+#
+# This LE-CODE parameter file is a textual representation of the LPAR section
+# of LE-CODE binary fils with editable parameters. It is defined by Wiimm.
+#
+# Hint:
+#   Set one of the options --no-header (-H) or --brief (-B) while decoding
+#   to suppress this general description. The --brief option will also disable
+#   info parts in the different sections.
+#
+
+#
+###############################################################################
+
+[LECODE-PARAMETERS]
+
+# This section defines general LE-CODE parameters. The corresponding options
+# have a higher priority. Remove or comment-out a parameter if its value
+# should not be changed. All values will be limited to the allowed ranges.
+
+#------------------------------------------------------------------------------
+
+# First we define a limitation mode. This mode defines the allowed values for
+# the other parameters of this section:
+#
+#   LE$PRODUCTIVE   : Exclude test and experimental values.
+#   LE$TESTING      : Allow test values, but exclude experimental values.
+#   LE$EXPERIMENTAL : Allow all values.
+#   LE$AUTOMATIC    : Enable automatic detection by analyzing all values.
+#
+# Values set by an option are never limited. See parameter descriptions for
+# limitation details.
+
+LIMIT-MODE	= LE$AUTOMATIC
+
+#------------------------------------------------------------------------------
+
+# LE-CODE supports cheat codes as sequence of D-Pad keys in combination with
+# ALT keys. Here you can define, which type of cheat codes are allowed:
+#  0: Almost all cheat codes are disabled.
+#  1: Only cheat codes without impact to game play are allowed.
+#  2: All cheat codes are allowed. (Not possible if LIMIT-MODE==LE$PRODUCTIVE).
+
+CHEAT-MODE	= 0
+
+# Define probabilities for engine classes. A list for »100cc,150cc,mirror« is
+# expected. If 200cc is enabled, the values are for »150cc,200cc,mirror«. Any
+# number is accepted. They are normalized to get a total of 100 percent.
+# Use »0,1,0« to force 150cc. Use »0,0,0« to reset to Nintendo's VR based
+# choice. Option --engine will overrides these settings.
+
+ENGINE		= 10,60,30
+
+# Enable (1) or disable (0) 200cc support. Option --200cc will overrides this
+# setting. LE-CODE hasn't implemented this feature yet!
+
+ENABLE-200CC	= 0
+
+# Enable (1) or disable (0) the performance monitor at Wii and Wii U. Enabling
+# is only possible if LIMIT-MODE is LE$TESTING or LE$EXPERIMENTAL. The special
+# value 2 enables it for Dolphin too, but only on LE$EXPERIMENTAL. It doesn't
+# work correctly with Dolphin. Option --perf-mon will overrides this setting.
+
+PERF-MONITOR	= 0
+
+# Enable (1) or disable (0) Time Trial for custom tracks. Option --custom-tt
+# will overrides this setting.
+
+CUSTOM-TT	= 0
+
+# Enable (1) or disable (0) support for Extended Presence Flags. Disable it
+# only for tests! If LIMIT-MODE==LE$PRODUCTIVE, XPFLAGS is always enabled.
+# Option --xpflags overrides this setting.
+
+XPFLAGS		= 1
+
+# Define the number of races that a previously used track is blocked. LE-CODE
+# will try to find another possible track among the selected tracks. Values
+# between 0 (deactivated at all) and 50 are allowed. Chat messages can clear
+# the track list and enable or disable this feature.
+
+BLOCK-TRACK	= 0
+
+# Enables (SPEEDO$0 .. SPPEDO$3) or disables (SPEEDO$OFF) the speedometer.
+# If enabled, the speedometer is displayed at bottom right of the screen
+# using format »123.123 km/h«. The digit behind SPEEDO$ defines the number
+# of fraction digits.
+# Option --speedometer overrides this setting.
+
+SPEEDOMETER	= SPEEDO$OFF
+
+# Define a debug mode. Debug output is displayed below the speedometer. It is
+# defined by sections [DEBUG-*]. This parameter defines the general behaviour.
+# Possible values are DEBUG$OFF, DEBUG$ENABLED and DEBUG$1 to DEBUG$4.
+# DEBUG$OFF disables the debug output at all. All other values enable debug
+# output and define the start configuration.
+# Option --debug overrides this setting.
+
+DEBUG		= DEBUG$OFF
+
+# Enable (1) or disable (0) built-in item cheat.
+
+ITEM-CHEAT	= 0
+
+# Allow (1) or forbid (0) players to drag blue shells behind them.
+# LE-CODE default is 1.
+
+DRAG-BLUE-SHELL	= 1
+
+# Define the time in frames a player is small after being struck by a
+# thundercloud. Only values between 1 and 32767 (0x7fff) are accepted.
+# MKW uses 612 (10.2s) and LE-CODE default is 300 (5.0s).
+
+THCLOUD-TIME	= 300 # 5.00s
+
+# Since build 36, LE-CODE supports worldwide matches. Here you can disable (0)
+# or enable (1) it for battle or versus. The online "worldwide" button is
+# disabled, if both settings are disabled.
+
+BT-WORLDWIDE	= LE$DISABLE
+VS-WORLDWIDE	= LE$DISABLE
+
+# Since build 34, LE-CODE supports texture hacks for original Nintendo tracks
+# and arenas. This new feature can be disabled by value LE$DISABLE (default)
+# or enabled by value LE$ENABLE. Additonally you can append »|LE$ALTERABLE«
+# to allow the user to enable or disable this feature by controller cheat
+# codes. Append »|LE$EXCLUDE« to exclude the original track from the random
+# selection.
+
+BT-TEXTURES	= LE$DISABLE
+VS-TEXTURES	= LE$DISABLE
+
+# Disable (0) or enable (1) the blocking of recent texture hacks. If disabled
+# all online players select always the same texture variant. If enabled, then
+# a texture variant will be blocked for the next 3 races. However, this has
+# the disadvantage that players with different pasts may select different
+# variants. But this should go away after a few races.
+
+BLOCK-TEXTURES	= 1
+
+# LE-CODE usually (0) overwrites the table that determines the distribution of
+# points in private races. Nintendo has defined values between 0 and 15 in
+# StaticR.rel, LE-CODE defines values between 1 and 25. If this parameter is
+# set to 1, then the values are read from StaticR.rel.
+
+STATICR-POINTS	= 0
+
+
+#
+###############################################################################
+
+[CHAT-MESSAGE-MODES]
+
+# LE-CODE supports a special feature for chat messages in private rooms. If a
+# message is send by the host and at least one guest is present, then some
+# messages change the behavior of the game. This section defines the special
+# function.
+
+# The first parameter resets all message to CHAT$OFF (no function).
+# The default is value 1. If set to 0, the current map is edited.
+@reset = 1
+
+# Set the value to 1 if you want to use the old behavior defined for MKW-Fun.
+@legacy = 0
+
+# And now define the functions for different chat messages. The syntax is:
+#
+#	MESSAGE '=' EXPRESSION1
+#	MESSAGE '=' EXPRESSION1 ',' EXPRESSION2
+#
+# MESSAGE is the letter 'M' followed by a number between 1 and 96. Examples
+# are M1, M02, M96. EXPRESSION is any expression supported by the parser.
+# Up to 2 modes (separated by a comma) can be defined for each message.
+# Usually the following constants or functions are used:
+#
+#   CHAT$TRACK_BY_HOST : The host selects a tracks and wins the lottery.
+#                        The track selection for guests is disabled. 
+#   CHAT$ANY_TRACK     : Cancel CHAT$TRACK_BY_HOST.
+#
+#   CHAT$BLOCK_CLEAR   : Clear the used-tracks list.
+#   CHAT$BLOCK_DISABLE : Disable the block-track functionality.
+#   CHAT$BLOCK_ENABLE  : Enable the block-track functionality. This is the
+#                        default, but have only impact, if BLOCK-TRACK > 0.
+#
+#   CHAT$KARTS_ONLY    : Each player must select a kart.
+#   CHAT$BIKES_ONLY    : Each player must select a bike.
+#   CHAT$ANY_VEHICLE   : Cancel vehicle requirement.
+#
+#   CHAT$USE_ENGINE_1  : Select first engine class  (100cc or 150cc if 200cc enabled)
+#   CHAT$USE_ENGINE_2  : Select second engine class (150cc or 200cc if 200cc enabled)
+#   CHAT$USE_ENGINE_3  : Select third engine class  (mirror)
+#   CHAT$RESET_ENGINE  : Cancel engine selection.
+#
+#   chat$n_races(N)    : Define the number of races in the next Grand Prix.
+#                        N is a number between 1 and 512 (inclusive). 
+#
+#   chat$vehicle(...)  : Define a chat modus for a vehicle group. 0 to N values
+#                        are expected as function parameters. Each parameter is
+#                        either from the group VEH$SMALL, VEH$MEDIUM, VEH$LARGE
+#                        and VEH$ANY_SIZE for size selections and/or from the
+#                        group VEH$KART, VEH$BIKE, VEH$ANY_TYPE for type
+#                        selections. VEH$ANY resets the limitations.
+#
+#   CHAT$RESET         : Reset all settings to their defaults.
+#
+# See https://wiki.tockdom.com/wiki/LE-CODE/Distribution_Tutorial#chatmsg
+# for more details.
+#
+# Examples:
+#   M01 = CHAT$TRACK_BY_HOST
+#   M96 = chat$n_races(15), CHAT$USE_ENGINE_2
+
+#
+###############################################################################
+
+[DEBUG-DOCU]
+# This section is documentation only and has no impact!
+
+# If the general parameter DEBUG (see section [LECODE-PARAMETERS]) is set to
+# a value ≥1, then additional information is added below the speed (even if
+# speedometer is disabled). The intention is to debug tracks.
+
+# 4 debug displays with up to 10 lines each can be defined.
+
+#------------------------------------------------------------------------------
+
+# SETUP = DEBUG$...
+# Usually, a debug section is edited, so that not specified parameters are
+# not modified (same as DEBUG$OFF). With SETUP a section can be initialized:
+#
+#  DEBUG$OFF      : Do nothing.
+#  DEBUG$CLEAR    : Clear all data.
+#
+#  DEBUG$STANDARD : Use a standard debug line for the player.
+#  DEBUG$OPPONENT : Use a standard debug line for the player and one more line
+#		    for the first opponent.
+#  DEBUG$VERTICAL : Arrange the output vertically for the player.
+
+# HIDE-SPEEDO = 0 | 1
+# This global command is independent from lines. If set and this configuration
+# becomes active, then hide the speedometer. This helps if many elements are
+# active. Otherwise a smaller font is selected by the system. 
+    
+#------------------------------------------------------------------------------
+
+# LINE = -1 | 0..9
+# Select a line. All following commands until the next LINE command disable or
+# enable the output for the current line. Lines are numbered from 0 to 9. If
+# an invalid index is entered, the following commands are ignored. So set
+# LINE=-1 to disable a complete line. 
+
+# ENABLED = 0|1
+# ENABLED defines, if the current lines becomes active. If set to 0 or if all
+# other parts are disabled, then the debug line is not printed. So you can
+# disable a line without changing the other parameters.
+
+# OPPONENT = 0|1
+# Usually the data of the current player is printed (font color yellow). If
+# OPPONENT is enabled, then print the data of the first opponent and use a
+# blue font color as indicator. 
+
+# SPACE = 0|1
+# Usually the lines are separated by a line terminator (line feed). If SPACE
+# is set, then a space is used instead, so that the previous and the current
+# line are displayed in one visual line. 
+
+# POSITION = 0|1
+#   Output: P=x,y,z
+# If enabled then print the current position (x, y and z coordinates) of the
+# player. Coordinates outside the range ±131071 (see Item position bug) are
+# highlighted by an orange font, or a white font it the position is fixed by
+# LEX ITEM-POS-FACTOR.
+
+# CHECK-POINT = 0..3
+#   Output: CK=c   |   CK=c,k   |   CK=c,k^m
+# If enabled print a check point info. The mode defines how many parts are
+# printed. 'c' is the current check point. 'k' is the last relevant key check
+# point. 'm' is the highest reached key check point in the current lap. If
+# driving backwards, 'k' is decreased, but 'm' not. 
+
+# RESPAWN = 0|1
+#   Output: R=r
+# If enabled then print the respawn index defined by the current check point. 
+# This information may help to test all respawn points of a track. 
+
+# ITEM-POINT = 0|1
+#   Output: I=i
+# If enabled print the current item point index of the player.
+
+# KCL-TYPE = 0|1
+#   Output: K=t,v
+# If enabled print current KCL type (t=00-1F) and KCL variant (v=000-7FF).
+
+# LAP-POS = 0|1
+#   Output: L=lap
+# Print the current lap position as floating point value with 3 digits. The
+# integer number reflects the current lap number, and the decimal (0.000 to
+# 0.999) the progress within the current lap. This number is calculated by
+# Mario Kart Wii to compare positions. Together with the opponent view it
+# can help to investigate different paths of a track and to place the check
+# points at good positions.
+
+# XPF = 0|1|2
+#   Output: X:...
+# If enabled, a short (1) or long (2) information about the usage of extended
+# presence flags is printed, but only if an information is available. The long
+# information is similar to the short one, but with more or extended members.
+# See https://wiki.tockdom.com/wiki/LPAR#XPF for details.
+
+#
+###############################################################################
+
+[DEBUG-1]
+# See section [DEBUG-DOCU] for details.
+
+SETUP		= DEBUG$STANDARD
+HIDE-SPEEDO	= 0
+
+LINE		= 1
+ENABLED		= 1
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 1
+CHECK-POINT	= 3
+RESPAWN		= 1
+ITEM-POINT	= 1
+KCL-TYPE	= 1
+LAP-POS		= 1
+TRACK-ID	= 1
+XPF		= 3
+
+#
+###############################################################################
+
+[DEBUG-2]
+# See section [DEBUG-DOCU] for details.
+
+SETUP		= DEBUG$OPPONENT
+HIDE-SPEEDO	= 0
+
+LINE		= 1
+ENABLED		= 1
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 1
+CHECK-POINT	= 3
+RESPAWN		= 1
+ITEM-POINT	= 1
+KCL-TYPE	= 1
+LAP-POS		= 1
+TRACK-ID	= 1
+XPF		= 3
+
+LINE		= 2
+ENABLED		= 1
+OPPONENT	= 1
+SPACE		= 0
+POSITION	= 1
+CHECK-POINT	= 3
+RESPAWN		= 1
+ITEM-POINT	= 1
+KCL-TYPE	= 1
+LAP-POS		= 1
+TRACK-ID	= 1
+XPF		= 3
+
+#
+###############################################################################
+
+[DEBUG-3]
+# See section [DEBUG-DOCU] for details.
+
+SETUP		= DEBUG$VERTICAL
+HIDE-SPEEDO	= 1
+
+LINE		= 1
+ENABLED		= 1
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 0
+CHECK-POINT	= 3
+RESPAWN		= 0
+ITEM-POINT	= 0
+KCL-TYPE	= 0
+LAP-POS		= 0
+TRACK-ID	= 0
+XPF		= 0
+
+LINE		= 2
+ENABLED		= 1
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 0
+CHECK-POINT	= 0
+RESPAWN		= 1
+ITEM-POINT	= 0
+KCL-TYPE	= 0
+LAP-POS		= 0
+TRACK-ID	= 0
+XPF		= 0
+
+LINE		= 3
+ENABLED		= 1
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 0
+CHECK-POINT	= 0
+RESPAWN		= 0
+ITEM-POINT	= 1
+KCL-TYPE	= 0
+LAP-POS		= 0
+TRACK-ID	= 0
+XPF		= 0
+
+LINE		= 4
+ENABLED		= 1
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 0
+CHECK-POINT	= 0
+RESPAWN		= 0
+ITEM-POINT	= 0
+KCL-TYPE	= 1
+LAP-POS		= 0
+TRACK-ID	= 0
+XPF		= 0
+
+LINE		= 5
+ENABLED		= 1
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 0
+CHECK-POINT	= 0
+RESPAWN		= 0
+ITEM-POINT	= 0
+KCL-TYPE	= 0
+LAP-POS		= 1
+TRACK-ID	= 0
+XPF		= 0
+
+LINE		= 6
+ENABLED		= 1
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 1
+CHECK-POINT	= 0
+RESPAWN		= 0
+ITEM-POINT	= 0
+KCL-TYPE	= 0
+LAP-POS		= 0
+TRACK-ID	= 0
+XPF		= 0
+
+LINE		= 7
+ENABLED		= 1
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 0
+CHECK-POINT	= 0
+RESPAWN		= 0
+ITEM-POINT	= 0
+KCL-TYPE	= 0
+LAP-POS		= 0
+TRACK-ID	= 1
+XPF		= 0
+
+LINE		= 8
+ENABLED		= 1
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 0
+CHECK-POINT	= 0
+RESPAWN		= 0
+ITEM-POINT	= 0
+KCL-TYPE	= 0
+LAP-POS		= 0
+TRACK-ID	= 0
+XPF		= 2
+
+#
+###############################################################################
+
+[DEBUG-4]
+# See section [DEBUG-DOCU] for details.
+
+SETUP		= DEBUG$OFF
+HIDE-SPEEDO	= 0
+
+LINE		= 1
+ENABLED		= 0
+OPPONENT	= 0
+SPACE		= 0
+POSITION	= 0
+CHECK-POINT	= 0
+RESPAWN		= 0
+ITEM-POINT	= 0
+KCL-TYPE	= 0
+LAP-POS		= 0
+TRACK-ID	= 0
+XPF		= 0
+
+#
+###############################################################################
+
+[END]
+# This section is ignored.
+
