@@ -1,3 +1,4 @@
+import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,10 +33,9 @@ void main() async {
   if (!prefs.containsKey('isoVersion')) {
     prefs.setString('isoVersion', 'PAL');
   }
-  // if (!prefs.containsKey('isoExtracted')) {
-  //   prefs.setBool("isoExtracted", false);
-  // }
 
+  WidgetsFlutterBinding.ensureInitialized();
+  await DesktopWindow.setMinWindowSize(const Size(1000, 800));
   runApp(const MyApp());
 }
 

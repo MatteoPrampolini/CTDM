@@ -50,7 +50,31 @@ class _PackEditorState extends State<PackEditor> {
 
   @override
   void initState() {
+    loadSettings();
     super.initState();
+  }
+
+  void loadSettings() async {
+    if (!await Directory(path.join(widget.packPath, 'Scene')).exists()) {
+      Directory(path.join(widget.packPath, 'Scene')).create();
+    }
+    if (!await Directory(path.join(widget.packPath, 'sys')).exists()) {
+      Directory(path.join(widget.packPath, 'sys')).create();
+    }
+    if (!await Directory(path.join(widget.packPath, 'rel')).exists()) {
+      Directory(path.join(widget.packPath, 'rel')).create();
+    }
+    if (!await Directory(path.join(widget.packPath, 'Race')).exists()) {
+      Directory(path.join(widget.packPath, 'Race')).create();
+    }
+    if (!await Directory(path.join(widget.packPath, 'Race', 'Course'))
+        .exists()) {
+      Directory(path.join(widget.packPath, 'Race', 'Course')).create();
+    }
+    if (!await Directory(path.join(widget.packPath, 'Race', 'Common'))
+        .exists()) {
+      Directory(path.join(widget.packPath, 'Race', 'Common')).create();
+    }
   }
 
   @override
@@ -90,7 +114,7 @@ class _PackEditorState extends State<PackEditor> {
                     child: GridView.count(
                         crossAxisCount: 1,
                         shrinkWrap: true,
-                        childAspectRatio: 1 / 0.08,
+                        childAspectRatio: 1 / 0.09,
                         children: <Widget>[
                           for (var step in steps)
                             ListTile(
