@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--Made with CTDM-->
 <wiidisc version="1">
 	<id game="RMC" disc="0" version="0">
 	</id>
@@ -10,7 +11,7 @@
 		</section>
 	  </options>
 	<patch id="PACKID">
-		<file disc="/rel/lecode-VER.bin" external="/PACKNAME/boot/lecode-VER.bin" create="true" />
+		<file disc="/rel/lecode-VER.bin" external="/PACKNAME/rel/lecode-VER.bin" create="true" />
 		<folder external="/PACKNAME/sys" recursive="false" />
 		<folder external="/PACKNAME/sys" disc="/" />
 		<file disc="/Scene/UI/MenuSingle_J.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
@@ -21,7 +22,9 @@
 		<file disc="/Scene/UI/MenuSingle_G.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
 		<file disc="/Scene/UI/MenuSingle_I.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
 		<file disc="/Scene/UI/MenuSingle_S.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
-
+		<file disc="/Scene/UI/MenuSingle.szs" external="/PACKNAME/Scene/MenuSingle.szs" />
+		<!--MY COMMONS-->
+		<!--END MY TRACKS-->
 
 	</patch>
 

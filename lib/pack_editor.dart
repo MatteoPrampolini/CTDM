@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ctdm/custom_drawer.dart';
+import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/patch_window.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -13,25 +14,59 @@ class PackEditor extends StatefulWidget {
   State<PackEditor> createState() => _PackEditorState();
 }
 
+void wipeOldFiles(String packPath) {
+  try {
+    if (Directory(path.join(packPath, 'Race', 'Course')).existsSync()) {
+      Directory(path.join(packPath, 'Race', 'Course'))
+          .deleteSync(recursive: true);
+    }
+    if (Directory(path.join(packPath, 'Race', 'Common')).existsSync()) {
+      Directory(path.join(packPath, 'Race', 'Common'))
+          .deleteSync(recursive: true);
+    }
+    if (Directory(path.join(packPath, 'rel')).existsSync()) {
+      Directory(path.join(packPath, 'rel')).deleteSync(recursive: true);
+    }
+    if (Directory(path.join(packPath, 'Scene')).existsSync()) {
+      Directory(path.join(packPath, 'Scene')).deleteSync(recursive: true);
+    }
+    if (Directory(path.join(packPath, 'sys')).existsSync()) {
+      Directory(path.join(packPath, 'sys')).deleteSync(recursive: true);
+    }
+  } catch (_) {}
+}
+
 class _PackEditorState extends State<PackEditor> {
   late bool checkResultVisibility = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late bool canPatch = false;
-  late List<bool> checks = [false, false, false, false, false, false];
-  final int optIndex = 3;
+  late List<bool> checks = [false, false, false, false, false, false, false];
+  final int optIndex = 4;
   final List<String> steps = [
     "valid pack name",
     'track config',
     'lpar config',
+    'cup icons',
     'gecko codes',
     'custom character',
     'online patch'
   ];
-  void checkEverything() {
+  void checkEverything() async {
     checks[0] = !widget.packPath.contains('tmp_pack_');
     checks[1] = File(path.join(widget.packPath, 'config.txt')).existsSync();
     checks[2] = File(path.join(widget.packPath, 'lpar.txt')).existsSync();
 
+    if (!Directory(path.join(widget.packPath, 'Icons')).existsSync()) {
+      checks[3] = false;
+    } else {
+      checks[3] = Directory(path.join(widget.packPath, 'Icons'))
+                  .listSync()
+                  .whereType<File>()
+                  .toList()
+                  .length -
+              2 ==
+          await getNumberOfIconsFromConfig(widget.packPath);
+    }
     canPatch = checks.take(optIndex).every((element) => element == true);
     if (!checkResultVisibility && !canPatch) {
       checkResultVisibility = true;
@@ -177,6 +212,7 @@ class _PackEditorState extends State<PackEditor> {
                                   backgroundColor: Colors.amberAccent),
                               onPressed: canPatch
                                   ? () => {
+                                        wipeOldFiles(widget.packPath),
                                         Navigator.push(
                                             context,
                                             MaterialPageRoute(

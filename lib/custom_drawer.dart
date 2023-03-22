@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/drawer_options/lpar_config.dart';
 import 'package:ctdm/drawer_options/rename_pack.dart';
 import 'package:ctdm/drawer_options/track_config.dart';
+import 'package:ctdm/drawer_options/track_config_gui.dart';
 import 'package:flutter/material.dart';
 
 import 'main.dart';
@@ -80,6 +82,17 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => LparConfig(widget.packPath)));
+            // Update the state of the app.
+            // ...
+          },
+        ),
+        ListTile(
+          title: const Text('Cup icons'),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CupIconsWindow(widget.packPath)));
             // Update the state of the app.
             // ...
           },

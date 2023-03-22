@@ -9,12 +9,26 @@
 %WIIMM-CUP = 1
 
 # standard setup
-N N$SWAP | N$F_WII
- 
-C "Mushroom" # 1
+N N$NONE | N$F_WII
+
+C "LELLO" 1
+T T11; T11; 0x00; "Circuito Luigi"; "Gigi Circuito";
+T T12; T12; 0x00; "Roba Mucche"; "MOOOOOOOOOO Circuit";
+T T13; T13; 0x00; "Gola Fungo"; "Troppi funghi + caverna del cazzo";
+T T14; T14; 0x00; "Fabbrica Toad"; "Fabbrica di toad";
+
+C "SWAG" 2
+T T42; T42; 0x00; "Royal Rainbow 2"; "Royal Rainbow";
+T T42; T42; 0x00; "WP Wii Tanks 2"; "WP Wii Tanks";
+T T42; T42; 0x02; "temp"; "Random";
+H T42; T42; 0x04; "GCN Mushroom City"; "GCN Mushroom City";
+H T82; T82; 0x04; "Garden of Dreams"; "Garden of Dreams";
+T T13; T13; 0x00; "Mushroom Valley"; "Mushroom Valley";
+
+C "SWAG" 3
 T T42; T42; 0x00; "GCN Mushroom City"; "GCN Mushroom City";
 T T82; T82; 0x00; "Garden of Dreams"; "Garden of Dreams";
-T T42; T42; 0x04; "temp"; "Random";
-H T42; T42; 0x02; "Royal Rainbow 2"; "Royal Rainbow";
-H T42; T42; 0x02; "WP Wii Tanks 2"; "WP Wii Tanks";
-T T13; T13; 0x01; "Mushroom Valley"; "Mushroom Valley";
+T T42; T42; 0x02; "temp"; "Random";
+H T42; T42; 0x04; "Royal Rainbow 2"; "Royal Rainbow";
+H T42; T42; 0x04; "WP Wii Tanks 2"; "WP Wii Tanks";
+T T13; T13; 0x00; "Mushroom Valley"; "Mushroom Valley";

@@ -181,7 +181,7 @@ class _RenamePackState extends State<RenamePack> {
                             style: TextStyle(color: Colors.white54),
                           ),
                           SizedBox(
-                            width: MediaQuery.of(context).size.width / 2,
+                            width: MediaQuery.of(context).size.width / 2 - 15,
                             child: TextField(
                                 onChanged: (newvalue) => {
                                       packNameChosen = newvalue,
