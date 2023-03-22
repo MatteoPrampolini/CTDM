@@ -54,7 +54,7 @@ Track parseTrackLine(String trackLine) {
         break;
       case 4:
         tmp.name = param.trim().replaceAll('"', '');
-        ;
+
         break;
     }
     i++;
