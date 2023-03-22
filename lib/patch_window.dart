@@ -184,7 +184,7 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
   final File origSingle = File(path.join(
       workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle.szs'));
   origSingle.copySync(path.join(packPath, 'Scene', 'MenuSingle.szs'));
-  //TODO RIMETTERE
+
   try {
     //wszst patch MenuSingle.szs --le-menu --cup-icons ./icons.tpl --links
     final process = await Process.start(
@@ -341,11 +341,6 @@ String getBmgFromFileName(File configFile, String filePath) {
 // }
 
 List<String> getIdFromTracksBmgTxt(List<String> bmgLines, String trackName) {
-  //print(trackName);
-  //String contents = File(bmgTxtPath).readAsStringSync();
-  //RegExp exp = RegExp(trackName);
-  //print(exp.allMatches(contents));
-  //List<String> lines = File(bmgTxtPath).readAsLinesSync();
   List<String> ids = [];
   for (var line in bmgLines) {
     //print(line);
@@ -354,9 +349,6 @@ List<String> getIdFromTracksBmgTxt(List<String> bmgLines, String trackName) {
     }
   }
   return ids;
-  //print(bmgTxtPath);
-  // print("|$trackName|");
-  // return "ID NOT FOUND";
 }
 
 void trackPathToCommon(
@@ -422,7 +414,7 @@ Future<void> patchIcons(String packPath) async {
   Directory iconDir = Directory(path.join(packPath, 'Icons'));
   int nCups = await getNumberOfIconsFromConfig(packPath);
   if (iconDir.listSync().whereType<File>().length < nCups + 2) {
-    print("mancano delle icone!");
+    //print("mancano delle icone!"); TODO
     return;
   }
   await createBigImage(iconDir, nCups);
@@ -526,7 +518,7 @@ class _PatchWindowState extends State<PatchWindow> {
     }
     try {
       //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-      final process = await Process.run(
+      final process = await Process.start(
           'wlect',
           [
             'patch',
