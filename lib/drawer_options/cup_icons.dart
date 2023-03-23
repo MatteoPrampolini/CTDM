@@ -70,6 +70,7 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
 
   @override
   Widget build(BuildContext context) {
+    Process pr;
     return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -141,21 +142,28 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width / 2.5),
-                      child: ElevatedButton(
+                        padding: EdgeInsets.symmetric(
+                            horizontal:
+                                MediaQuery.of(context).size.width / 2.5),
+                        child: ElevatedButton(
                           child: const Text(
                             "open Icons folder",
                             textAlign: TextAlign.center,
                           ),
-                          onPressed: () => {
-                                if (Directory(
-                                        path.join(widget.packPath, 'Icons'))
-                                    .existsSync())
-                                  launchUrlString(
-                                      path.join(widget.packPath, 'Icons'))
-                              }),
-                    ),
+                          onPressed: () async => {
+                            if (Directory(path.join(widget.packPath, 'Icons'))
+                                .existsSync())
+                              if (!Platform.isLinux)
+                                {launchUrlString(widget.packPath)},
+                            if (Platform.isLinux)
+                              {
+                                pr = await Process.start(
+                                    'open', [widget.packPath]),
+                                await pr.exitCode,
+                                //await
+                              }
+                          },
+                        )),
                     // Padding(
                     //   padding: EdgeInsets.symmetric(
                     //       horizontal: MediaQuery.of(context).size.width / 2.5),

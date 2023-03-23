@@ -141,9 +141,7 @@ class _CupTableHeaderState extends State<CupTableHeader> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Colors.red,
-          border:
-              Border.all(color: Colors.black, strokeAlign: StrokeAlign.center)),
+          color: Colors.red, border: Border.all(color: Colors.black)),
       height: 60,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,

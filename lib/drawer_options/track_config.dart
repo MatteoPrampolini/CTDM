@@ -35,6 +35,7 @@ class _TrackConfigState extends State<TrackConfig> {
 
   @override
   Widget build(BuildContext context) {
+    Process pr;
     return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -64,7 +65,17 @@ class _TrackConfigState extends State<TrackConfig> {
                   Padding(
                     padding: const EdgeInsets.only(top: 12.0),
                     child: ElevatedButton(
-                        onPressed: () => {launchUrlString(widget.packPath)},
+                        onPressed: () async => {
+                              if (!Platform.isLinux)
+                                {launchUrlString(widget.packPath)},
+                              if (Platform.isLinux)
+                                {
+                                  pr = await Process.start(
+                                      'open', [widget.packPath]),
+                                  await pr.exitCode,
+                                  //await
+                                }
+                            },
                         child: const Text("open folder")),
                   ),
                   Padding(

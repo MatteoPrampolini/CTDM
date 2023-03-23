@@ -579,6 +579,9 @@ class _PatchWindowState extends State<PatchWindow> {
       //print(_);
     }
     completeXmlFile(packPath);
+    setState(() {
+      patchStatus = PatchingStatus.completed;
+    });
   }
 
   @override
@@ -596,7 +599,10 @@ class _PatchWindowState extends State<PatchWindow> {
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-              const Center(child: Text("patching...")),
+              Center(
+                  child: Text(patchStatus == PatchingStatus.running
+                      ? "patching..."
+                      : "Patch Completed!")),
               Visibility(
                 visible: missingTracks.isNotEmpty,
                 child: Padding(
@@ -644,8 +650,8 @@ class _PatchWindowState extends State<PatchWindow> {
                                     decoration: BoxDecoration(
                                         color: Colors.amber.shade300,
                                         border: Border.all(
-                                            color: Colors.black,
-                                            strokeAlign: StrokeAlign.center)),
+                                          color: Colors.black,
+                                        )),
                                     child: SelectableText(
                                       "${missingTracks[index]}.szs",
                                       textAlign: TextAlign.center,
