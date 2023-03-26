@@ -56,7 +56,8 @@ class _LparConfigState extends State<LparConfig> {
               padding: const EdgeInsets.only(top: 20.0),
               child: Text("Graphics not implemented yet, WIP",
                   style: TextStyle(
-                      fontSize: Theme.of(context).textTheme.headline4?.fontSize,
+                      fontSize:
+                          Theme.of(context).textTheme.headlineMedium?.fontSize,
                       color: Colors.white54),
                   textAlign: TextAlign.center),
             ),

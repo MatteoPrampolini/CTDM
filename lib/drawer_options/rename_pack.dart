@@ -166,8 +166,10 @@ class _RenamePackState extends State<RenamePack> {
                   Text(
                     "please choose your pack name and id",
                     style: TextStyle(
-                        fontSize:
-                            Theme.of(context).textTheme.headline5?.fontSize),
+                        fontSize: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.fontSize),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
@@ -221,6 +223,8 @@ class _RenamePackState extends State<RenamePack> {
                         SizedBox(
                           width: MediaQuery.of(context).size.width / 2,
                           child: TextField(
+                              //onEditingComplete: () => print("editin complete"),
+                              // onSubmitted: (value) => print('submitted'),
                               onChanged: (newvalue) => {
                                     packIdChosen = newvalue,
                                     setState(() => {

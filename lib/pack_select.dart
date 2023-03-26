@@ -124,7 +124,7 @@ class _PackSelectState extends State<PackSelect> {
                       style: TextStyle(
                         color: Colors.black,
                         fontSize:
-                            Theme.of(context).textTheme.headline5?.fontSize,
+                            Theme.of(context).textTheme.headlineSmall?.fontSize,
                       ),
                     ),
                   ),
@@ -144,7 +144,7 @@ class _PackSelectState extends State<PackSelect> {
                                 color: Colors.white54,
                                 fontSize: Theme.of(context)
                                     .textTheme
-                                    .headline5
+                                    .headlineSmall
                                     ?.fontSize),
                           ),
                         )
@@ -163,7 +163,7 @@ class _PackSelectState extends State<PackSelect> {
                   "Your Packs",
                   style: TextStyle(
                       fontSize:
-                          Theme.of(context).textTheme.headline4?.fontSize),
+                          Theme.of(context).textTheme.headlineMedium?.fontSize),
                 ),
               ),
               Padding(

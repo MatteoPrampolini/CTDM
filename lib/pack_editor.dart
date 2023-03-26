@@ -142,8 +142,10 @@ class _PackEditorState extends State<PackEditor> {
                 children: [
                   Text("Automatic Check List",
                       style: TextStyle(
-                          fontSize:
-                              Theme.of(context).textTheme.headline4?.fontSize)),
+                          fontSize: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.fontSize)),
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
                     child: GridView.count(

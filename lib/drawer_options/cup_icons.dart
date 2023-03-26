@@ -38,22 +38,6 @@ Future<int> getNumberOfIconsFromConfig(String packPath) async {
   }
 }
 
-void createFolder(String packPath) {
-  Directory iconDir = Directory(path.join(packPath, 'Icons'));
-  if (iconDir.existsSync() && iconDir.listSync().isNotEmpty) return;
-
-  if (!iconDir.existsSync()) {
-    iconDir.createSync();
-  }
-
-  Directory assetIconsDir = Directory('assets/images/default_pack_icons/');
-  for (File icon in assetIconsDir.listSync().whereType<File>()) {
-    icon.copySync(path.join(packPath, 'Icons', path.basename(icon.path)));
-  }
-  // File configFile = File("assets/config.txt");
-  // configFile.copy(path.join(tmp.path, 'config.txt'));
-}
-
 class _CupIconsWindowState extends State<CupIconsWindow> {
   int nCups = -99;
   @override
@@ -66,6 +50,29 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
     nCups = await getNumberOfIconsFromConfig(widget.packPath);
     createFolder(widget.packPath);
     setState(() {});
+  }
+
+  void createFolder(String packPath) {
+    Directory iconDir = Directory(path.join(packPath, 'Icons'));
+    //if (iconDir.existsSync() && iconDir.listSync().isNotEmpty) return;
+
+    if (!iconDir.existsSync()) {
+      iconDir.createSync();
+    }
+
+    Directory assetIconsDir = Directory('assets/images/default_pack_icons/');
+
+    int i = -2;
+    for (File icon in assetIconsDir.listSync().whereType<File>()) {
+      if (i >= nCups) return;
+      if (!File(path.join(packPath, 'Icons', path.basename(icon.path)))
+          .existsSync()) {
+        icon.copySync(path.join(packPath, 'Icons', path.basename(icon.path)));
+      }
+      i++;
+    }
+    // File configFile = File("assets/config.txt");
+    // configFile.copy(path.join(tmp.path, 'config.txt'));
   }
 
   @override
@@ -93,7 +100,7 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
                         style: TextStyle(
                             fontSize: Theme.of(context)
                                 .textTheme
-                                .headline5
+                                .headlineSmall
                                 ?.fontSize),
                       )),
                 ],
@@ -111,11 +118,11 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
                           style: TextStyle(
                               fontFamily: Theme.of(context)
                                   .textTheme
-                                  .headline5
+                                  .headlineSmall
                                   ?.fontFamily,
                               fontSize: Theme.of(context)
                                   .textTheme
-                                  .headline4
+                                  .headlineMedium
                                   ?.fontSize),
                           children: <TextSpan>[
                             TextSpan(
@@ -137,7 +144,7 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
                             color: Colors.white54,
                             fontSize: Theme.of(context)
                                 .textTheme
-                                .headline6
+                                .titleLarge
                                 ?.fontSize),
                       ),
                     ),
@@ -153,14 +160,19 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
                           onPressed: () async => {
                             if (Directory(path.join(widget.packPath, 'Icons'))
                                 .existsSync())
-                              if (!Platform.isLinux)
-                                {launchUrlString(widget.packPath)},
-                            if (Platform.isLinux)
                               {
-                                pr = await Process.start(
-                                    'open', [widget.packPath]),
-                                await pr.exitCode,
-                                //await
+                                if (!Platform.isLinux)
+                                  {
+                                    launchUrlString(
+                                        path.join(widget.packPath, 'Icons'))
+                                  },
+                                if (Platform.isLinux)
+                                  {
+                                    pr = await Process.start('open',
+                                        [path.join(widget.packPath, 'Icons')]),
+                                    await pr.exitCode,
+                                    //await
+                                  }
                               }
                           },
                         )),

@@ -1,20 +1,21 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:path/path.dart' as path;
+
+import '../gui_elements/cub_table_header.dart';
+import '../gui_elements/cup_table_row.dart';
+import '../gui_elements/types.dart';
 
 List<List<Track>> parseConfig(String configPath) {
   List<List<Track>> cups = [];
   File configFile = File(configPath);
   String contents = configFile.readAsStringSync();
-  List<String> cupList =
-      contents.split(r"N$F_WII")[1].split(RegExp(r'C.*[0-9]+'));
+  List<String> cupList = contents
+      .split(r"N$F_WII")[1]
+      .split(RegExp(r'^C.*[0-9]+', multiLine: true));
 
   cupList.removeAt(0);
-  //print(cupList);
-
   for (var cup in cupList) {
     cups.add(splitCupListsFromText(cup.trim()));
   }
@@ -32,8 +33,10 @@ List<Track> splitCupListsFromText(String str) {
 }
 
 Track parseTrackLine(String trackLine) {
-  Track tmp = Track('', 0, 0, '');
+  Track tmp = Track('', 0, 0, '', TrackType.base);
   int i = 0;
+
+  //return; //TODO
   for (String param in trackLine.split(r';')) {
     if (param.trim() == "") continue;
     //print("|${param.trim().replaceRange(0, 3, '')}|");
@@ -48,6 +51,17 @@ Track parseTrackLine(String trackLine) {
         tmp.slotId = int.parse(RegExp('[0-9]+').stringMatch(param)!);
         break;
       case 2:
+        switch (param.trim()) {
+          case "0x00":
+            tmp.type = TrackType.base;
+            break;
+          case "0x02":
+            tmp.type = TrackType.menu;
+            break;
+          case "0x04":
+            tmp.type = TrackType.hidden;
+            break;
+        }
         break;
       case 3:
         tmp.path = param.trim().replaceAll('"', '');
@@ -62,21 +76,22 @@ Track parseTrackLine(String trackLine) {
   return tmp;
 }
 
-class trackConfigGUI extends StatefulWidget {
+class TrackConfigGui extends StatefulWidget {
   final String packPath;
-  const trackConfigGUI(this.packPath, {super.key});
+  const TrackConfigGui(this.packPath, {super.key});
 
   @override
-  State<trackConfigGUI> createState() => _trackConfigGUIState();
+  State<TrackConfigGui> createState() => _TrackConfigGuiState();
 }
 
-class _trackConfigGUIState extends State<trackConfigGUI> {
-  late List<List<Track>> cups;
+class _TrackConfigGuiState extends State<TrackConfigGui> {
+  late List<List<Track>> cups = [];
   @override
   void initState() {
     super.initState();
     setState(() {
       cups = parseConfig(path.join(widget.packPath, 'config.txt'));
+      print(cups.length);
     });
   }
 
@@ -98,7 +113,17 @@ class _trackConfigGUIState extends State<trackConfigGUI> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (int i = 0; i < cups.length; i++)
-                  CupTable(i + 1, cups[i], widget.packPath)
+                  CupTable(i + 1, cups[i], widget.packPath),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width / 2 - 100),
+                  child: ElevatedButton(
+                    child: Text("Add cup"),
+                    onPressed: () => {
+                      setState(() => {cups.add([])})
+                    },
+                  ),
+                )
               ]),
         ));
   }
@@ -122,215 +147,9 @@ class _CupTableState extends State<CupTable> {
             const EdgeInsets.only(top: 40, bottom: 40, left: 100, right: 100),
         child: Column(children: [
           CupTableHeader(widget.cupIndex, widget.packPath),
-          for (var track in widget.cup) CupTableRow(track)
+          for (var track
+              in widget.cup.where((element) => element.type == TrackType.base))
+            CupTableRow(track, widget.packPath)
         ]));
-  }
-}
-
-class CupTableHeader extends StatefulWidget {
-  final int cupIndex;
-  final String packPath;
-  const CupTableHeader(this.cupIndex, this.packPath, {super.key});
-
-  @override
-  State<CupTableHeader> createState() => _CupTableHeaderState();
-}
-
-class _CupTableHeaderState extends State<CupTableHeader> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.red, border: Border.all(color: Colors.black)),
-      height: 60,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Container(
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black)),
-              child: const Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: Text(
-                    "Track Name",
-                    style: TextStyle(color: Colors.black87),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black)),
-              child: const Center(
-                child: Text("track slot",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.black87)),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black)),
-              child: const Center(
-                child: Text("music slot",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.black87)),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 4,
-            child: Container(
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black)),
-              child: const Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16),
-                  child: Text("File Path",
-                      textAlign: TextAlign.start,
-                      style: TextStyle(color: Colors.black87)),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-                child: Image.file(
-              File(path.join(
-                  widget.packPath, 'Icons', '${widget.cupIndex}.png')),
-            )),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class CupTableRow extends StatefulWidget {
-  late Track track;
-  CupTableRow(this.track, {super.key});
-
-  @override
-  State<CupTableRow> createState() => _CupTableRowState();
-}
-
-class _CupTableRowState extends State<CupTableRow> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.amberAccent, border: Border.all(color: Colors.black)),
-      height: 60,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Container(
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black)),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: Text(
-                    widget.track.name,
-                    style: const TextStyle(color: Colors.black87),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black)),
-              child: Center(
-                child: Text(
-                  widget.track.slotId.toString(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.black87),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black)),
-              child: Center(
-                child: Text(
-                  widget.track.musicId.toString(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.black87),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Container(
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black)),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: Text(
-                    widget.track.path,
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(color: Colors.black87),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class Track {
-  late String name;
-  late int slotId;
-  late int musicId;
-  late String path;
-  Track(this.name, this.slotId, this.musicId, this.path);
-  @override
-  String toString() {
-    return "Track($path)";
-  }
-}
-
-class AdjustableScrollController extends ScrollController {
-  AdjustableScrollController([int extraScrollSpeed = 40]) {
-    super.addListener(() {
-      ScrollDirection scrollDirection = super.position.userScrollDirection;
-      if (scrollDirection != ScrollDirection.idle) {
-        double scrollEnd = super.offset +
-            (scrollDirection == ScrollDirection.reverse
-                ? extraScrollSpeed
-                : -extraScrollSpeed);
-        scrollEnd = min(super.position.maxScrollExtent,
-            max(super.position.minScrollExtent, scrollEnd));
-        jumpTo(scrollEnd);
-      }
-    });
   }
 }

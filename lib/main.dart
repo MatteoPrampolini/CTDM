@@ -112,10 +112,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 text: TextSpan(
                     style: TextStyle(
                         color: Colors.black,
-                        fontFamily:
-                            Theme.of(context).textTheme.headline4?.fontFamily,
-                        fontSize:
-                            Theme.of(context).textTheme.headline4?.fontSize),
+                        fontFamily: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.fontFamily,
+                        fontSize: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.fontSize),
                     text: 'CT Distribution ',
                     children: <TextSpan>[
                   TextSpan(
@@ -141,8 +145,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         "Wiimms SZS Toolset not installed.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize:
-                                Theme.of(context).textTheme.headline5?.fontSize,
+                            fontSize: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.fontSize,
                             color: Colors.white54),
                       ),
                       TextButton(
@@ -156,8 +162,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           style: TextStyle(
                             color: Colors.red.shade700,
                             decoration: TextDecoration.underline,
-                            fontSize:
-                                Theme.of(context).textTheme.headline5?.fontSize,
+                            fontSize: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.fontSize,
                           ),
                         ),
                       ),
@@ -184,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           style: TextStyle(
                               fontSize: Theme.of(context)
                                   .textTheme
-                                  .headline5
+                                  .headlineSmall
                                   ?.fontSize,
                               color: Colors.white54),
                         ),
@@ -201,16 +209,18 @@ class _MyHomePageState extends State<MyHomePage> {
                               decoration: TextDecoration.underline,
                               fontSize: Theme.of(context)
                                   .textTheme
-                                  .headline5
+                                  .headlineSmall
                                   ?.fontSize,
                             ),
                           ),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.only(top: 20.0),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20.0),
                           child: Text(
-                            "(Remember to reboot your PC after)",
-                            style: TextStyle(color: Colors.white54),
+                            Platform.isWindows
+                                ? "(Remember to reboot your PC after)"
+                                : "",
+                            style: const TextStyle(color: Colors.white54),
                           ),
                         )
                       ],
@@ -236,7 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 color: Colors.red.shade700,
                                 fontSize: Theme.of(context)
                                     .textTheme
-                                    .headline4
+                                    .headlineMedium
                                     ?.fontSize),
                           )),
                       const Padding(

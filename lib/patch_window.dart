@@ -162,16 +162,15 @@ Future<String> createBMGList(String packPath) async {
   } on Exception catch (_) {
     //return [];
   }
-  String contents = trackFile.readAsStringSync();
-  int begin = contents.lastIndexOf(RegExp(r'703e'));
-  int end = contents.lastIndexOf(RegExp(r'7041'));
-  //print(begin);
-  contents = contents.replaceRange(begin, end,
-      "703e\t= All tracks\n703f\t= Original tracks\n7040\t= Custom tracks\n703e\t= New Tracks\n");
-  //contents.split(RegExp(r'703e.= '))[1].repl
-  contents = contents.replaceFirstMapped(
-      'beginner_course', (match) => 'Circuito Luigi bro');
-  trackFile.writeAsStringSync(contents, mode: FileMode.write);
+  // String contents = trackFile.readAsStringSync();
+  // int begin = contents.lastIndexOf(RegExp(r'703e'));
+  // int end = contents.lastIndexOf(RegExp(r'7041'));
+  // contents = contents.replaceRange(begin, end,
+  //     "703e\t= All tracks\n703f\t= Original tracks\n7040\t= Custom tracks\n703e\t= New Tracks\n");
+  // //contents.split(RegExp(r'703e.= '))[1].repl
+  // contents = contents.replaceFirstMapped(
+  //     'beginner_course', (match) => 'Circuito Luigi bro');
+  //trackFile.writeAsStringSync(contents, mode: FileMode.write);
   return path.join(packPath, 'Scene', 'tracks.bmg.txt');
   //2 leggi tracks.bmg.txt da 7044
   //3 controlla che i nomi siano nella cartella MyTracks
@@ -617,7 +616,7 @@ class _PatchWindowState extends State<PatchWindow> {
                               backgroundColor: Colors.red,
                               fontSize: Theme.of(context)
                                   .textTheme
-                                  .headline4
+                                  .headlineMedium
                                   ?.fontSize),
                         ),
                       ),
@@ -631,7 +630,7 @@ class _PatchWindowState extends State<PatchWindow> {
                                 color: Colors.white70,
                                 fontSize: Theme.of(context)
                                     .textTheme
-                                    .headline6
+                                    .titleLarge
                                     ?.fontSize),
                           ),
                         ),
@@ -674,7 +673,7 @@ class _PatchWindowState extends State<PatchWindow> {
                                     color: Colors.white70,
                                     fontSize: Theme.of(context)
                                         .textTheme
-                                        .headline6
+                                        .titleLarge
                                         ?.fontSize),
                               ),
                             ),
