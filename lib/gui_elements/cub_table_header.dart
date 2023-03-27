@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 class CupTableHeader extends StatefulWidget {
   final int cupIndex;
   final String packPath;
+
   const CupTableHeader(this.cupIndex, this.packPath, {super.key});
 
   @override
@@ -13,6 +14,7 @@ class CupTableHeader extends StatefulWidget {
 }
 
 class _CupTableHeaderState extends State<CupTableHeader> {
+  late bool canDelete = false;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -28,13 +30,24 @@ class _CupTableHeaderState extends State<CupTableHeader> {
             child: Container(
               decoration:
                   BoxDecoration(border: Border.all(color: Colors.black)),
-              child: const Align(
+              child: Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: Text(
-                    "Track Name",
-                    style: TextStyle(color: Colors.black87),
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Track Name",
+                        style: TextStyle(color: Colors.black87),
+                      ),
+                      IconButton(
+                          onPressed: () => {
+                                setState(() => {canDelete = !canDelete})
+                              },
+                          icon: Icon(
+                              canDelete ? Icons.delete_forever : Icons.delete))
+                    ],
                   ),
                 ),
               ),

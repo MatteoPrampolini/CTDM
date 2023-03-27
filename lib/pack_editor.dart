@@ -38,6 +38,7 @@ void wipeOldFiles(String packPath) {
 
 class _PackEditorState extends State<PackEditor> {
   late bool checkResultVisibility = false;
+  late bool xmlExist = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late bool canPatch = false;
   late List<bool> checks = [false, false, false, false, false, false, false];
@@ -86,6 +87,11 @@ class _PackEditorState extends State<PackEditor> {
   @override
   void initState() {
     loadSettings();
+
+    List tmp = Directory(widget.packPath).listSync().whereType<File>().toList();
+    tmp.retainWhere((element) => element.path.endsWith('xml'));
+
+    xmlExist = tmp.isNotEmpty;
     super.initState();
   }
 
@@ -121,7 +127,7 @@ class _PackEditorState extends State<PackEditor> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: CustomDrawer(widget.packPath),
+      drawer: CustomDrawer(widget.packPath, this.xmlExist),
       appBar: AppBar(
         iconTheme: IconThemeData(
           color: Colors.red.shade700, //change your color here

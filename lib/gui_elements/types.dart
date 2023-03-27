@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:ctdm/gui_elements/cup_table_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -34,4 +35,10 @@ class AdjustableScrollController extends ScrollController {
       }
     });
   }
+}
+
+class RowDeletePressed extends Notification {
+  final int cupIndex;
+  final int rowIndex;
+  RowDeletePressed(this.cupIndex, this.rowIndex);
 }

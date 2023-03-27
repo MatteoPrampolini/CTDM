@@ -7,6 +7,13 @@ import '../gui_elements/cub_table_header.dart';
 import '../gui_elements/cup_table_row.dart';
 import '../gui_elements/types.dart';
 
+void createConfigFile(String packPath) {
+  if (!File(path.join(packPath, 'config.txt')).existsSync()) {
+    File configFile = File("assets/config.txt");
+    configFile.copySync(path.join(packPath, 'config.txt'));
+  }
+}
+
 List<List<Track>> parseConfig(String configPath) {
   List<List<Track>> cups = [];
   File configFile = File(configPath);
@@ -89,10 +96,15 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   @override
   void initState() {
     super.initState();
+    createConfigFile(widget.packPath);
     setState(() {
       cups = parseConfig(path.join(widget.packPath, 'config.txt'));
       print(cups.length);
     });
+  }
+
+  void search() {
+    print("search");
   }
 
   @override
@@ -106,25 +118,59 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
           backgroundColor: Colors.amber,
           iconTheme: IconThemeData(color: Colors.red.shade700),
         ),
-        body: SingleChildScrollView(
-          controller: AdjustableScrollController(80),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (int i = 0; i < cups.length; i++)
-                  CupTable(i + 1, cups[i], widget.packPath),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width / 2 - 100),
-                  child: ElevatedButton(
-                    child: Text("Add cup"),
-                    onPressed: () => {
-                      setState(() => {cups.add([])})
-                    },
-                  ),
-                )
-              ]),
+        body: Stack(
+          children: [
+            // Padding(
+            //   padding: const EdgeInsets.only(top: 60.0, right: 20),
+            //   child: Container(
+            //     width: 80,
+            //     height: 1000,
+            //     color: Colors.amber,
+            //     child: Column(
+            //       //crossAxisAlignment: CrossAxisAlignment.stretch,
+            //       children: [
+            //         const Text(
+            //           "Edit Tools",
+            //           style: TextStyle(color: Colors.black87),
+            //         ),
+            //         IconButton(
+            //             iconSize: 60,
+            //             color: Colors.red.shade600,
+            //             onPressed: () => {print("edit")},
+            //             icon: const Icon(Icons.edit_note_rounded)),
+            //         IconButton(
+            //             onPressed: () => {print("remove")},
+            //             icon: const Icon(Icons.delete_forever))
+            //       ],
+            //     ),
+            //   ),
+            // ),
+            SingleChildScrollView(
+              controller: AdjustableScrollController(80),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (int i = 0; i < cups.length; i++)
+                      CupTable(i + 1, cups[i], widget.packPath),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          left: MediaQuery.of(context).size.width / 2 - 100,
+                          right: MediaQuery.of(context).size.width / 2 - 100,
+                          bottom: 60),
+                      child: SizedBox(
+                        height: 60,
+                        child: ElevatedButton(
+                          child: const Text("Add cup"),
+                          onPressed: () => {
+                            setState(() => {cups.add([])})
+                          },
+                        ),
+                      ),
+                    )
+                  ]),
+            ),
+          ],
         ));
   }
 }
@@ -141,6 +187,7 @@ class CupTable extends StatefulWidget {
 
 class _CupTableState extends State<CupTable> {
   @override
+  int i = 0;
   Widget build(BuildContext context) {
     return Padding(
         padding:
@@ -149,7 +196,18 @@ class _CupTableState extends State<CupTable> {
           CupTableHeader(widget.cupIndex, widget.packPath),
           for (var track
               in widget.cup.where((element) => element.type == TrackType.base))
-            CupTableRow(track, widget.packPath)
+            NotificationListener<RowDeletePressed>(
+              child: CupTableRow(
+                  track, widget.cupIndex, i = i + 1, widget.packPath),
+              onNotification: notificationCallback,
+            )
         ]));
+  }
+
+  bool notificationCallback(RowDeletePressed n) {
+    //print(this.widget.cup);
+    print("devo eliminare track ${n.rowIndex} in cup ${n.cupIndex}");
+    //notifica il parent TrackConfigGui che questa CupTable è stata aggiornata e che deve aggiornare il suo cups.
+    return true;
   }
 }

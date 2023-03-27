@@ -12,7 +12,8 @@ import 'main.dart';
 
 class CustomDrawer extends StatefulWidget {
   final String packPath;
-  const CustomDrawer(this.packPath, {super.key});
+  final xmlExist;
+  const CustomDrawer(this.packPath, this.xmlExist, {super.key});
 
   @override
   State<CustomDrawer> createState() => _CustomDrawerState();
@@ -68,6 +69,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           },
         ),
         ListTile(
+          enabled: widget.xmlExist,
           title: const Text('Track config'),
           onTap: () {
             Navigator.push(
@@ -77,6 +79,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           },
         ),
         ListTile(
+          enabled: widget.xmlExist,
           title: const Text('Lpar'),
           onTap: () {
             Navigator.push(
@@ -88,6 +91,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           },
         ),
         ListTile(
+          enabled: widget.xmlExist,
           title: const Text('Cup icons'),
           onTap: () {
             Navigator.push(

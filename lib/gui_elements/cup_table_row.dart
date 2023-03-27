@@ -8,8 +8,11 @@ import 'package:path/path.dart' as path;
 class CupTableRow extends StatefulWidget {
   late Track track;
   late String packPath;
+  late int cupIndex = -1;
+  late int rowIndex = -1;
   late MaterialAccentColor color = Colors.amberAccent;
-  CupTableRow(this.track, this.packPath, {super.key});
+  CupTableRow(this.track, this.cupIndex, this.rowIndex, this.packPath,
+      {super.key});
 
   @override
   State<CupTableRow> createState() => _CupTableRowState();
@@ -17,6 +20,7 @@ class CupTableRow extends StatefulWidget {
 
 class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController trackNameTextField;
+  late bool canDelete = false;
   @override
   void initState() {
     switch (widget.track.type) {
@@ -62,10 +66,29 @@ class _CupTableRowState extends State<CupTableRow> {
                 alignment: Alignment.centerLeft,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16.0),
-                  child: TextField(
-                    controller: trackNameTextField,
-                    //widget.track.name,
-                    style: const TextStyle(color: Colors.black87),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 7,
+                        child: TextField(
+                          controller: trackNameTextField,
+                          //widget.track.name,
+                          style: const TextStyle(color: Colors.black87),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: IconButton(
+                            onPressed: () => {
+                                  setState(() => {canDelete = !canDelete}),
+                                  RowDeletePressed(this.widget.cupIndex,
+                                          this.widget.rowIndex)
+                                      .dispatch(context)
+                                },
+                            icon: const Icon(Icons.delete_forever,
+                                color: Colors.redAccent)),
+                      )
+                    ],
                   ),
                 ),
               ),

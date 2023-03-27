@@ -24,7 +24,7 @@ class _TrackConfigState extends State<TrackConfig> {
   void createConfigFile(String packPath) {
     if (!File(path.join(packPath, 'config.txt')).existsSync()) {
       File configFile = File("assets/config.txt");
-      configFile.copy(path.join(packPath, 'config.txt'));
+      configFile.copySync(path.join(packPath, 'config.txt'));
     }
   }
 
