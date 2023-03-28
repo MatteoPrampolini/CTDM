@@ -133,7 +133,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   }
 
   bool changeDeleteMode(DeleteModeUpdated n) {
-    print(n.shouldDelete);
+    //print(n.shouldDelete);
     return true;
   }
 
