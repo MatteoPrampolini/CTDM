@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:ctdm/gui_elements/cup_table_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -41,4 +40,15 @@ class RowDeletePressed extends Notification {
   final int cupIndex;
   final int rowIndex;
   RowDeletePressed(this.cupIndex, this.rowIndex);
+}
+
+class DeleteModeUpdated extends Notification {
+  final bool shouldDelete;
+  DeleteModeUpdated(this.shouldDelete);
+}
+
+class AddTrackRequest extends Notification {
+  final TrackType type;
+  final int cupIndex;
+  AddTrackRequest(this.type, this.cupIndex);
 }

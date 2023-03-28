@@ -1,10 +1,8 @@
 import 'dart:io';
 
+import 'package:ctdm/gui_elements/cup_table.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
-
-import '../gui_elements/cub_table_header.dart';
-import '../gui_elements/cup_table_row.dart';
 import '../gui_elements/types.dart';
 
 void createConfigFile(String packPath) {
@@ -99,16 +97,58 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     createConfigFile(widget.packPath);
     setState(() {
       cups = parseConfig(path.join(widget.packPath, 'config.txt'));
-      print(cups.length);
+      //print(cups.length);
     });
   }
 
-  void search() {
-    print("search");
+  void deleteRow(int cupIndex, int rowIndex) {
+    // print("search");
+    cups[cupIndex - 1].removeAt(rowIndex - 1);
+    setState(() {
+      // if (cups[cupIndex - 1].length < rowIndex) {
+      //   print("c'è un problema");
+      //   //print(rowIndex);
+      //   return;
+      // }
+      //cups[cupIndex - 1].removeAt(rowIndex - 1);
+    });
+  }
+
+  bool rowAskedForDeletionNotification(RowDeletePressed n) {
+    //print(this.widget.cup);
+
+    //print("devo eliminare track ${n.rowIndex} in cup ${n.cupIndex}");
+    deleteRow(n.cupIndex, n.rowIndex);
+    //print(cups[n.cupIndex - 1]);
+    return true;
+  }
+
+  bool addEmptyRow(AddTrackRequest n) {
+    print(n.cupIndex);
+    setState(() {
+      cups[n.cupIndex - 1]
+          .add(Track('', 11, 11, "-----ADD TRACK-----", n.type));
+    });
+    return true;
+  }
+
+  bool changeDeleteMode(DeleteModeUpdated n) {
+    print(n.shouldDelete);
+    return true;
+  }
+
+  void rebuildAllChildren(BuildContext context) {
+    void rebuild(Element el) {
+      el.markNeedsBuild();
+      el.visitChildren(rebuild);
+    }
+
+    (context as Element).visitChildren(rebuild);
   }
 
   @override
   Widget build(BuildContext context) {
+    rebuildAllChildren(context);
     return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -120,94 +160,39 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         ),
         body: Stack(
           children: [
-            // Padding(
-            //   padding: const EdgeInsets.only(top: 60.0, right: 20),
-            //   child: Container(
-            //     width: 80,
-            //     height: 1000,
-            //     color: Colors.amber,
-            //     child: Column(
-            //       //crossAxisAlignment: CrossAxisAlignment.stretch,
-            //       children: [
-            //         const Text(
-            //           "Edit Tools",
-            //           style: TextStyle(color: Colors.black87),
-            //         ),
-            //         IconButton(
-            //             iconSize: 60,
-            //             color: Colors.red.shade600,
-            //             onPressed: () => {print("edit")},
-            //             icon: const Icon(Icons.edit_note_rounded)),
-            //         IconButton(
-            //             onPressed: () => {print("remove")},
-            //             icon: const Icon(Icons.delete_forever))
-            //       ],
-            //     ),
-            //   ),
-            // ),
             SingleChildScrollView(
               controller: AdjustableScrollController(80),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (int i = 0; i < cups.length; i++)
-                      CupTable(i + 1, cups[i], widget.packPath),
-                    Padding(
-                      padding: EdgeInsets.only(
-                          left: MediaQuery.of(context).size.width / 2 - 100,
-                          right: MediaQuery.of(context).size.width / 2 - 100,
-                          bottom: 60),
-                      child: SizedBox(
-                        height: 60,
-                        child: ElevatedButton(
-                          child: const Text("Add cup"),
-                          onPressed: () => {
-                            setState(() => {cups.add([])})
-                          },
-                        ),
-                      ),
-                    )
-                  ]),
+              child: NotificationListener<AddTrackRequest>(
+                onNotification: addEmptyRow,
+                child: NotificationListener<RowDeletePressed>(
+                  onNotification: rowAskedForDeletionNotification,
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (int i = 0; i < cups.length; i++)
+                          CupTable(i + 1, cups[i], widget.packPath),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              left: MediaQuery.of(context).size.width / 2 - 100,
+                              right:
+                                  MediaQuery.of(context).size.width / 2 - 100,
+                              bottom: 60),
+                          child: SizedBox(
+                            height: 60,
+                            child: ElevatedButton(
+                              child: const Text("Add cup"),
+                              onPressed: () => {
+                                setState(() => {cups.add([])})
+                              },
+                            ),
+                          ),
+                        )
+                      ]),
+                ),
+              ),
             ),
           ],
         ));
-  }
-}
-
-class CupTable extends StatefulWidget {
-  late int cupIndex;
-  late String packPath;
-  late List<Track> cup;
-  CupTable(this.cupIndex, this.cup, this.packPath, {super.key});
-
-  @override
-  State<CupTable> createState() => _CupTableState();
-}
-
-class _CupTableState extends State<CupTable> {
-  @override
-  int i = 0;
-  Widget build(BuildContext context) {
-    return Padding(
-        padding:
-            const EdgeInsets.only(top: 40, bottom: 40, left: 100, right: 100),
-        child: Column(children: [
-          CupTableHeader(widget.cupIndex, widget.packPath),
-          for (var track
-              in widget.cup.where((element) => element.type == TrackType.base))
-            NotificationListener<RowDeletePressed>(
-              child: CupTableRow(
-                  track, widget.cupIndex, i = i + 1, widget.packPath),
-              onNotification: notificationCallback,
-            )
-        ]));
-  }
-
-  bool notificationCallback(RowDeletePressed n) {
-    //print(this.widget.cup);
-    print("devo eliminare track ${n.rowIndex} in cup ${n.cupIndex}");
-    //notifica il parent TrackConfigGui che questa CupTable è stata aggiornata e che deve aggiornare il suo cups.
-    return true;
   }
 }

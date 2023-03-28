@@ -127,7 +127,7 @@ class _PackEditorState extends State<PackEditor> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: CustomDrawer(widget.packPath, this.xmlExist),
+      drawer: CustomDrawer(widget.packPath, xmlExist),
       appBar: AppBar(
         iconTheme: IconThemeData(
           color: Colors.red.shade700, //change your color here

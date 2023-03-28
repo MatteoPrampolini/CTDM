@@ -10,8 +10,10 @@ class CupTableRow extends StatefulWidget {
   late String packPath;
   late int cupIndex = -1;
   late int rowIndex = -1;
+  late bool canDeleteTracks = false;
   late MaterialAccentColor color = Colors.amberAccent;
   CupTableRow(this.track, this.cupIndex, this.rowIndex, this.packPath,
+      this.canDeleteTracks,
       {super.key});
 
   @override
@@ -20,7 +22,6 @@ class CupTableRow extends StatefulWidget {
 
 class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController trackNameTextField;
-  late bool canDelete = false;
   @override
   void initState() {
     switch (widget.track.type) {
@@ -48,6 +49,7 @@ class _CupTableRowState extends State<CupTableRow> {
 
   @override
   Widget build(BuildContext context) {
+    trackNameTextField.text = widget.track.name;
     FilePickerResult? result;
     return Container(
       decoration: BoxDecoration(
@@ -72,21 +74,26 @@ class _CupTableRowState extends State<CupTableRow> {
                         flex: 7,
                         child: TextField(
                           controller: trackNameTextField,
+                          onChanged: (value) => {widget.track.name = value},
                           //widget.track.name,
                           style: const TextStyle(color: Colors.black87),
                         ),
                       ),
                       Expanded(
                         flex: 1,
-                        child: IconButton(
-                            onPressed: () => {
-                                  setState(() => {canDelete = !canDelete}),
-                                  RowDeletePressed(this.widget.cupIndex,
-                                          this.widget.rowIndex)
-                                      .dispatch(context)
-                                },
-                            icon: const Icon(Icons.delete_forever,
-                                color: Colors.redAccent)),
+                        child: Visibility(
+                          visible: widget.canDeleteTracks == true,
+                          child: IconButton(
+                              onPressed: () => {
+                                    //print("sono row: ${widget.rowIndex}"),
+                                    //setState(() => {canDelete = !canDelete}),
+                                    RowDeletePressed(
+                                            widget.cupIndex, widget.rowIndex)
+                                        .dispatch(context)
+                                  },
+                              icon: const Icon(Icons.delete_forever,
+                                  color: Colors.redAccent)),
+                        ),
                       )
                     ],
                   ),

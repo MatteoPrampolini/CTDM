@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ctdm/gui_elements/types.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
@@ -43,10 +44,14 @@ class _CupTableHeaderState extends State<CupTableHeader> {
                       ),
                       IconButton(
                           onPressed: () => {
-                                setState(() => {canDelete = !canDelete})
+                                canDelete = !canDelete,
+                                DeleteModeUpdated(canDelete).dispatch(context),
+                                setState(() => {})
                               },
                           icon: Icon(
-                              canDelete ? Icons.delete_forever : Icons.delete))
+                            Icons.delete,
+                            color: canDelete ? Colors.amber : Colors.black87,
+                          ))
                     ],
                   ),
                 ),
