@@ -99,6 +99,8 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       cups = parseConfig(path.join(widget.packPath, 'config.txt'));
       //print(cups.length);
     });
+
+    print(cups);
   }
 
   void deleteRow(int cupIndex, int rowIndex) {
@@ -112,6 +114,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       // }
       //cups[cupIndex - 1].removeAt(rowIndex - 1);
     });
+    print(cups[cupIndex - 1]);
   }
 
   bool rowAskedForDeletionNotification(RowDeletePressed n) {
@@ -124,11 +127,18 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   }
 
   bool addEmptyRow(AddTrackRequest n) {
-    print(n.cupIndex);
+    //print(n.cupIndex);
     setState(() {
-      cups[n.cupIndex - 1]
-          .add(Track('', 11, 11, "-----ADD TRACK-----", n.type));
+      if (n.lastHiddenIndex == null) {
+        cups[n.cupIndex - 1]
+            .add(Track('', 11, 11, "-----ADD TRACK-----", n.type));
+      } else {
+        //print("lastHidden:${n.lastHiddenIndex}");
+        cups[n.cupIndex - 1].insert(n.lastHiddenIndex!,
+            Track('', 11, 11, "-----ADD TRACK-----", n.type));
+      }
     });
+    print(cups[n.cupIndex - 1]);
     return true;
   }
 

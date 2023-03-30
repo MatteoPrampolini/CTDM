@@ -15,7 +15,7 @@ class Track {
   Track(this.name, this.slotId, this.musicId, this.path, this.type);
   @override
   String toString() {
-    return "Track($path)";
+    return "Track($name)";
   }
 }
 
@@ -50,5 +50,6 @@ class DeleteModeUpdated extends Notification {
 class AddTrackRequest extends Notification {
   final TrackType type;
   final int cupIndex;
-  AddTrackRequest(this.type, this.cupIndex);
+  final int? lastHiddenIndex;
+  AddTrackRequest(this.type, this.cupIndex, [this.lastHiddenIndex]);
 }

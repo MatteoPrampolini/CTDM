@@ -1,4 +1,6 @@
-import 'dart:io';
+//import 'dart:io';
+
+// ignore_for_file: must_be_immutable
 
 import 'package:ctdm/gui_elements/types.dart';
 import 'package:file_picker/file_picker.dart';
@@ -11,7 +13,7 @@ class CupTableRow extends StatefulWidget {
   late int cupIndex = -1;
   late int rowIndex = -1;
   late bool canDeleteTracks = false;
-  late MaterialAccentColor color = Colors.amberAccent;
+  late MaterialAccentColor color = Colors.purpleAccent;
   CupTableRow(this.track, this.cupIndex, this.rowIndex, this.packPath,
       this.canDeleteTracks,
       {super.key});
@@ -24,21 +26,24 @@ class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController trackNameTextField;
   @override
   void initState() {
+    setColor();
+    super.initState();
+    trackNameTextField = TextEditingController();
+    trackNameTextField.text = widget.track.name;
+  }
+
+  void setColor() {
     switch (widget.track.type) {
       case TrackType.base:
         widget.color = Colors.amberAccent;
         break;
       case TrackType.menu:
-        widget.color = Colors.cyanAccent;
-        break;
-      case TrackType.hidden:
         widget.color = Colors.limeAccent;
         break;
+      case TrackType.hidden:
+        widget.color = Colors.amberAccent;
+        break;
     }
-
-    super.initState();
-    trackNameTextField = TextEditingController();
-    trackNameTextField.text = widget.track.name;
   }
 
   @override
@@ -49,7 +54,8 @@ class _CupTableRowState extends State<CupTableRow> {
 
   @override
   Widget build(BuildContext context) {
-    trackNameTextField.text = widget.track.name;
+    trackNameTextField.text = "${widget.track.name}[${widget.rowIndex}]";
+    setColor();
     FilePickerResult? result;
     return Container(
       decoration: BoxDecoration(
@@ -87,6 +93,7 @@ class _CupTableRowState extends State<CupTableRow> {
                               onPressed: () => {
                                     //print("sono row: ${widget.rowIndex}"),
                                     //setState(() => {canDelete = !canDelete}),
+                                    print("row at:${widget.rowIndex}"),
                                     RowDeletePressed(
                                             widget.cupIndex, widget.rowIndex)
                                         .dispatch(context)
