@@ -24,7 +24,11 @@ class _CupTableState extends State<CupTable> {
   bool changeDeleteMode(DeleteModeUpdated n) {
     canDelete = n.shouldDelete;
     setState(() {});
-    return true;
+    if (n.destroyCupIndex != null && n.destroyCupIndex! > 0) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   void rebuildAllChildren(BuildContext context) {
@@ -96,7 +100,7 @@ class _CupTableState extends State<CupTable> {
                   visible: widget.cup
                           .where((element) => element.type != TrackType.hidden)
                           .length <
-                      4, //TODO FIXARE QUANDO SI USA MENU
+                      4,
                   child: SizedBox(
                     width: 300,
                     child: Row(

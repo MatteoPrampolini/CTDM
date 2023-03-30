@@ -45,7 +45,8 @@ class _CupTableHeaderState extends State<CupTableHeader> {
                       IconButton(
                           onPressed: () => {
                                 canDelete = !canDelete,
-                                DeleteModeUpdated(canDelete).dispatch(context),
+                                DeleteModeUpdated(canDelete, widget.cupIndex)
+                                    .dispatch(context),
                                 setState(() => {})
                               },
                           icon: Icon(

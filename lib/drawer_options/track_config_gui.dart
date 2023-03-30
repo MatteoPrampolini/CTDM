@@ -40,8 +40,6 @@ List<Track> splitCupListsFromText(String str) {
 Track parseTrackLine(String trackLine) {
   Track tmp = Track('', 0, 0, '', TrackType.base);
   int i = 0;
-
-  //return; //TODO
   for (String param in trackLine.split(r';')) {
     if (param.trim() == "") continue;
     //print("|${param.trim().replaceRange(0, 3, '')}|");
@@ -100,7 +98,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       //print(cups.length);
     });
 
-    print(cups);
+    //print(cups);
   }
 
   void deleteRow(int cupIndex, int rowIndex) {
@@ -114,7 +112,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       // }
       //cups[cupIndex - 1].removeAt(rowIndex - 1);
     });
-    print(cups[cupIndex - 1]);
+    //print(cups[cupIndex - 1]);
   }
 
   bool rowAskedForDeletionNotification(RowDeletePressed n) {
@@ -138,12 +136,17 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
             Track('', 11, 11, "-----ADD TRACK-----", n.type));
       }
     });
-    print(cups[n.cupIndex - 1]);
+    //print(cups[n.cupIndex - 1]);
     return true;
   }
 
-  bool changeDeleteMode(DeleteModeUpdated n) {
-    //print(n.shouldDelete);
+  bool deleteHeaderPressed(DeleteModeUpdated n) {
+    if (n.destroyCupIndex! > 0 &&
+        cups[n.destroyCupIndex! - 1].isEmpty &&
+        n.shouldDelete == true) {
+      cups.removeAt(n.destroyCupIndex! - 1);
+    }
+    setState(() {});
     return true;
   }
 
@@ -172,33 +175,37 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
           children: [
             SingleChildScrollView(
               controller: AdjustableScrollController(80),
-              child: NotificationListener<AddTrackRequest>(
-                onNotification: addEmptyRow,
-                child: NotificationListener<RowDeletePressed>(
-                  onNotification: rowAskedForDeletionNotification,
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (int i = 0; i < cups.length; i++)
-                          CupTable(i + 1, cups[i], widget.packPath),
-                        Padding(
-                          padding: EdgeInsets.only(
-                              left: MediaQuery.of(context).size.width / 2 - 100,
-                              right:
-                                  MediaQuery.of(context).size.width / 2 - 100,
-                              bottom: 60),
-                          child: SizedBox(
-                            height: 60,
-                            child: ElevatedButton(
-                              child: const Text("Add cup"),
-                              onPressed: () => {
-                                setState(() => {cups.add([])})
-                              },
+              child: NotificationListener<DeleteModeUpdated>(
+                onNotification: deleteHeaderPressed,
+                child: NotificationListener<AddTrackRequest>(
+                  onNotification: addEmptyRow,
+                  child: NotificationListener<RowDeletePressed>(
+                    onNotification: rowAskedForDeletionNotification,
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (int i = 0; i < cups.length; i++)
+                            CupTable(i + 1, cups[i], widget.packPath),
+                          Padding(
+                            padding: EdgeInsets.only(
+                                left:
+                                    MediaQuery.of(context).size.width / 2 - 100,
+                                right:
+                                    MediaQuery.of(context).size.width / 2 - 100,
+                                bottom: 60),
+                            child: SizedBox(
+                              height: 60,
+                              child: ElevatedButton(
+                                child: const Text("Add cup"),
+                                onPressed: () => {
+                                  setState(() => {cups.add([])})
+                                },
+                              ),
                             ),
-                          ),
-                        )
-                      ]),
+                          )
+                        ]),
+                  ),
                 ),
               ),
             ),

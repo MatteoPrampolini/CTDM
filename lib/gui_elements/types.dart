@@ -44,7 +44,8 @@ class RowDeletePressed extends Notification {
 
 class DeleteModeUpdated extends Notification {
   final bool shouldDelete;
-  DeleteModeUpdated(this.shouldDelete);
+  final int? destroyCupIndex;
+  DeleteModeUpdated(this.shouldDelete, [this.destroyCupIndex]);
 }
 
 class AddTrackRequest extends Notification {

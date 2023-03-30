@@ -2,6 +2,8 @@
 
 // ignore_for_file: must_be_immutable
 
+import 'dart:io';
+
 import 'package:ctdm/gui_elements/types.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ class CupTableRow extends StatefulWidget {
   late int cupIndex = -1;
   late int rowIndex = -1;
   late bool canDeleteTracks = false;
+
   late MaterialAccentColor color = Colors.purpleAccent;
   CupTableRow(this.track, this.cupIndex, this.rowIndex, this.packPath,
       this.canDeleteTracks,
@@ -24,6 +27,7 @@ class CupTableRow extends StatefulWidget {
 
 class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController trackNameTextField;
+  String? musicFolder = "select music";
   @override
   void initState() {
     setColor();
@@ -54,7 +58,8 @@ class _CupTableRowState extends State<CupTableRow> {
 
   @override
   Widget build(BuildContext context) {
-    trackNameTextField.text = "${widget.track.name}[${widget.rowIndex}]";
+    trackNameTextField.text = widget.track.name;
+
     setColor();
     FilePickerResult? result;
     return Container(
@@ -93,7 +98,7 @@ class _CupTableRowState extends State<CupTableRow> {
                               onPressed: () => {
                                     //print("sono row: ${widget.rowIndex}"),
                                     //setState(() => {canDelete = !canDelete}),
-                                    print("row at:${widget.rowIndex}"),
+                                    //print("row at:${widget.rowIndex}"),
                                     RowDeletePressed(
                                             widget.cupIndex, widget.rowIndex)
                                         .dispatch(context)
@@ -170,10 +175,25 @@ class _CupTableRowState extends State<CupTableRow> {
                 alignment: Alignment.centerLeft,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16),
-                  child: Text(
-                    widget.track.path,
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(color: Colors.black87),
+                  child: SizedBox(
+                    width: 300.0,
+                    child: TextButton(
+                      onPressed: () async => {
+                        musicFolder = await FilePicker.platform
+                            .getDirectoryPath(
+                                initialDirectory:
+                                    path.dirname(path.dirname(widget.packPath)),
+                                dialogTitle: 'select music folder'),
+                        if (musicFolder == null)
+                          {musicFolder = "select music folder"},
+                        setState(() => {})
+                      },
+                      child: Text(
+                        path.basename(musicFolder!),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.black87),
+                      ),
+                    ),
                   ),
                 ),
               ),

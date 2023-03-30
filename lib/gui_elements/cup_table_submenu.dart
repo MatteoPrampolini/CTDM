@@ -3,7 +3,6 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:ctdm/gui_elements/types.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 //import 'package:path/path.dart' as path;
 
@@ -45,10 +44,9 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
 
   @override
   Widget build(BuildContext context) {
-    print("submenu dice:${widget.tracks}");
+    //print("submenu dice:${widget.tracks}");
     int i = widget.rowIndex;
-    trackNameTextField.text = "${widget.tracks[0].name}[${widget.rowIndex}]";
-    FilePickerResult? result;
+    trackNameTextField.text = widget.tracks[0].name;
     return Container(
       decoration: BoxDecoration(
           border: Border.all(color: Colors.black), color: widget.color),
