@@ -4,6 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:url_launcher/url_launcher_string.dart';
 
+int compareAlphamagically(File a, File b) {
+  if (int.tryParse(path.basenameWithoutExtension(a.path)) == null &&
+      int.tryParse(path.basenameWithoutExtension(a.path)) == null) {
+    return a.path.compareTo(b.path);
+  }
+  if (int.tryParse(path.basenameWithoutExtension(a.path)) == null &&
+      int.tryParse(path.basenameWithoutExtension(b.path)) != null) {
+    return -1;
+  }
+  if (int.tryParse(path.basenameWithoutExtension(a.path)) != null &&
+      int.tryParse(path.basenameWithoutExtension(b.path)) == null) {
+    return 1;
+  }
+  return int.parse(path.basenameWithoutExtension(a.path))
+      .compareTo(int.parse(path.basenameWithoutExtension(b.path)));
+}
+
 class CupIconsWindow extends StatefulWidget {
   final String packPath;
   const CupIconsWindow(this.packPath, {super.key});
@@ -63,7 +80,13 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
     Directory assetIconsDir = Directory('assets/images/default_pack_icons/');
 
     int i = -2;
-    for (File icon in assetIconsDir.listSync().whereType<File>()) {
+    print("test icon");
+    print(assetIconsDir.listSync());
+
+    List<File> iconFileList =
+        assetIconsDir.listSync().whereType<File>().toList();
+    iconFileList.sort((a, b) => compareAlphamagically(a, b));
+    for (File icon in iconFileList) {
       if (i >= nCups) return;
       if (!File(path.join(packPath, 'Icons', path.basename(icon.path)))
           .existsSync()) {

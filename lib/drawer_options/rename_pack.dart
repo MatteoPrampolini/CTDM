@@ -38,8 +38,14 @@ void saveAndRenamePack(
 }
 
 void createXmlFile(String xmlPath) {
-  final File xmlFile = File("assets/Pack.xml");
-  xmlFile.copySync(xmlPath);
+  //a quanto da debug si puo' fare ma non in release.... TODO
+  Directory assetFolder = Directory('assets/');
+  List<File> xmlFileList = assetFolder.listSync().whereType<File>().toList();
+  xmlFileList.retainWhere((element) => element.path.endsWith('xml'));
+
+  xmlFileList.first.copySync(xmlPath);
+  //final File xmlFile = File("assets/Pack.xml");
+  //xmlFile.copySync(xmlPath);
 }
 
 void replaceParamsInXml(
