@@ -2,29 +2,12 @@ import 'dart:io';
 
 import 'package:ctdm/gui_elements/cup_table.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import '../gui_elements/types.dart';
 
-void createConfigFile(String packPath) {
-  if (!File(path.join(packPath, 'config.txt')).existsSync()) {
-    File configFile = File("assets/config.txt");
-    configFile.copySync(path.join(packPath, 'config.txt'));
-  }
-}
-
-List<List<Track>> parseConfig(String configPath) {
-  List<List<Track>> cups = [];
-  File configFile = File(configPath);
-  String contents = configFile.readAsStringSync();
-  List<String> cupList = contents
-      .split(r"N$F_WII")[1]
-      .split(RegExp(r'^C.*[0-9]+', multiLine: true));
-
-  cupList.removeAt(0);
-  for (var cup in cupList) {
-    cups.add(splitCupListsFromText(cup.trim()));
-  }
-  return cups;
+Future<String> loadAsset(String assetPath) async {
+  return await rootBundle.loadString(assetPath);
 }
 
 List<Track> splitCupListsFromText(String str) {
@@ -94,33 +77,58 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     super.initState();
     createConfigFile(widget.packPath);
     setState(() {
-      cups = parseConfig(path.join(widget.packPath, 'config.txt'));
+      //parseConfig(path.join(widget.packPath, 'config.txt'));
       //print(cups.length);
     });
 
     //print(cups);
   }
 
+  void createConfigFile(String packPath) async {
+    File configTxt = File(path.join(packPath, 'config.txt'));
+    if (!configTxt.existsSync()) {
+      configTxt.createSync();
+
+      configTxt.writeAsStringSync(await loadAsset("assets/config.txt"),
+          flush: true);
+
+      parseConfig(configTxt.path);
+      return;
+      // //print(await loadAsset("assets/config.txt"));
+      // //loadAsset("assets/config.txt").then((value) => print("ciao"));
+    }
+    parseConfig(configTxt.path);
+  }
+
+  parseConfig(String configPath) {
+    List<List<Track>> cups = [];
+    File configFile = File(configPath);
+    String contents = configFile.readAsStringSync();
+    List<String> cupList = contents
+        .split(r"N$F_WII")[1]
+        .split(RegExp(r'^C.*[0-9]+', multiLine: true));
+
+    cupList.removeAt(0);
+    for (var cup in cupList) {
+      cups.add(splitCupListsFromText(cup.trim()));
+    }
+    this.cups = cups;
+  }
+
   void deleteRow(int cupIndex, int rowIndex) {
-    // print("search");
     cups[cupIndex - 1].removeAt(rowIndex - 1);
-    setState(() {
-      // if (cups[cupIndex - 1].length < rowIndex) {
-      //   print("c'è un problema");
-      //   //print(rowIndex);
-      //   return;
-      // }
-      //cups[cupIndex - 1].removeAt(rowIndex - 1);
-    });
-    //print(cups[cupIndex - 1]);
+    setState(() {});
   }
 
   bool rowAskedForDeletionNotification(RowDeletePressed n) {
-    //print(this.widget.cup);
-
-    //print("devo eliminare track ${n.rowIndex} in cup ${n.cupIndex}");
     deleteRow(n.cupIndex, n.rowIndex);
-    //print(cups[n.cupIndex - 1]);
+    return true;
+  }
+
+  bool rowChangedValue(RowChangedValue n) {
+    cups[n.cupIndex - 1][n.rowIndex - 1] = n.track;
+    //TODO MUSIC FOLDER
+    print(cups[n.cupIndex - 1][n.rowIndex - 1]);
     return true;
   }
 
@@ -128,8 +136,13 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     //print(n.cupIndex);
     setState(() {
       if (n.lastHiddenIndex == null) {
-        cups[n.cupIndex - 1]
-            .add(Track('', 11, 11, "-----ADD TRACK-----", n.type));
+        if (n.type == TrackType.base) {
+          cups[n.cupIndex - 1]
+              .add(Track('', 11, 11, "-----ADD TRACK-----", n.type));
+        }
+        if (n.type == TrackType.menu) {
+          cups[n.cupIndex - 1].add(Track('', 11, 11, "temp", n.type));
+        }
       } else {
         //print("lastHidden:${n.lastHiddenIndex}");
         cups[n.cupIndex - 1].insert(n.lastHiddenIndex!,
@@ -159,9 +172,121 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     (context as Element).visitChildren(rebuild);
   }
 
+  void saveConfig() {
+    //print(cups);
+    if (cups.length < 4) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text(r'Not valid config.'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                    'you made ${cups.length} cups but the required minimum is 4.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    if (cups.any((element) =>
+        element.where((element2) => element2.type != TrackType.hidden).length <
+        4)) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text(r'Not valid config.'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text('All the cups must have at least 4 selactable tracks.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    File configTxt = File(path.join(widget.packPath, 'config.txt'));
+    //configTxt.deleteSync();
+    //createConfigFile(widget.packPath);
+
+    appendToFreshConfig(cups, configTxt);
+  }
+
+  appendToFreshConfig(List<List<Track>> cups, File configTxt) {
+    String content = r"""#CT-CODE
+
+[RACING-TRACK-LIST]
+
+# enable support for LE-CODE flags
+%LE-FLAGS  = 1
+
+# auto insert a Wiimm cup (4 special random slots)
+%WIIMM-CUP = 0
+
+# standard setup
+N N$NONE | N$F_WII
+
+""";
+    int i = 1;
+    for (var cup in cups) {
+      content = "${content}C $i\n";
+      i++;
+      for (var track in cup) {
+        content = content + trackToString(track);
+      }
+      content = "$content\n";
+    }
+    configTxt.writeAsStringSync(content, mode: FileMode.write);
+    print(content);
+  }
+
+  String trackToString(Track track) {
+    String typeLetter = "";
+    String code = "";
+    switch (track.type) {
+      case TrackType.base:
+        typeLetter = "T";
+        code = "0x00";
+
+        break;
+      case TrackType.menu:
+        typeLetter = "T";
+        code = "0x02";
+
+        break;
+      case TrackType.hidden:
+        typeLetter = "H";
+        code = "0x04";
+
+        break;
+    }
+    return '$typeLetter T${track.musicId}; T${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
+  }
+
   @override
   Widget build(BuildContext context) {
     rebuildAllChildren(context);
+    print(cups);
     return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -175,36 +300,65 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
           children: [
             SingleChildScrollView(
               controller: AdjustableScrollController(80),
-              child: NotificationListener<DeleteModeUpdated>(
-                onNotification: deleteHeaderPressed,
-                child: NotificationListener<AddTrackRequest>(
-                  onNotification: addEmptyRow,
-                  child: NotificationListener<RowDeletePressed>(
-                    onNotification: rowAskedForDeletionNotification,
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (int i = 0; i < cups.length; i++)
-                            CupTable(i + 1, cups[i], widget.packPath),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left:
-                                    MediaQuery.of(context).size.width / 2 - 100,
-                                right:
-                                    MediaQuery.of(context).size.width / 2 - 100,
-                                bottom: 60),
-                            child: SizedBox(
-                              height: 60,
-                              child: ElevatedButton(
-                                child: const Text("Add cup"),
-                                onPressed: () => {
-                                  setState(() => {cups.add([])})
-                                },
+              child: NotificationListener<RowChangedValue>(
+                onNotification: rowChangedValue,
+                child: NotificationListener<DeleteModeUpdated>(
+                  onNotification: deleteHeaderPressed,
+                  child: NotificationListener<AddTrackRequest>(
+                    onNotification: addEmptyRow,
+                    child: NotificationListener<RowDeletePressed>(
+                      onNotification: rowAskedForDeletionNotification,
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (int i = 0; i < cups.length; i++)
+                              CupTable(i + 1, cups[i], widget.packPath),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  left: MediaQuery.of(context).size.width / 2 -
+                                      140,
+                                  right: MediaQuery.of(context).size.width / 2 -
+                                      140,
+                                  bottom: 60),
+                              child: SizedBox(
+                                height: 60,
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    ElevatedButton(
+                                      child: const Text("Add cup"),
+                                      onPressed: () => {
+                                        setState(() => {cups.add([])})
+                                      },
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 8.0),
+                                        child: ElevatedButton(
+                                          style: const ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStatePropertyAll(
+                                                      Colors.amberAccent)),
+                                          child: const Text(
+                                            "Save config",
+                                            style: TextStyle(
+                                                color: Colors.black87),
+                                          ),
+                                          onPressed: () => {saveConfig()},
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          )
-                        ]),
+                            )
+                          ]),
+                    ),
                   ),
                 ),
               ),

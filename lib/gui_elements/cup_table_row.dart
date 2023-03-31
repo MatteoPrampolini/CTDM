@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:ctdm/gui_elements/types.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 
 class CupTableRow extends StatefulWidget {
@@ -27,6 +28,7 @@ class CupTableRow extends StatefulWidget {
 
 class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController trackNameTextField;
+  late TextEditingController trackslotTextField;
   String? musicFolder = "select music";
   @override
   void initState() {
@@ -34,6 +36,8 @@ class _CupTableRowState extends State<CupTableRow> {
     super.initState();
     trackNameTextField = TextEditingController();
     trackNameTextField.text = widget.track.name;
+    trackslotTextField = TextEditingController();
+    trackslotTextField.text = widget.track.slotId.toString();
   }
 
   void setColor() {
@@ -53,13 +57,19 @@ class _CupTableRowState extends State<CupTableRow> {
   @override
   void dispose() {
     trackNameTextField.dispose();
+    trackslotTextField.dispose();
     super.dispose();
+  }
+
+  List returnValues() {
+    //widget.track.slotId=
+    return [widget.track, musicFolder];
   }
 
   @override
   Widget build(BuildContext context) {
     trackNameTextField.text = widget.track.name;
-
+    //trackslotTextField.text = widget.track.slotId.toString();
     setColor();
     FilePickerResult? result;
     return Container(
@@ -85,7 +95,12 @@ class _CupTableRowState extends State<CupTableRow> {
                         flex: 7,
                         child: TextField(
                           controller: trackNameTextField,
-                          onChanged: (value) => {widget.track.name = value},
+                          onChanged: (value) => {
+                            widget.track.name = value,
+                            RowChangedValue(widget.track, widget.cupIndex,
+                                    widget.rowIndex, musicFolder)
+                                .dispatch(context)
+                          },
                           //widget.track.name,
                           style: const TextStyle(color: Colors.black87),
                         ),
@@ -119,13 +134,28 @@ class _CupTableRowState extends State<CupTableRow> {
               decoration:
                   BoxDecoration(border: Border.all(color: Colors.black)),
               child: Center(
-                child: InkWell(
-                  onTap: () => {print("hello")},
-                  child: Text(
-                    widget.track.slotId.toString(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.black87),
-                  ),
+                child: TextField(
+                  controller: trackslotTextField,
+                  onChanged: (value) => {
+                    if (int.tryParse(value) == null)
+                      {}
+                    else
+                      {
+                        widget.track.slotId = int.tryParse(value)!,
+                        widget.track.musicId = int.tryParse(value)!,
+                        RowChangedValue(widget.track, widget.cupIndex,
+                                widget.rowIndex, musicFolder)
+                            .dispatch(context)
+                      }
+                  },
+                  style: const TextStyle(color: Colors.black87),
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(2),
+                    FilteringTextInputFormatter.allow(RegExp(r'[1-4]'))
+                  ],
                 ),
               ),
             ),
@@ -151,7 +181,10 @@ class _CupTableRowState extends State<CupTableRow> {
                           if (result?.files.single.path != null)
                             {
                               widget.track.path = path.basenameWithoutExtension(
-                                  result?.files.single.path as String)
+                                  result?.files.single.path as String),
+                              RowChangedValue(widget.track, widget.cupIndex,
+                                      widget.rowIndex, musicFolder)
+                                  .dispatch(context)
                             }
                         },
                       setState(() {}),
@@ -185,7 +218,12 @@ class _CupTableRowState extends State<CupTableRow> {
                                     path.dirname(path.dirname(widget.packPath)),
                                 dialogTitle: 'select music folder'),
                         if (musicFolder == null)
-                          {musicFolder = "select music folder"},
+                          {
+                            musicFolder = "select music",
+                            RowChangedValue(widget.track, widget.cupIndex,
+                                    widget.rowIndex, musicFolder)
+                                .dispatch(context)
+                          },
                         setState(() => {})
                       },
                       child: Text(

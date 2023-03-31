@@ -59,6 +59,9 @@ class _PackSelectState extends State<PackSelect> {
       if (!await Directory(path.join(workspace, 'MyTracks')).exists()) {
         Directory(path.join(workspace, 'MyTracks')).create();
       }
+      if (!await Directory(path.join(workspace, 'MyMusic')).exists()) {
+        Directory(path.join(workspace, 'MyMusic')).create();
+      }
 
       isoExtracted =
           await Directory(path.join(workspace, 'ORIGINAL_DISC')).exists();

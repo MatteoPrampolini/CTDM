@@ -45,6 +45,7 @@ class _CupTableState extends State<CupTable> {
     return val + 1;
   }
 
+  void askChildForValues() {}
   @override
   Widget build(BuildContext context) {
     i = 0;

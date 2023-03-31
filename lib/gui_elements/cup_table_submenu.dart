@@ -73,8 +73,12 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
                               flex: 7,
                               child: TextField(
                                 controller: trackNameTextField,
-                                onChanged: (value) =>
-                                    {widget.tracks[0].name = value},
+                                onChanged: (value) => {
+                                  widget.tracks[0].name = value,
+                                  RowChangedValue(widget.tracks[0],
+                                          widget.cupIndex, widget.rowIndex)
+                                      .dispatch(context)
+                                },
                                 //widget.track.name,
                                 style: const TextStyle(color: Colors.black87),
                               ),
@@ -106,14 +110,11 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
                   child: Container(
                     decoration:
                         BoxDecoration(border: Border.all(color: Colors.black)),
-                    child: Center(
-                      child: InkWell(
-                        onTap: () => {print("hello")},
-                        child: const Text(
-                          "", //widget.track.slotId.toString(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.black87),
-                        ),
+                    child: const Center(
+                      child: Text(
+                        "", //widget.track.slotId.toString(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.black87),
                       ),
                     ),
                   ),

@@ -15,7 +15,8 @@ class Track {
   Track(this.name, this.slotId, this.musicId, this.path, this.type);
   @override
   String toString() {
-    return "Track($name)";
+    //return "Track($name)";
+    return "Track($name,$path,$slotId,$musicId,$type)";
   }
 }
 
@@ -46,6 +47,14 @@ class DeleteModeUpdated extends Notification {
   final bool shouldDelete;
   final int? destroyCupIndex;
   DeleteModeUpdated(this.shouldDelete, [this.destroyCupIndex]);
+}
+
+class RowChangedValue extends Notification {
+  final int cupIndex;
+  final int rowIndex;
+  final Track track;
+  final String? musicFolder;
+  RowChangedValue(this.track, this.cupIndex, this.rowIndex, [this.musicFolder]);
 }
 
 class AddTrackRequest extends Notification {
