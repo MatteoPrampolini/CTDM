@@ -501,7 +501,14 @@ class _PatchWindowState extends State<PatchWindow> {
     //4b)wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String isoVersion = prefs.getString('isoVersion')!;
-    File("assets/lecode_build/lecode-$isoVersion.bin")
+    String lecodePath = path.join(
+        path.dirname(Platform.resolvedExecutable),
+        "data",
+        "flutter_assets",
+        "assets",
+        "lecode_build",
+        "lecode-$isoVersion.bin");
+    File(lecodePath)
         .copySync(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
 
     List<File> szsFileList = Directory(path.join(workspace, 'MyTracks'))
