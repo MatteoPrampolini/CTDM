@@ -38,8 +38,9 @@ void saveAndRenamePack(
 }
 
 void createXmlFile(String xmlPath) {
-  //a quanto da debug si puo' fare ma non in release.... TODO
-  Directory assetFolder = Directory('assets/');
+  String assetPath = path.join(path.dirname(Platform.resolvedExecutable),
+      "data", "flutter_assets", "assets");
+  Directory assetFolder = Directory(assetPath);
   List<File> xmlFileList = assetFolder.listSync().whereType<File>().toList();
   xmlFileList.retainWhere((element) => element.path.endsWith('xml'));
 

@@ -77,7 +77,9 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
       iconDir.createSync();
     }
 
-    Directory assetIconsDir = Directory('assets/images/default_pack_icons/');
+    String iconDirPath = path.join(path.dirname(Platform.resolvedExecutable),
+        "data", "flutter_assets", "assets", "images", "default_pack_icons");
+    Directory assetIconsDir = Directory(iconDirPath);
 
     int i = -2;
     print("test icon");

@@ -87,10 +87,18 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   void createConfigFile(String packPath) async {
     File configTxt = File(path.join(packPath, 'config.txt'));
     if (!configTxt.existsSync()) {
-      configTxt.createSync();
+      // configTxt.createSync();
 
-      configTxt.writeAsStringSync(await loadAsset("assets/config.txt"),
-          flush: true);
+      // configTxt.writeAsStringSync(await loadAsset("assets/config.txt"),
+      //     flush: true);
+      String assetConfigPath = path.join(
+          path.dirname(Platform.resolvedExecutable),
+          "data",
+          "flutter_assets",
+          "assets",
+          "config.txt");
+
+      File(assetConfigPath).copySync(path.join(packPath, 'config.txt'));
 
       parseConfig(configTxt.path);
       return;
