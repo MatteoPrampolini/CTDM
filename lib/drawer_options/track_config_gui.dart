@@ -174,57 +174,59 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
   void saveConfig() {
     //print(cups);
-    if (cups.length < 4) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text(r'Not valid config.'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                    'you made ${cups.length} cups but the required minimum is 4.'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-    if (cups.any((element) =>
-        element.where((element2) => element2.type != TrackType.hidden).length <
-        4)) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text(r'Not valid config.'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: const <Widget>[
-                Text('All the cups must have at least 4 selactable tracks.'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
-      );
-      return;
-    }
+    // if (cups.length < 4) {
+    //   showDialog(
+    //     context: context,
+    //     builder: (_) => AlertDialog(
+    //       title: const Text(r'Not valid config.'),
+    //       content: SingleChildScrollView(
+    //         child: ListBody(
+    //           children: <Widget>[
+    //             Text(
+    //                 'you made ${cups.length} cups but the required minimum is 4.'),
+    //           ],
+    //         ),
+    //       ),
+    //       actions: <Widget>[
+    //         TextButton(
+    //           child: const Text('OK'),
+    //           onPressed: () {
+    //             Get.back();
+    //             //Navigator.of(context).pop();
+    //           },
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    //   return;
+    // }
+    // if (cups.any((element) =>
+    //     element.where((element2) => element2.type != TrackType.hidden).length <
+    //     4)) {
+    //   showDialog(
+    //     context: context,
+    //     builder: (_) => AlertDialog(
+    //       title: const Text(r'Not valid config.'),
+    //       content: SingleChildScrollView(
+    //         child: ListBody(
+    //           children: const <Widget>[
+    //             Text('All the cups must have at least 4 selactable tracks.'),
+    //           ],
+    //         ),
+    //       ),
+    //       actions: <Widget>[
+    //         TextButton(
+    //           child: const Text('OK'),
+    //           onPressed: () {
+    //             Get.back();
+    //             //Navigator.of(context).pop();
+    //           },
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    //   return;
+    // }
     File configTxt = File(path.join(widget.packPath, 'config.txt'));
     //configTxt.deleteSync();
     //createConfigFile(widget.packPath);

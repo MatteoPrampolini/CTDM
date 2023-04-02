@@ -9,6 +9,8 @@ import 'pack_select.dart';
 import 'settings.dart';
 
 void main() async {
+  Directory current = Directory.current;
+  print(current.path);
   final prefs = await SharedPreferences.getInstance();
   try {
     final _ = await Process.start('wlect', [], runInShell: false);
