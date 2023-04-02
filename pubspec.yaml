@@ -99,7 +99,6 @@ flutter:
       - assets/images/default_pack_icons/9.png
       - assets/images/default_pack_icons/0_l.png
       - assets/images/default_pack_icons/0_r.png
-      - assets/images/default_pack_icons/0_r.png
       - assets/lecode_build/
       - assets/lecode_build/lecode-JAP.bin
       - assets/lecode_build/lecode-KOR.bin
