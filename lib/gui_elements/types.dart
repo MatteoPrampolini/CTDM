@@ -11,12 +11,17 @@ class Track {
   late int musicId;
   late String path;
   late TrackType type;
+  late String? musicFolder;
 
-  Track(this.name, this.slotId, this.musicId, this.path, this.type);
+  Track(this.name, this.slotId, this.musicId, this.path, this.type,
+      [this.musicFolder]);
   @override
   String toString() {
     //return "Track($name)";
-    return "Track($name,$path,$slotId,$musicId,$type)";
+    if (musicFolder == null) {
+      return "Track($name,$path,$slotId,$musicId,$type)";
+    }
+    return "Track($name,$path,$slotId,$musicId,$type,$musicFolder)";
   }
 }
 
@@ -53,8 +58,7 @@ class RowChangedValue extends Notification {
   final int cupIndex;
   final int rowIndex;
   final Track track;
-  final String? musicFolder;
-  RowChangedValue(this.track, this.cupIndex, this.rowIndex, [this.musicFolder]);
+  RowChangedValue(this.track, this.cupIndex, this.rowIndex);
 }
 
 class AddTrackRequest extends Notification {

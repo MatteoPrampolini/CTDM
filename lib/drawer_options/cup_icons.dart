@@ -82,8 +82,8 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
     Directory assetIconsDir = Directory(iconDirPath);
 
     int i = -2;
-    print("test icon");
-    print(assetIconsDir.listSync());
+    //print("test icon");
+    //print(assetIconsDir.listSync());
 
     List<File> iconFileList =
         assetIconsDir.listSync().whereType<File>().toList();

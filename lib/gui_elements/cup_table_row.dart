@@ -2,8 +2,6 @@
 
 // ignore_for_file: must_be_immutable
 
-import 'dart:io';
-
 import 'package:ctdm/gui_elements/types.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +96,7 @@ class _CupTableRowState extends State<CupTableRow> {
                           onChanged: (value) => {
                             widget.track.name = value,
                             RowChangedValue(widget.track, widget.cupIndex,
-                                    widget.rowIndex, musicFolder)
+                                    widget.rowIndex)
                                 .dispatch(context)
                           },
                           //widget.track.name,
@@ -143,8 +141,8 @@ class _CupTableRowState extends State<CupTableRow> {
                       {
                         widget.track.slotId = int.tryParse(value)!,
                         widget.track.musicId = int.tryParse(value)!,
-                        RowChangedValue(widget.track, widget.cupIndex,
-                                widget.rowIndex, musicFolder)
+                        RowChangedValue(
+                                widget.track, widget.cupIndex, widget.rowIndex)
                             .dispatch(context)
                       }
                   },
@@ -183,7 +181,7 @@ class _CupTableRowState extends State<CupTableRow> {
                               widget.track.path = path.basenameWithoutExtension(
                                   result?.files.single.path as String),
                               RowChangedValue(widget.track, widget.cupIndex,
-                                      widget.rowIndex, musicFolder)
+                                      widget.rowIndex)
                                   .dispatch(context)
                             }
                         },
@@ -220,10 +218,24 @@ class _CupTableRowState extends State<CupTableRow> {
                         if (musicFolder == null)
                           {
                             musicFolder = "select music",
-                            RowChangedValue(widget.track, widget.cupIndex,
-                                    widget.rowIndex, musicFolder)
-                                .dispatch(context)
+                          }
+                        else
+                          {
+                            //controllo se stringa è numero slot o folder
+                            if (RegExp(r'^[1-4][1-4]$').hasMatch(musicFolder!))
+                              {
+                                musicFolder = "select music",
+                                widget.track.slotId = int.parse(musicFolder!)
+                              }
+                            else
+                              {
+                                widget.track.musicFolder =
+                                    path.basename(musicFolder!)
+                              }
                           },
+                        RowChangedValue(
+                                widget.track, widget.cupIndex, widget.rowIndex)
+                            .dispatch(context),
                         setState(() => {})
                       },
                       child: Text(

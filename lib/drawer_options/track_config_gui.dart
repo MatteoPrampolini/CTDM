@@ -76,6 +76,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   void initState() {
     super.initState();
     createConfigFile(widget.packPath);
+    //TODO load music.txt
     setState(() {
       //parseConfig(path.join(widget.packPath, 'config.txt'));
       //print(cups.length);
@@ -87,10 +88,6 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   void createConfigFile(String packPath) async {
     File configTxt = File(path.join(packPath, 'config.txt'));
     if (!configTxt.existsSync()) {
-      // configTxt.createSync();
-
-      // configTxt.writeAsStringSync(await loadAsset("assets/config.txt"),
-      //     flush: true);
       String assetConfigPath = path.join(
           path.dirname(Platform.resolvedExecutable),
           "data",
@@ -108,13 +105,13 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     parseConfig(configTxt.path);
   }
 
-  parseConfig(String configPath) {
+  void parseConfig(String configPath) {
     List<List<Track>> cups = [];
     File configFile = File(configPath);
     String contents = configFile.readAsStringSync();
     List<String> cupList = contents
         .split(r"N$F_WII")[1]
-        .split(RegExp(r'^C.*[0-9]+', multiLine: true));
+        .split(RegExp(r'^C.*[0-9]?', multiLine: true));
 
     cupList.removeAt(0);
     for (var cup in cupList) {
@@ -135,8 +132,6 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
   bool rowChangedValue(RowChangedValue n) {
     cups[n.cupIndex - 1][n.rowIndex - 1] = n.track;
-    //TODO MUSIC FOLDER
-    print(cups[n.cupIndex - 1][n.rowIndex - 1]);
     return true;
   }
 
@@ -236,13 +231,33 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     //   return;
     // }
     File configTxt = File(path.join(widget.packPath, 'config.txt'));
+    File musicTxt = File(path.join(widget.packPath, 'music.txt'));
     //configTxt.deleteSync();
     //createConfigFile(widget.packPath);
 
-    appendToFreshConfig(cups, configTxt);
+    updateConfigContent(cups, configTxt);
+    updateMusicConfig(cups, configTxt, musicTxt);
   }
 
-  appendToFreshConfig(List<List<Track>> cups, File configTxt) {
+  void updateMusicConfig(cups, File configTxt, File musicTxt) {
+    if (!musicTxt.existsSync()) {
+      musicTxt.createSync();
+    }
+    String content = "";
+    int i = 0;
+    for (var cup in cups) {
+      for (Track track in cup) {
+        if (track.musicFolder != null && track.type != TrackType.menu) {
+          content +=
+              "${i.toRadixString(16).padLeft(3, '0')};${track.musicFolder!}\n";
+        }
+        i++;
+      }
+    }
+    musicTxt.writeAsStringSync(content, mode: FileMode.write);
+  }
+
+  void updateConfigContent(List<List<Track>> cups, File configTxt) {
     String content = r"""#CT-CODE
 
 [RACING-TRACK-LIST]
@@ -267,7 +282,7 @@ N N$NONE | N$F_WII
       content = "$content\n";
     }
     configTxt.writeAsStringSync(content, mode: FileMode.write);
-    print(content);
+    //print(content);
   }
 
   String trackToString(Track track) {
@@ -296,7 +311,7 @@ N N$NONE | N$F_WII
   @override
   Widget build(BuildContext context) {
     rebuildAllChildren(context);
-    print(cups);
+    //print(cups);
     return Scaffold(
         appBar: AppBar(
           title: const Text(

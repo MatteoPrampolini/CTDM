@@ -516,7 +516,8 @@ class _PatchWindowState extends State<PatchWindow> {
         .whereType<File>()
         .toList();
     szsFileList.retainWhere((element) => element.path.endsWith('.szs'));
-
+    szsFileList.retainWhere((element) =>
+        trackList.contains(path.basenameWithoutExtension(element.path)));
     Directory(path.join(packPath, 'Race', 'Course', 'tmp')).createSync();
     for (File szs in szsFileList) {
       szs.copySync(path.join(
