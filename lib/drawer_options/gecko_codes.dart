@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -15,28 +14,153 @@ class GeckoCodes extends StatefulWidget {
 }
 
 class _GeckoCodesState extends State<GeckoCodes> {
+  void rebuildAllChildren(BuildContext context) {
+    void rebuild(Element el) {
+      el.markNeedsBuild();
+      el.visitChildren(rebuild);
+    }
+
+    (context as Element).visitChildren(rebuild);
+  }
+
   List<Gecko> codes = [];
+  int selectedCode = 0;
+  late TextEditingController _nameController;
+  late TextEditingController _authorController;
+  late TextEditingController _descController;
+  late TextEditingController _palController;
+  late TextEditingController _usaController;
+  late TextEditingController _japController;
+  late TextEditingController _korController;
+
   @override
   void initState() {
     loadCodes();
+    _nameController = TextEditingController();
+    _authorController = TextEditingController();
+    _descController = TextEditingController();
+    _palController = TextEditingController();
+    _usaController = TextEditingController();
+    _japController = TextEditingController();
+    _korController = TextEditingController();
+
     super.initState();
   }
 
+  @override
+  void dispose() {
+    // _nameController.dispose();
+    // _nameController.dispose();
+    // _authorController.dispose();
+    // _descController.dispose();
+    // _palController.dispose();
+    // _usaController.dispose();
+    // _japController.dispose();
+    // _korController.dispose();
+    super.dispose();
+  }
+
   void loadCodes() {
-    Directory codesFolder = Directory(
-        path.join(path.dirname(path.dirname(widget.packPath)), 'MyCodes'));
+    Directory codesFolder = Directory(path.join(widget.packPath, 'MyCodes'));
     if (!codesFolder.existsSync()) {
       codesFolder.createSync();
+    }
+    String assetPath = path.join(path.dirname(Platform.resolvedExecutable),
+        "data", "flutter_assets", "assets");
+    File musicCheat1 =
+        File(path.join(assetPath, 'gecko', 'trackMusicExpander.json'));
+    File musicCheat2 =
+        File(path.join(assetPath, 'gecko', 'automaticBrsarPatching.json'));
+    if (!File(path.join(widget.packPath, "MyCodes", 'trackMusicExpander.json'))
+        .existsSync()) {
+      musicCheat1.copySync(
+          path.join(widget.packPath, "MyCodes", 'trackMusicExpander.json'));
+    }
+    if (!File(path.join(
+            widget.packPath, "MyCodes", 'automaticBrsarPatching.json'))
+        .existsSync()) {
+      musicCheat2.copySync(
+          path.join(widget.packPath, "MyCodes", 'automaticBrsarPatching.json'));
     }
     List<File> codeList = codesFolder.listSync().whereType<File>().toList();
     for (File code in codeList) {
       var json = jsonDecode(code.readAsStringSync());
+      codes.add(Gecko(
+          json['name'],
+          json['PAL'],
+          json['USA'],
+          json['JAP'],
+          json['KOR'],
+          json['author'],
+          json['desc'],
+          path.basename(code.path),
+          json['name'] == "Automatic BRSAR Patching" ||
+              json['name'] == "Track Music Expander"));
       //process json e append codes
     }
   }
 
+  void addCode() {
+    setState(() {
+      codes.add(Gecko("New Code", "", "", "", "", "",
+          "please fill the description", "", false));
+    });
+  }
+
+  void saveCode() {
+    File oldSelectedFile = File(
+        path.join(widget.packPath, 'MyCodes', codes[selectedCode].baseName));
+    if (oldSelectedFile.existsSync()) {
+      oldSelectedFile.deleteSync();
+    }
+    codes[selectedCode].name = _nameController.value.text;
+    codes[selectedCode].author = _authorController.value.text;
+    codes[selectedCode].desc = _descController.value.text;
+    codes[selectedCode].baseName = "${_nameController.value.text}.json";
+    codes[selectedCode].pal = _palController.value.text;
+    codes[selectedCode].usa = _usaController.value.text;
+    codes[selectedCode].jap = _japController.value.text;
+    codes[selectedCode].kor = _korController.value.text;
+
+    String content = jsonEncode({
+      'name': codes[selectedCode].name,
+      'author': codes[selectedCode].author,
+      'desc': codes[selectedCode].desc,
+      'PAL': codes[selectedCode].pal.replaceAll(RegExp(r'[\n\r\s]+'), ''),
+      'USA': codes[selectedCode].usa.replaceAll(RegExp(r'[\n\r\s]+'), ''),
+      'JAP': codes[selectedCode].jap.replaceAll(RegExp(r'[\n\r\s]+'), ''),
+      'KOR': codes[selectedCode].kor.replaceAll(RegExp(r'[\n\r\s]+'), '')
+    });
+
+    File selectedFile = File(
+        path.join(widget.packPath, 'MyCodes', codes[selectedCode].baseName));
+
+    selectedFile.writeAsStringSync(content, mode: FileMode.write);
+    setState(() {});
+  }
+
+  void deleteCode() {
+    codes.removeAt(selectedCode);
+    selectedCode = selectedCode - 1;
+    File selectedFile = File(
+        path.join(widget.packPath, 'MyCodes', codes[selectedCode].baseName));
+    if (selectedFile.existsSync()) {
+      selectedFile.deleteSync();
+    }
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    rebuildAllChildren(context);
+    _nameController.text = codes[selectedCode].name;
+    _authorController.text = codes[selectedCode].author;
+    _descController.text = codes[selectedCode].desc;
+    _palController.text = codes[selectedCode].pal;
+    _usaController.text = codes[selectedCode].usa;
+    _japController.text = codes[selectedCode].jap;
+    _korController.text = codes[selectedCode].kor;
     return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -47,54 +171,191 @@ class _GeckoCodesState extends State<GeckoCodes> {
           iconTheme: IconThemeData(color: Colors.red.shade700),
         ),
         body: Stack(children: [
-          SingleChildScrollView(
-              child: Column(children: [
-            for (int i = 0; i < codes.length; i++) Text(codes[i].name)
-          ])),
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Container(
+              decoration:
+                  BoxDecoration(border: Border.all(color: Colors.amberAccent)),
+              height: MediaQuery.of(context).size.height - 30,
+              width: MediaQuery.of(context).size.width / 5,
+              child: SingleChildScrollView(
+                  child: Column(children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 5.0),
+                  child: Text("CHEAT LIST",
+                      style: TextStyle(color: Colors.amber, fontSize: 30)),
+                ),
+                const Divider(),
+                for (int i = 0; i < codes.length; i++)
+                  ListTile(
+                    leading: const Icon(Icons.chevron_right),
+                    selected: i == selectedCode,
+                    title: Text(codes[i].name),
+                    onTap: () => {
+                      setState(
+                        () => {selectedCode = i},
+                      )
+                    },
+                  ),
+                IconButton(
+                    onPressed: addCode,
+                    icon: const Icon(
+                      Icons.add,
+                      color: Colors.amberAccent,
+                    ))
+              ])),
+            ),
+          ),
           Center(
             child: SizedBox(
               width: MediaQuery.of(context).size.width / 2,
-              height: 400,
+              height: 500,
               child: Column(
                 children: [
-                  Text("Name,Author,Save row"),
                   SizedBox(
-                    height: 300,
+                      height: 100,
+                      width: MediaQuery.of(context).size.width / 2,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              enabled: !codes[selectedCode].mandatory,
+                              controller: _nameController,
+                              style: TextStyle(
+                                  color: codes[selectedCode].mandatory
+                                      ? Colors.white30
+                                      : Colors.white),
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: 'Cheat name',
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              enabled: !codes[selectedCode].mandatory,
+                              controller: _authorController,
+                              style: TextStyle(
+                                  color: codes[selectedCode].mandatory
+                                      ? Colors.white30
+                                      : Colors.white),
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: 'Author',
+                              ),
+                            ),
+                          )
+                        ],
+                      )),
+                  SizedBox(
+                    height: 200,
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          GeckoTable("", GameVersion.PAL),
-                          GeckoTable("", GameVersion.USA),
-                          GeckoTable("", GameVersion.JAP),
-                          GeckoTable("", GameVersion.KOR)
+                          GeckoTable(codes[selectedCode].pal, GameVersion.PAL,
+                              _palController, codes[selectedCode].mandatory),
+                          GeckoTable(codes[selectedCode].usa, GameVersion.USA,
+                              _usaController, codes[selectedCode].mandatory),
+                          GeckoTable(codes[selectedCode].jap, GameVersion.JAP,
+                              _japController, codes[selectedCode].mandatory),
+                          GeckoTable(codes[selectedCode].kor, GameVersion.KOR,
+                              _korController, codes[selectedCode].mandatory)
                         ]),
                   ),
+                  Expanded(
+                    child: SizedBox(
+                      height: 100,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: TextField(
+                          enabled: !codes[selectedCode].mandatory,
+                          controller: _descController,
+                          maxLines: null,
+                          minLines: null,
+                          expands: true,
+                          style: TextStyle(
+                              color: codes[selectedCode].mandatory
+                                  ? Colors.white30
+                                  : Colors.white),
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Desc',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 500,
+                    height: 80,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 30.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                                style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(
+                                        Colors.amberAccent)),
+                                onPressed: codes[selectedCode].mandatory
+                                    ? null
+                                    : () => {saveCode()},
+                                child: const Text(
+                                  "Save",
+                                  style: TextStyle(color: Colors.black87),
+                                )),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: ElevatedButton(
+                                  onPressed: codes[selectedCode].mandatory
+                                      ? null
+                                      : () => {deleteCode()},
+                                  child: const Text("Delete")),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
           ),
-          const Text("select code")
         ]));
   }
 }
 
 class Gecko {
   String name;
-  String? author;
+  String author;
   String pal;
   String usa;
-  String kor;
   String jap;
-  Gecko(this.name, this.pal, this.usa, this.kor, this.jap, {this.author});
+  String kor;
+
+  String desc;
+  String baseName;
+  bool mandatory;
+  Gecko(this.name, this.pal, this.usa, this.kor, this.jap, this.author,
+      this.desc, this.baseName, this.mandatory);
 }
 
+// ignore: constant_identifier_names
 enum GameVersion { PAL, USA, JAP, KOR }
 
 class GeckoTable extends StatefulWidget {
   String codeString;
   GameVersion version;
-  GeckoTable(this.codeString, this.version, {super.key});
+  TextEditingController _controller;
+  bool disabled;
+  GeckoTable(this.codeString, this.version, this._controller, this.disabled,
+      {super.key});
 
   @override
   State<GeckoTable> createState() => _GeckoTableState();
@@ -104,17 +365,19 @@ class _GeckoTableState extends State<GeckoTable> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 300,
       width: MediaQuery.of(context).size.width / 8,
       child: TextField(
+        enabled: !widget.disabled,
+        controller: widget._controller,
         maxLines: null,
         minLines: null,
         expands: true,
         decoration: InputDecoration(
           border: const OutlineInputBorder(),
-          labelText: 'Insert ${widget.version.name} Code',
+          labelText: '${widget.version.name} Code',
         ),
-        style: const TextStyle(color: Colors.white70),
+        style:
+            TextStyle(color: widget.disabled ? Colors.white30 : Colors.white),
       ),
     );
   }

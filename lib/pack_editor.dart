@@ -96,6 +96,27 @@ class _PackEditorState extends State<PackEditor> {
   }
 
   void loadSettings() async {
+    if (!Directory(path.join(widget.packPath, 'MyCodes')).existsSync()) {
+      Directory(path.join(widget.packPath, 'MyCodes')).createSync();
+    }
+    String assetPath = path.join(path.dirname(Platform.resolvedExecutable),
+        "data", "flutter_assets", "assets");
+    File musicCheat1 =
+        File(path.join(assetPath, 'gecko', 'trackMusicExpander.json'));
+    File musicCheat2 =
+        File(path.join(assetPath, 'gecko', 'automaticBrsarPatching.json'));
+    if (!File(path.join(widget.packPath, "MyCodes", 'trackMusicExpander.json'))
+        .existsSync()) {
+      musicCheat1.copySync(
+          path.join(widget.packPath, "MyCodes", 'trackMusicExpander.json'));
+    }
+    if (!File(path.join(
+            widget.packPath, "MyCodes", 'automaticBrsarPatching.json'))
+        .existsSync()) {
+      musicCheat2.copySync(
+          path.join(widget.packPath, "MyCodes", 'automaticBrsarPatching.json'));
+    }
+
     if (!await Directory(path.join(widget.packPath, 'Scene')).exists()) {
       Directory(path.join(widget.packPath, 'Scene')).create();
     }

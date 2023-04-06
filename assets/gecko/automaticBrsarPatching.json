@@ -1,0 +1,9 @@
+{
+    "name":"Automatic BRSAR Patching",
+    "author":"Elias_",
+    "desc":"REQUIRED. This code will automatically patch the size of the entry of any BRSTM file to its maximum size on the fly. https://youtu.be/y2tOmsdoBjw",
+    "PAL":"C2091350000000023FE07FFF63FFFFFF93FD007400000000",
+    "USA":"C20912B0000000023FE07FFF63FFFFFF93FD007400000000",
+    "JAP":"C2091270000000023FE07FFF63FFFFFF93FD007400000000",
+    "KOR":"C20913B0000000023FE07FFF63FFFFFF93FD007400000000"
+}
