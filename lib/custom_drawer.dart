@@ -8,6 +8,7 @@ import 'package:ctdm/drawer_options/track_config_gui.dart';
 //import 'package:ctdm/drawer_options/track_config_gui.dart';
 import 'package:flutter/material.dart';
 
+import 'drawer_options/gecko_codes.dart';
 import 'main.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -103,6 +104,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
           },
         ),
         const Divider(),
+        ListTile(
+          enabled: widget.xmlExist,
+          title: const Text('Gecko codes'),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => GeckoCodes(widget.packPath)));
+            // Update the state of the app.
+            // ...
+          },
+        ),
       ],
     ));
   }

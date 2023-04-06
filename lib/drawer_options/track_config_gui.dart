@@ -77,12 +77,32 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     super.initState();
     createConfigFile(widget.packPath);
     //TODO load music.txt
+    loadMusic(widget.packPath);
     setState(() {
       //parseConfig(path.join(widget.packPath, 'config.txt'));
       //print(cups.length);
     });
 
     //print(cups);
+  }
+
+  void loadMusic(String packPath) {
+    File musicTxt = File(path.join(packPath, 'music.txt'));
+    if (!musicTxt.existsSync()) return;
+
+    for (String line in musicTxt.readAsLinesSync()) {
+      String hex = line.substring(0, 3);
+      int i = 0;
+      for (List<Track> cup in cups) {
+        for (Track track in cup) {
+          if (int.parse(hex, radix: 16) == i) {
+            track.musicFolder = line.substring(4);
+          }
+
+          i++;
+        }
+      }
+    }
   }
 
   void createConfigFile(String packPath) async {
@@ -236,10 +256,10 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     //createConfigFile(widget.packPath);
 
     updateConfigContent(cups, configTxt);
-    updateMusicConfig(cups, configTxt, musicTxt);
+    updateMusicConfig(configTxt, musicTxt);
   }
 
-  void updateMusicConfig(cups, File configTxt, File musicTxt) {
+  void updateMusicConfig(File configTxt, File musicTxt) {
     if (!musicTxt.existsSync()) {
       musicTxt.createSync();
     }
@@ -311,7 +331,6 @@ N N$NONE | N$F_WII
   @override
   Widget build(BuildContext context) {
     rebuildAllChildren(context);
-    //print(cups);
     return Scaffold(
         appBar: AppBar(
           title: const Text(

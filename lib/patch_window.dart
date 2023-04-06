@@ -8,6 +8,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 //import 'package:image/image.dart' as img;
 
+bool isFastBrstm(String path) {
+  if (path.endsWith("_f.brstm")) return true;
+  if (path.endsWith("_F.brstm")) return true;
+  return false;
+}
+
 class PatchWindow extends StatefulWidget {
   final String packPath;
   const PatchWindow(this.packPath, {super.key});
@@ -39,9 +45,23 @@ void completeXmlFile(String packPath) {
     courseBigString +=
         '<file external="/$packName/Race/Course/${path.basename(course.path)}" disc="/Race/Course/${path.basename(course.path)}" create="true"/>\n\t\t';
   }
+  //3 music dir
+  Directory musicDir = Directory(path.join(packPath, 'Music'));
+  String musicBigString = "";
+  List<File> musicDirList = musicDir.listSync().whereType<File>().toList();
+  for (File music in musicDirList) {
+    int hex = int.parse(path.basename(music.path).substring(0, 3), radix: 16);
+    if (hex < 32) {
+      musicBigString +=
+          '<file external="/$packName/Music/${path.basename(music.path)}" disc="/sound/strm/${path.basename(music.path)}"/>\n\t\t';
+    } else {
+      musicBigString +=
+          '<file external="/$packName/Music/${path.basename(music.path)}" disc="/sound/strm/${path.basename(music.path)}" create="true"/>\n\t\t';
+    }
+  }
   contents = contents.replaceFirst(
       RegExp(r'<!--MY COMMONS-->.*<!--END MY TRACKS-->', dotAll: true),
-      '<!--MY COMMONS-->\n\t\t$commonBigString$courseBigString<!--END MY TRACKS-->\t\t');
+      '<!--MY COMMONS-->\n\t\t$commonBigString$musicBigString$courseBigString<!--END MY TRACKS-->\t\t');
   //print(contents);
   //print(commonBigString);
   //print(courseBigString);
@@ -585,10 +605,47 @@ class _PatchWindowState extends State<PatchWindow> {
     } on Exception catch (_) {
       //print(_);
     }
+
+    //copy music
+    copyMusic(packPath);
     completeXmlFile(packPath);
     setState(() {
       patchStatus = PatchingStatus.completed;
     });
+  }
+
+  void copyMusic(packPath) {
+    File musicTxt = File(path.join(packPath, "music.txt"));
+    Directory musicDir = Directory(path.join(packPath, 'Music'));
+    if (musicDir.existsSync()) {
+      musicDir.deleteSync(recursive: true);
+    }
+    musicDir.createSync();
+
+    List<String> tracksWithMusicHex = [];
+    Directory workspaceMyMusic =
+        Directory(path.join(path.dirname(path.dirname(packPath)), 'myMusic'));
+    for (String line in musicTxt.readAsLinesSync()) {
+      tracksWithMusicHex.add(line.substring(0, 3));
+
+      Directory mDir =
+          Directory(path.join(workspaceMyMusic.path, line.substring(4)));
+      File fastFile = mDir
+          .listSync()
+          .whereType<File>()
+          .firstWhere((element) => isFastBrstm(element.path));
+      File normalFile = mDir
+          .listSync()
+          .whereType<File>()
+          .firstWhere((element) => !isFastBrstm(element.path));
+
+      //copia i due file
+      normalFile
+          .copySync(path.join(musicDir.path, '${line.substring(0, 3)}.brstm'));
+      fastFile.copySync(
+          path.join(musicDir.path, '${line.substring(0, 3)}_f.brstm'));
+      //File(path.join(workspaceMyMusic.path,)).copySync(musicDir.path, line.substring(0, 3));
+    }
   }
 
   @override

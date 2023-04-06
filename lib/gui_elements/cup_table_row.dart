@@ -67,6 +67,9 @@ class _CupTableRowState extends State<CupTableRow> {
   @override
   Widget build(BuildContext context) {
     trackNameTextField.text = widget.track.name;
+    widget.track.musicFolder != null
+        ? musicFolder = widget.track.musicFolder
+        : null;
     //trackslotTextField.text = widget.track.slotId.toString();
     setColor();
     FilePickerResult? result;
