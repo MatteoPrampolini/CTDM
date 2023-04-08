@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
+import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:merge_images/merge_images.dart';
 import 'package:path/path.dart' as path;
@@ -45,23 +46,23 @@ void completeXmlFile(String packPath) {
     courseBigString +=
         '<file external="/$packName/Race/Course/${path.basename(course.path)}" disc="/Race/Course/${path.basename(course.path)}" create="true"/>\n\t\t';
   }
-  //3 music dir
-  Directory musicDir = Directory(path.join(packPath, 'Music'));
-  String musicBigString = "";
-  List<File> musicDirList = musicDir.listSync().whereType<File>().toList();
-  for (File music in musicDirList) {
-    int hex = int.parse(path.basename(music.path).substring(0, 3), radix: 16);
-    if (hex < 32) {
-      musicBigString +=
-          '<file external="/$packName/Music/${path.basename(music.path)}" disc="/sound/strm/${path.basename(music.path)}"/>\n\t\t';
-    } else {
-      musicBigString +=
-          '<file external="/$packName/Music/${path.basename(music.path)}" disc="/sound/strm/${path.basename(music.path)}" create="true"/>\n\t\t';
-    }
-  }
+  // //3 music dir
+  // Directory musicDir = Directory(path.join(packPath, 'Music'));
+  // String musicBigString = "";
+  // List<File> musicDirList = musicDir.listSync().whereType<File>().toList();
+  // for (File music in musicDirList) {
+  //   int hex = int.parse(path.basename(music.path).substring(0, 3), radix: 16);
+  //   if (hex < 32) {
+  //     musicBigString +=
+  //         '<file external="/$packName/Music/${path.basename(music.path)}" disc="/sound/strm/${path.basename(music.path)}"/>\n\t\t';
+  //   } else {
+  //     musicBigString +=
+  //         '<file external="/$packName/Music/${path.basename(music.path)}" disc="/sound/strm/${path.basename(music.path)}" create="true"/>\n\t\t';
+  //   }
+  // }
   contents = contents.replaceFirst(
       RegExp(r'<!--MY COMMONS-->.*<!--END MY TRACKS-->', dotAll: true),
-      '<!--MY COMMONS-->\n\t\t$commonBigString$musicBigString$courseBigString<!--END MY TRACKS-->\t\t');
+      '<!--MY COMMONS-->\n\t\t$commonBigString$courseBigString<!--END MY TRACKS-->\t\t');
   //print(contents);
   //print(commonBigString);
   //print(courseBigString);
@@ -124,6 +125,9 @@ void createFolders(String packPath) {
   }
   if (!Directory(path.join(packPath, 'sys')).existsSync()) {
     Directory(path.join(packPath, 'sys')).createSync();
+  }
+  if (!Directory(path.join(packPath, 'codes')).existsSync()) {
+    Directory(path.join(packPath, 'codes')).createSync();
   }
 }
 
@@ -491,6 +495,7 @@ class _PatchWindowState extends State<PatchWindow> {
 
   void patch(String packPath) async {
     createFolders(packPath);
+    updateGtcFiles(packPath);
     patchStatus = PatchingStatus.running;
     //1 CHECK TRACKS FILES
     //wipeOldFiles(packPath);
@@ -596,12 +601,18 @@ class _PatchWindowState extends State<PatchWindow> {
             'patch',
             '--add-lecode',
             path.join(packPath, 'sys', 'main.dol'),
+            '--add-ctcode',
             '--overwrite',
             '--dest',
             path.join(packPath, 'sys', 'main.dol'),
+            '--add-section',
+            path.join(packPath, 'codes',
+                fileMap[GameVersion.PAL]) //TODO FIX FOR OTHER VERSIONS
           ],
           runInShell: false);
       final _ = await process.exitCode;
+      // stdout.addStream(process.stdout);
+      // stderr.addStream(process.stderr);
     } on Exception catch (_) {
       //print(_);
     }

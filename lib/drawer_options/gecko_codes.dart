@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import '../utils/gecko_utils.dart';
 
 class GeckoCodes extends StatefulWidget {
   final String packPath;
@@ -36,6 +37,7 @@ class _GeckoCodesState extends State<GeckoCodes> {
   @override
   void initState() {
     loadCodes();
+
     _nameController = TextEditingController();
     _authorController = TextEditingController();
     _descController = TextEditingController();
@@ -85,17 +87,7 @@ class _GeckoCodesState extends State<GeckoCodes> {
     List<File> codeList = codesFolder.listSync().whereType<File>().toList();
     for (File code in codeList) {
       var json = jsonDecode(code.readAsStringSync());
-      codes.add(Gecko(
-          json['name'],
-          json['PAL'],
-          json['USA'],
-          json['JAP'],
-          json['KOR'],
-          json['author'],
-          json['desc'],
-          path.basename(code.path),
-          json['name'] == "Automatic BRSAR Patching" ||
-              json['name'] == "Track Music Expander"));
+      codes.add(fileToGeckoCode(code));
       //process json e append codes
     }
   }
@@ -330,24 +322,6 @@ class _GeckoCodesState extends State<GeckoCodes> {
         ]));
   }
 }
-
-class Gecko {
-  String name;
-  String author;
-  String pal;
-  String usa;
-  String jap;
-  String kor;
-
-  String desc;
-  String baseName;
-  bool mandatory;
-  Gecko(this.name, this.pal, this.usa, this.kor, this.jap, this.author,
-      this.desc, this.baseName, this.mandatory);
-}
-
-// ignore: constant_identifier_names
-enum GameVersion { PAL, USA, JAP, KOR }
 
 class GeckoTable extends StatefulWidget {
   String codeString;

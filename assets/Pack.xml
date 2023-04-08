@@ -14,6 +14,8 @@
 		<file disc="/rel/lecode-VER.bin" external="/PACKNAME/rel/lecode-VER.bin" create="true" />
 		<folder external="/PACKNAME/sys" recursive="false" />
 		<folder external="/PACKNAME/sys" disc="/" />
+		<folder external="/PACKNAME/codes" disc="/codes" create="true"/>
+		<folder external="/PACKNAME/Music" disc="/sound/strm"  create="true"/>
 		<file disc="/Scene/UI/MenuSingle_J.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
 		<file disc="/Scene/UI/MenuSingle_M.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
 		<file disc="/Scene/UI/MenuSingle_Q.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
