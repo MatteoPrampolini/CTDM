@@ -28,6 +28,8 @@ class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController trackNameTextField;
   late TextEditingController trackslotTextField;
   String? musicFolder = "select music";
+  late TextEditingController musicslotTextField;
+  final List<bool> _selectedMusicOption = <bool>[false, true];
   @override
   void initState() {
     setColor();
@@ -35,7 +37,8 @@ class _CupTableRowState extends State<CupTableRow> {
     trackNameTextField = TextEditingController();
     trackNameTextField.text = widget.track.name;
     trackslotTextField = TextEditingController();
-    trackslotTextField.text = widget.track.slotId.toString();
+    musicslotTextField = TextEditingController();
+    musicslotTextField.text = widget.track.musicId.toString();
   }
 
   void setColor() {
@@ -56,6 +59,7 @@ class _CupTableRowState extends State<CupTableRow> {
   void dispose() {
     trackNameTextField.dispose();
     trackslotTextField.dispose();
+    musicslotTextField.dispose();
     super.dispose();
   }
 
@@ -143,7 +147,6 @@ class _CupTableRowState extends State<CupTableRow> {
                     else
                       {
                         widget.track.slotId = int.tryParse(value)!,
-                        widget.track.musicId = int.tryParse(value)!,
                         RowChangedValue(
                                 widget.track, widget.cupIndex, widget.rowIndex)
                             .dispatch(context)
@@ -155,7 +158,7 @@ class _CupTableRowState extends State<CupTableRow> {
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(2),
-                    FilteringTextInputFormatter.allow(RegExp(r'[1-4]'))
+                    FilteringTextInputFormatter.allow(RegExp(r'[1-8]'))
                   ],
                 ),
               ),
@@ -211,41 +214,88 @@ class _CupTableRowState extends State<CupTableRow> {
                   padding: const EdgeInsets.only(left: 16),
                   child: SizedBox(
                     width: 300.0,
-                    child: TextButton(
-                      onPressed: () async => {
-                        musicFolder = await FilePicker.platform
-                            .getDirectoryPath(
-                                initialDirectory:
-                                    path.dirname(path.dirname(widget.packPath)),
-                                dialogTitle: 'select music folder'),
-                        if (musicFolder == null)
-                          {
-                            musicFolder = "select music",
-                          }
-                        else
-                          {
-                            //controllo se stringa è numero slot o folder
-                            if (RegExp(r'^[1-4][1-4]$').hasMatch(musicFolder!))
-                              {
-                                musicFolder = "select music",
-                                widget.track.slotId = int.parse(musicFolder!)
-                              }
-                            else
-                              {
-                                widget.track.musicFolder =
-                                    path.basename(musicFolder!)
-                              }
-                          },
-                        RowChangedValue(
-                                widget.track, widget.cupIndex, widget.rowIndex)
-                            .dispatch(context),
-                        setState(() => {})
-                      },
-                      child: Text(
-                        path.basename(musicFolder!),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.black87),
-                      ),
+                    child: Row(
+                      children: [
+                        ToggleButtons(
+                            selectedBorderColor: Colors.red[700],
+                            selectedColor: Colors.white,
+                            fillColor: Colors.red[200],
+                            color: Colors.red[400],
+                            onPressed: (index) => {
+                                  for (int i = 0;
+                                      i < _selectedMusicOption.length;
+                                      i++)
+                                    {
+                                      _selectedMusicOption[i] = i == index,
+                                      setState(() => {}),
+                                    }
+                                },
+                            isSelected: _selectedMusicOption,
+                            children: icons),
+                        Visibility(
+                          visible: !_selectedMusicOption[0],
+                          child: Expanded(
+                            child: Center(
+                              child: TextField(
+                                controller: musicslotTextField,
+                                onChanged: (value) => {
+                                  if (int.tryParse(value) == null)
+                                    {}
+                                  else
+                                    {
+                                      widget.track.musicId =
+                                          int.tryParse(value)!,
+                                      RowChangedValue(widget.track,
+                                              widget.cupIndex, widget.rowIndex)
+                                          .dispatch(context)
+                                    }
+                                },
+                                style: const TextStyle(color: Colors.black87),
+                                textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: <TextInputFormatter>[
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(2),
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'[1-8]'))
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: _selectedMusicOption[0],
+                          child: Expanded(
+                            child: TextButton(
+                              onPressed: () async => {
+                                musicFolder = await FilePicker.platform
+                                    .getDirectoryPath(
+                                        initialDirectory: path.dirname(
+                                            path.dirname(widget.packPath)),
+                                        dialogTitle: 'select music folder'),
+                                if (musicFolder == null)
+                                  {
+                                    musicFolder = "select music",
+                                  }
+                                else
+                                  {
+                                    widget.track.musicFolder =
+                                        path.basename(musicFolder!)
+                                  },
+                                RowChangedValue(widget.track, widget.cupIndex,
+                                        widget.rowIndex)
+                                    .dispatch(context),
+                                setState(() => {})
+                              },
+                              child: Text(
+                                path.basename(musicFolder!),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.black87),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -257,3 +307,10 @@ class _CupTableRowState extends State<CupTableRow> {
     );
   }
 }
+
+const List<Widget> icons = <Widget>[
+  Icon(
+    Icons.folder,
+  ),
+  Icon(Icons.pin)
+];
