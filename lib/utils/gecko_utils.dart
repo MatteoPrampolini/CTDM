@@ -24,6 +24,10 @@ enum GameVersion { PAL, USA, JAP, KOR }
 Map<GameVersion, String> fileMap = Map.fromIterables(GameVersion.values,
     ['RMCP01.gct', 'RMCE01.gct', 'RMCJ01.gct', 'RMCK01.gct']);
 
+String getLetterFromGameVersion(GameVersion gameVersion) {
+  return fileMap[gameVersion]!.substring(3, 4);
+}
+
 void createEmptyGtcFiles(String codesPath) {
   for (String filePath in fileMap.values) {
     if (!File(path.join(codesPath, filePath)).existsSync()) {
@@ -51,7 +55,7 @@ void updateGtcFiles(String packPath) {
     Gecko gecko = fileToGeckoCode(myGeckoFile);
     for (GameVersion version in fileMap.keys) {
       File current = File(path.join(packPath, 'codes', fileMap[version]));
-      current.writeAsBytesSync(GeckoToHex(gecko, version),
+      current.writeAsBytesSync(geckoToHex(gecko, version),
           mode: FileMode.append);
     }
   }
@@ -78,20 +82,20 @@ Gecko fileToGeckoCode(File jsonFile) {
           json['name'] == "Track Music Expander");
 }
 
-Uint8List GeckoToHex(Gecko Gecko, GameVersion version) {
+Uint8List geckoToHex(Gecko gecko, GameVersion version) {
   String codeString;
   switch (version) {
     case GameVersion.PAL:
-      codeString = Gecko.pal;
+      codeString = gecko.pal;
       break;
     case GameVersion.USA:
-      codeString = Gecko.usa;
+      codeString = gecko.usa;
       break;
     case GameVersion.JAP:
-      codeString = Gecko.jap;
+      codeString = gecko.jap;
       break;
     case GameVersion.KOR:
-      codeString = Gecko.kor;
+      codeString = gecko.kor;
       break;
   }
   return hexToUint8List(codeString);

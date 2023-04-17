@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:merge_images/merge_images.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -129,6 +130,16 @@ void createFolders(String packPath) {
   if (!Directory(path.join(packPath, 'codes')).existsSync()) {
     Directory(path.join(packPath, 'codes')).createSync();
   }
+  for (var file in Directory(path.join(packPath, 'rel')).listSync()) {
+    file.deleteSync(recursive: true);
+  }
+  for (var file in Directory(path.join(packPath, 'sys')).listSync()) {
+    file.deleteSync(recursive: true);
+  }
+  Directory(path.join(packPath, 'sys', 'P')).createSync();
+  Directory(path.join(packPath, 'sys', 'E')).createSync();
+  Directory(path.join(packPath, 'sys', 'J')).createSync();
+  Directory(path.join(packPath, 'sys', 'K')).createSync();
 }
 
 List<String> getTracksFilenamesFromConfig(String packPath) {
@@ -202,30 +213,11 @@ Future<String> createBMGList(String packPath) async {
 
 Future<void> editMenuSingle(String workspace, String packPath) async {
   //crea icone
-  await patchIcons(packPath);
-
   final File origSingle = File(path.join(
       workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle.szs'));
   origSingle.copySync(path.join(packPath, 'Scene', 'MenuSingle.szs'));
 
-  try {
-    //wszst patch MenuSingle.szs --le-menu --cup-icons ./icons.tpl --links
-    final process = await Process.start(
-        'wszst',
-        [
-          'patch',
-          '--le-menu',
-          '--cup-icons',
-          path.join(packPath, 'Icons', 'merged.png'),
-          '--links',
-          path.join(packPath, 'Scene', 'MenuSingle.szs'),
-          '--overwrite',
-          '--dest',
-          path.join(packPath, 'Scene', 'MenuSingle.szs'),
-        ],
-        runInShell: false);
-    final _ = await process.exitCode;
-  } on Exception catch (_) {}
+  await patchIcons(packPath);
 
   //return; //REMOVE THIS AFTER TEST
   //1 copia menusingle_E
@@ -308,8 +300,6 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
         runInShell: false);
     final _ = await process.exitCode;
   } on Exception catch (_) {}
-
-  File(path.join(packPath, 'Icons', 'merged.png')).deleteSync();
 }
 
 String getBmgFromFileName(File configFile, String filePath) {
@@ -435,13 +425,32 @@ void createSingleCommon(String packPath, String id, String srcFolderPath) {
 
 Future<void> patchIcons(String packPath) async {
   Directory iconDir = Directory(path.join(packPath, 'Icons'));
-  int nCups = await getNumberOfIconsFromConfig(packPath);
+  int nCups = getNumberOfIconsFromConfig(packPath);
   if (iconDir.listSync().whereType<File>().length < nCups + 2) {
     //print("mancano delle icone!"); TODO
     return;
   }
-  await createBigImage(iconDir, nCups);
-  return;
+  //wszst patch MenuSingle.szs --le-menu --cup-icons ./icons.tpl --links
+  ProcessResult process;
+  File swag = await createBigImage(iconDir, nCups);
+  print(swag.existsSync());
+  process = Process.runSync(
+      'wszst',
+      [
+        'patch',
+        '--le-menu',
+        '--cup-icons',
+        path.join(packPath, 'Icons', 'merged.png'),
+        '--links',
+        path.join(packPath, 'Scene', 'MenuSingle.szs'),
+        '--overwrite',
+        '--dest',
+        path.join(packPath, 'Scene', 'MenuSingle.szs'),
+      ],
+      runInShell: false);
+  print(process.stdout);
+  print(process.stderr);
+  File(path.join(packPath, 'Icons', 'merged.png')).deleteSync();
 }
 
 int compareAlphamagically(File a, File b) {
@@ -461,7 +470,7 @@ int compareAlphamagically(File a, File b) {
       .compareTo(int.parse(path.basenameWithoutExtension(b.path)));
 }
 
-Future<void> createBigImage(Directory iconDir, int nCups) async {
+Future<File> createBigImage(Directory iconDir, int nCups) async {
   List<ui.Image> imageList = [];
   List<File> iconFileList = iconDir.listSync().whereType<File>().toList();
   iconFileList.sort((a, b) => compareAlphamagically(a, b));
@@ -481,24 +490,32 @@ Future<void> createBigImage(Directory iconDir, int nCups) async {
   File mergedFile = File(path.join(iconDir.path, 'merged.png'));
   mergedFile = await mergedFile.writeAsBytes(bytes, flush: true);
 
-  return;
+  return mergedFile;
 }
 
 class _PatchWindowState extends State<PatchWindow> {
   late List<String> missingTracks = [];
   PatchingStatus patchStatus = PatchingStatus.running;
+  String progressText = 'creating folder';
   @override
   void initState() {
     patch(widget.packPath);
     super.initState();
   }
 
+  void swag() {}
   void patch(String packPath) async {
     createFolders(packPath);
+    setState(() {
+      progressText = "creating gecko codes";
+    });
     updateGtcFiles(packPath);
     patchStatus = PatchingStatus.running;
     //1 CHECK TRACKS FILES
     //wipeOldFiles(packPath);
+    setState(() {
+      progressText = "checking for missing tracks";
+    });
     String workspace = path.dirname(path.dirname(packPath));
     List<String> trackList =
         getTracksFilenamesFromConfig(packPath).toSet().toList();
@@ -513,7 +530,10 @@ class _PatchWindowState extends State<PatchWindow> {
     }
 
     //2 EDIT MENU_SINGLE
-    await editMenuSingle(workspace, packPath);
+    setState(() {
+      progressText = "patching the game menu";
+    });
+    await editMenuSingle(workspace, packPath); //TODO FIX, MAIN.DOL IS BROKEN
     //1.5 create and polulate Race/Common
     trackPathToCommon(workspace, packPath, trackList);
     Directory(path.join(packPath, 'Scene', 'MenuSingle_E.d'))
@@ -524,18 +544,26 @@ class _PatchWindowState extends State<PatchWindow> {
     //4 FINALLY PATCHING
     //4a)copy lecode-VER.bin in rel
     //4b)wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String isoVersion = prefs.getString('isoVersion')!;
-    String lecodePath = path.join(
-        path.dirname(Platform.resolvedExecutable),
-        "data",
-        "flutter_assets",
-        "assets",
-        "lecode_build",
-        "lecode-$isoVersion.bin");
-    File(lecodePath)
-        .copySync(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
+    //SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      progressText =
+          "copying the lecode loader "; //TODO IT SHOULD COPY ALL THE 4 BINS, NOT JUST 1
+    });
 
+    // String isoVersion = prefs.getString('isoVersion')!;
+    // String lecodePath = path.join(
+    //     path.dirname(Platform.resolvedExecutable),
+    //     "data",
+    //     "flutter_assets",
+    //     "assets",
+    //     "lecode_build",
+    //     "lecode-$isoVersion.bin");
+    // File(lecodePath)
+    //     .copySync(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
+
+    setState(() {
+      progressText = "copying tracks";
+    });
     List<File> szsFileList = Directory(path.join(workspace, 'MyTracks'))
         .listSync(recursive: true)
         .whereType<File>()
@@ -543,82 +571,128 @@ class _PatchWindowState extends State<PatchWindow> {
     szsFileList.retainWhere((element) => element.path.endsWith('.szs'));
     szsFileList.retainWhere((element) =>
         trackList.contains(path.basenameWithoutExtension(element.path)));
-    Directory(path.join(packPath, 'Race', 'Course', 'tmp')).createSync();
-    for (File szs in szsFileList) {
-      szs.copySync(path.join(
-          packPath, 'Race', 'Course', 'tmp', path.basename(szs.path)));
-    }
-    try {
-      //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-      final process = await Process.start(
-          'wlect',
-          [
-            'patch',
-            path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
-            '--overwrite',
-            '--dest',
-            path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
-            '--le-define',
-            path.join(packPath, 'config.txt'),
-            '--track-dir',
-            path.join(packPath, 'Race', 'Course'),
-            '--copy-tracks',
-            path.join(packPath, 'Race', 'Course', 'tmp'),
-          ],
-          runInShell: false);
-      final _ = await process.exitCode;
-    } on Exception catch (_) {
-      //print(_);
-    }
-    Directory(path.join(packPath, 'Race', 'Course', 'tmp'))
-        .deleteSync(recursive: true);
-    try {
-      // wlect patch lecode-PAL.bin --lpar lpar.txt
-      final process = await Process.start(
-          'wlect',
-          [
-            'patch',
-            path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
-            '--overwrite',
-            '--dest',
-            path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
-            '--lpar',
-            path.join(packPath, 'lpar.txt'),
-          ],
-          runInShell: false);
-      final _ = await process.exitCode;
-    } on Exception catch (_) {
-      //print(_);
+    // Directory(path.join(packPath, 'Race', 'Course', 'tmp')).createSync();
+    // for (File szs in szsFileList) {
+    //   szs.copySync(path.join(
+    //       packPath, 'Race', 'Course', 'tmp', path.basename(szs.path)));
+    // }
+    setState(() {
+      progressText = "patching lecode loader with tracks";
+    });
+    for (GameVersion gv in fileMap.keys) {
+      if (gv != GameVersion.PAL) continue; //DEBUG TEST
+      Directory(path.join(packPath, 'Race', 'Course', 'tmp')).createSync();
+      for (File szs in szsFileList) {
+        szs.copySync(path.join(
+            packPath, 'Race', 'Course', 'tmp', path.basename(szs.path)));
+      }
+
+      print(gv.name);
+      String isoVersion = gv.name;
+      String lecodePath = path.join(
+          path.dirname(Platform.resolvedExecutable),
+          "data",
+          "flutter_assets",
+          "assets",
+          "lecode_build",
+          "lecode-$isoVersion.bin");
+      File(lecodePath)
+          .copySync(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
+      try {
+        //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
+        final process = Process.runSync(
+            'wlect',
+            [
+              'patch',
+              path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
+              '--le-define',
+              path.join(packPath, 'config.txt'),
+              '--track-dir',
+              path.join(packPath, 'Race', 'Course'),
+              '--copy-tracks',
+              path.join(packPath, 'Race', 'Course', 'tmp'),
+            ],
+            runInShell: false);
+        // final _ = await process.exitCode;
+        //stdout.addStream(process.stdout);
+        //stderr.addStream(process.stderr);
+        //print(process.stdout);
+        //print(process.stderr);
+      } on Exception catch (_) {
+        //print(_);
+      }
+      //forse mettere
+      Directory(path.join(packPath, 'Race', 'Course', 'tmp'))
+          .deleteSync(recursive: true);
+      try {
+        // wlect patch lecode-PAL.bin --lpar lpar.txt
+        final process = Process.runSync(
+            'wlect',
+            [
+              'patch',
+              path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
+              '--lpar',
+              path.join(packPath, 'lpar.txt'),
+            ],
+            runInShell: false);
+        //final _ = await process.exitCode;
+        //print(process.stdout);
+        //print(process.stderr);
+        // stdout.addStream(process.stdout);
+        // stderr.addStream(process.stderr);
+      } on Exception catch (_) {
+        //print(_);
+      }
     }
     //move main.dol and patch it
-    File(path.join(workspace, 'ORIGINAL_DISC', 'sys', 'main.dol'))
-        .copySync(path.join(packPath, 'sys', 'main.dol'));
-    try {
-      // wstrt patch --add-lecode main.dol
-      final process = await Process.start(
-          'wstrt',
-          [
-            'patch',
-            '--add-lecode',
-            path.join(packPath, 'sys', 'main.dol'),
-            '--add-ctcode',
-            '--overwrite',
-            '--dest',
-            path.join(packPath, 'sys', 'main.dol'),
-            '--add-section',
-            path.join(packPath, 'codes',
-                fileMap[GameVersion.PAL]) //TODO FIX FOR OTHER VERSIONS
-          ],
-          runInShell: false);
-      final _ = await process.exitCode;
-      // stdout.addStream(process.stdout);
-      // stderr.addStream(process.stderr);
-    } on Exception catch (_) {
-      //print(_);
+    // File(path.join(workspace, 'ORIGINAL_DISC', 'sys', 'main.dol'))
+    //     .copySync(path.join(packPath, 'sys', 'main.dol'));
+    setState(() {
+      progressText = "patching main.dol";
+    });
+    for (GameVersion gv in fileMap.keys) {
+      String letter = getLetterFromGameVersion(gv);
+      File dolFile = File(path.join(path.dirname(Platform.resolvedExecutable),
+          "data", "flutter_assets", "assets", "dols", "$letter.dol"));
+      dolFile.copySync(path.join(packPath, 'sys', letter, "main.dol"));
+      try {
+        // wstrt patch --add-lecode main.dol
+        final process = await Process.start(
+            'wstrt',
+            [
+              'patch',
+              '--add-lecode',
+              path.join(packPath, 'sys', letter, "main.dol"),
+              '--add-ctcode',
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'sys', letter, "main.dol"),
+              '--add-section',
+              path.join(packPath, 'codes', fileMap[gv])
+            ],
+            runInShell: false);
+        final _ = await process.exitCode;
+        // stdout.addStream(process.stdout);
+        // stderr.addStream(process.stderr);
+      } on Exception catch (_) {
+        //print(_);
+      }
     }
 
     //copy music
+    setState(() {
+      progressText = "copying music files";
+    });
     copyMusic(packPath);
+    setState(() {
+      progressText = "editing xml file";
+    });
     completeXmlFile(packPath);
     setState(() {
       patchStatus = PatchingStatus.completed;
@@ -673,11 +747,52 @@ class _PatchWindowState extends State<PatchWindow> {
         body: Center(
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+              // Center(
+              //     child: Text(patchStatus == PatchingStatus.running
+              //         ? "patching..."
+              //         : "Patch Completed!")),
               Center(
-                  child: Text(patchStatus == PatchingStatus.running
-                      ? "patching..."
-                      : "Patch Completed!")),
+                  child: Column(children: [
+                patchStatus == PatchingStatus.running
+                    ? Text("Patching...",
+                        style: TextStyle(
+                            fontSize: Theme.of(context)
+                                .textTheme
+                                .headlineLarge
+                                ?.fontSize))
+                    : patchStatus == PatchingStatus.completed
+                        ? Text("Patch is completed",
+                            style: TextStyle(
+                                fontSize: Theme.of(context)
+                                    .textTheme
+                                    .headlineLarge
+                                    ?.fontSize))
+                        : const Text(''),
+                if (patchStatus == PatchingStatus.running)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: Column(
+                      children: [
+                        LoadingAnimationWidget.fourRotatingDots(
+                            color: Colors.amberAccent, size: 50),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20.0),
+                          child: Text(
+                            progressText,
+                            style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall
+                                    ?.fontSize),
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+              ])),
               Visibility(
                 visible: missingTracks.isNotEmpty,
                 child: Padding(
@@ -716,6 +831,7 @@ class _PatchWindowState extends State<PatchWindow> {
                         child: Center(
                           child: SizedBox(
                             width: MediaQuery.of(context).size.width / 3,
+                            height: 300,
                             child: ListView.builder(
                                 shrinkWrap: true,
                                 itemCount: missingTracks.length,
@@ -742,7 +858,7 @@ class _PatchWindowState extends State<PatchWindow> {
                           visible: patchStatus == PatchingStatus.aborted,
                           child: Center(
                             child: Padding(
-                              padding: const EdgeInsets.only(top: 120.0),
+                              padding: const EdgeInsets.only(top: 30.0),
                               child: Text(
                                 "the patching process has been stopped.",
                                 style: TextStyle(

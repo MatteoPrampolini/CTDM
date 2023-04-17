@@ -76,7 +76,6 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   void initState() {
     super.initState();
     createConfigFile(widget.packPath);
-    //TODO load music.txt
     loadMusic(widget.packPath);
     setState(() {
       //parseConfig(path.join(widget.packPath, 'config.txt'));

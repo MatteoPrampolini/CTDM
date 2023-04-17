@@ -104,6 +104,11 @@ flutter:
       - assets/lecode_build/lecode-KOR.bin
       - assets/lecode_build/lecode-PAL.bin
       - assets/lecode_build/lecode-USA.bin
+      - assets/dols/
+      - assets/dols/J.dol
+      - assets/dols/K.dol
+      - assets/dols/P.dol
+      - assets/dols/E.dol
       - assets/gecko/
       - assets/gecko/trackMusicExpander.json
       - assets/gecko/automaticBrsarPatching.json

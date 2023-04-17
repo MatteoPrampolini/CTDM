@@ -66,7 +66,7 @@ class _PackEditorState extends State<PackEditor> {
                   .toList()
                   .length -
               2 ==
-          await getNumberOfIconsFromConfig(widget.packPath);
+          getNumberOfIconsFromConfig(widget.packPath);
     }
     canPatch = checks.take(optIndex).every((element) => element == true);
     if (!checkResultVisibility && !canPatch) {
@@ -122,6 +122,9 @@ class _PackEditorState extends State<PackEditor> {
     }
     if (!await Directory(path.join(widget.packPath, 'sys')).exists()) {
       Directory(path.join(widget.packPath, 'sys')).create();
+      if (!await Directory(path.join(widget.packPath, 'sys')).exists()) {
+        Directory(path.join(widget.packPath, 'sys')).create();
+      }
     }
     if (!await Directory(path.join(widget.packPath, 'rel')).exists()) {
       Directory(path.join(widget.packPath, 'rel')).create();

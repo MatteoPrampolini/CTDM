@@ -86,7 +86,6 @@ class _GeckoCodesState extends State<GeckoCodes> {
     }
     List<File> codeList = codesFolder.listSync().whereType<File>().toList();
     for (File code in codeList) {
-      var json = jsonDecode(code.readAsStringSync());
       codes.add(fileToGeckoCode(code));
       //process json e append codes
     }
@@ -323,10 +322,11 @@ class _GeckoCodesState extends State<GeckoCodes> {
   }
 }
 
+// ignore: must_be_immutable
 class GeckoTable extends StatefulWidget {
   String codeString;
   GameVersion version;
-  TextEditingController _controller;
+  final TextEditingController _controller;
   bool disabled;
   GeckoTable(this.codeString, this.version, this._controller, this.disabled,
       {super.key});

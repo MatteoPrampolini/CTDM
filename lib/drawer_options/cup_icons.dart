@@ -29,13 +29,13 @@ class CupIconsWindow extends StatefulWidget {
   State<CupIconsWindow> createState() => _CupIconsWindowState();
 }
 
-Future<int> getNumberOfIconsFromConfig(String packPath) async {
+int getNumberOfIconsFromConfig(String packPath) {
   if (!File(path.join(packPath, 'config.txt')).existsSync()) {
     return -1;
   } else {
     try {
       //wlect config config.txt
-      final process = await Process.run(
+      final process = Process.runSync(
           'wlect',
           [
             'dump',
@@ -64,7 +64,7 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
   }
 
   void setup() async {
-    nCups = await getNumberOfIconsFromConfig(widget.packPath);
+    nCups = getNumberOfIconsFromConfig(widget.packPath);
     createFolder(widget.packPath);
     setState(() {});
   }

@@ -39,6 +39,7 @@ class _CupTableRowState extends State<CupTableRow> {
     trackslotTextField = TextEditingController();
     musicslotTextField = TextEditingController();
     musicslotTextField.text = widget.track.musicId.toString();
+    trackslotTextField.text = widget.track.slotId.toString();
   }
 
   void setColor() {
@@ -216,22 +217,30 @@ class _CupTableRowState extends State<CupTableRow> {
                     width: 300.0,
                     child: Row(
                       children: [
-                        ToggleButtons(
-                            selectedBorderColor: Colors.red[700],
-                            selectedColor: Colors.white,
-                            fillColor: Colors.red[200],
-                            color: Colors.red[400],
-                            onPressed: (index) => {
-                                  for (int i = 0;
-                                      i < _selectedMusicOption.length;
-                                      i++)
-                                    {
-                                      _selectedMusicOption[i] = i == index,
-                                      setState(() => {}),
-                                    }
-                                },
-                            isSelected: _selectedMusicOption,
-                            children: icons),
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Colors.amberAccent,
+                              borderRadius: BorderRadius.circular(3),
+                              border: Border.all(color: Colors.red)),
+                          child: ToggleButtons(
+
+                              //selectedBorderColor: Colors.redAccent,
+                              //selectedColor: Colors.red[700],
+                              //borderRadius: BorderRadius.circular(3),
+                              fillColor: Colors.amber[200],
+                              color: Colors.red[400],
+                              onPressed: (index) => {
+                                    for (int i = 0;
+                                        i < _selectedMusicOption.length;
+                                        i++)
+                                      {
+                                        _selectedMusicOption[i] = i == index,
+                                        setState(() => {}),
+                                      }
+                                  },
+                              isSelected: _selectedMusicOption,
+                              children: icons),
+                        ),
                         Visibility(
                           visible: !_selectedMusicOption[0],
                           child: Expanded(
@@ -311,6 +320,10 @@ class _CupTableRowState extends State<CupTableRow> {
 const List<Widget> icons = <Widget>[
   Icon(
     Icons.folder,
+    size: 25,
   ),
-  Icon(Icons.pin)
+  Icon(
+    Icons.pin,
+    size: 25,
+  )
 ];
