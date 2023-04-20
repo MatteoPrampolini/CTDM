@@ -392,7 +392,37 @@ N N$NONE | N$F_WII
                                             style: TextStyle(
                                                 color: Colors.black87),
                                           ),
-                                          onPressed: () => {saveConfig()},
+                                          onPressed: () => {
+                                            saveConfig(),
+                                            showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  Future.delayed(
+                                                      const Duration(
+                                                          milliseconds: 500),
+                                                      () {
+                                                    Navigator.of(context)
+                                                        .pop(true);
+                                                  });
+                                                  return AlertDialog(
+                                                    content: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: const [
+                                                        Text("Saved"),
+                                                        Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 8.0),
+                                                          child: Icon(
+                                                              Icons.thumb_up),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                })
+                                          },
                                         ),
                                       ),
                                     ),

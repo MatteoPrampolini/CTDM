@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:ctdm/custom_drawer.dart';
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/patch_window.dart';
+import 'package:ctdm/utils/gecko_utils.dart';
+import 'package:ctdm/utils/log_utils.dart';
 import 'package:flutter/material.dart';
+
 import 'package:path/path.dart' as path;
 
 class PackEditor extends StatefulWidget {
@@ -33,7 +36,9 @@ void wipeOldFiles(String packPath) {
     if (Directory(path.join(packPath, 'sys')).existsSync()) {
       Directory(path.join(packPath, 'sys')).deleteSync(recursive: true);
     }
-  } catch (_) {}
+  } catch (_) {
+    logString(LogType.ERROR, "cannot create subfolders in $packPath");
+  }
 }
 
 class _PackEditorState extends State<PackEditor> {
@@ -68,6 +73,8 @@ class _PackEditorState extends State<PackEditor> {
               2 ==
           getNumberOfIconsFromConfig(widget.packPath);
     }
+    checks[4] =
+        Directory(path.join(widget.packPath, 'MyCodes')).listSync().length > 2;
     canPatch = checks.take(optIndex).every((element) => element == true);
     if (!checkResultVisibility && !canPatch) {
       checkResultVisibility = true;
@@ -98,23 +105,7 @@ class _PackEditorState extends State<PackEditor> {
   void loadSettings() async {
     if (!Directory(path.join(widget.packPath, 'MyCodes')).existsSync()) {
       Directory(path.join(widget.packPath, 'MyCodes')).createSync();
-    }
-    String assetPath = path.join(path.dirname(Platform.resolvedExecutable),
-        "data", "flutter_assets", "assets");
-    File musicCheat1 =
-        File(path.join(assetPath, 'gecko', 'trackMusicExpander.json'));
-    File musicCheat2 =
-        File(path.join(assetPath, 'gecko', 'automaticBrsarPatching.json'));
-    if (!File(path.join(widget.packPath, "MyCodes", 'trackMusicExpander.json'))
-        .existsSync()) {
-      musicCheat1.copySync(
-          path.join(widget.packPath, "MyCodes", 'trackMusicExpander.json'));
-    }
-    if (!File(path.join(
-            widget.packPath, "MyCodes", 'automaticBrsarPatching.json'))
-        .existsSync()) {
-      musicCheat2.copySync(
-          path.join(widget.packPath, "MyCodes", 'automaticBrsarPatching.json'));
+      copyGeckoAssetsToPack(widget.packPath);
     }
 
     if (!await Directory(path.join(widget.packPath, 'Scene')).exists()) {

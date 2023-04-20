@@ -112,6 +112,8 @@ flutter:
       - assets/gecko/
       - assets/gecko/trackMusicExpander.json
       - assets/gecko/automaticBrsarPatching.json
+      - assets/scene/
+      - assets/scene/MenuSingle_E.szs
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

@@ -91,12 +91,11 @@ class _PackSelectState extends State<PackSelect> {
             padding: const EdgeInsets.only(top: 20.0),
             child: Column(
               children: [
-                const Text(
-                    "we are almost done with the settings, don't give up!"),
+                const Text("one last step."),
                 const Text("please now select the Mario Kart iso/wbfs.",
                     style: TextStyle(color: Colors.amberAccent)),
                 const Text(
-                    "it will be extracted into a folder and it will be used to get the files we want to modify."),
+                    "it will be extracted into a folder and it will be used to get the files we want to mod."),
                 Padding(
                   padding: const EdgeInsets.only(top: 20.0),
                   child: ElevatedButton(

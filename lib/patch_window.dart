@@ -2,11 +2,11 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
+import 'package:ctdm/utils/log_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:merge_images/merge_images.dart';
 import 'package:path/path.dart' as path;
-import 'package:shared_preferences/shared_preferences.dart';
 
 //import 'package:image/image.dart' as img;
 
@@ -129,6 +129,7 @@ void createFolders(String packPath) {
   }
   if (!Directory(path.join(packPath, 'codes')).existsSync()) {
     Directory(path.join(packPath, 'codes')).createSync();
+    updateGtcFiles(packPath);
   }
   for (var file in Directory(path.join(packPath, 'rel')).listSync()) {
     file.deleteSync(recursive: true);
@@ -215,6 +216,7 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
   //crea icone
   final File origSingle = File(path.join(
       workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle.szs'));
+
   origSingle.copySync(path.join(packPath, 'Scene', 'MenuSingle.szs'));
 
   await patchIcons(packPath);
@@ -230,7 +232,14 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
 
   //1
   final File origMenuFile = File(path.join(
-      workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle_E.szs'));
+      path.dirname(Platform.resolvedExecutable),
+      "data",
+      "flutter_assets",
+      "assets",
+      "scene",
+      "MenuSingle_E.szs"));
+  // final File origMenuFile = File(path.join(
+  //     workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle_E.szs'));
   origMenuFile.copySync(path.join(packPath, 'Scene', 'MenuSingle_E.szs'));
   //2
   String bmgFilePath = await createBMGList(packPath);
@@ -249,7 +258,9 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
         runInShell: false);
 
     final _ = await process.exitCode;
-  } on Exception catch (_) {}
+  } on Exception catch (_) {
+    logString(LogType.ERROR, _.toString());
+  }
 
   //4
   try {
@@ -264,7 +275,9 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
         ],
         runInShell: false);
     final _ = await process.exitCode;
-  } on Exception catch (_) {}
+  } on Exception catch (_) {
+    logString(LogType.ERROR, _.toString());
+  }
   //5
   String contents = trackBmgTxt.readAsStringSync();
   contents = contents.replaceAll(RegExp(r'#BMG'), '');
@@ -285,7 +298,9 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
         ],
         runInShell: false);
     final _ = await process.exitCode;
-  } on Exception catch (_) {}
+  } on Exception catch (_) {
+    logString(LogType.ERROR, _.toString());
+  }
   //7
   try {
     final process = await Process.start(
@@ -299,7 +314,9 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
         ],
         runInShell: false);
     final _ = await process.exitCode;
-  } on Exception catch (_) {}
+  } on Exception catch (_) {
+    logString(LogType.ERROR, _.toString());
+  }
 }
 
 String getBmgFromFileName(File configFile, String filePath) {
@@ -427,30 +444,31 @@ Future<void> patchIcons(String packPath) async {
   Directory iconDir = Directory(path.join(packPath, 'Icons'));
   int nCups = getNumberOfIconsFromConfig(packPath);
   if (iconDir.listSync().whereType<File>().length < nCups + 2) {
-    //print("mancano delle icone!"); TODO
+    logString(LogType.ERROR, "not enough icons to patch");
     return;
   }
   //wszst patch MenuSingle.szs --le-menu --cup-icons ./icons.tpl --links
-  ProcessResult process;
-  File swag = await createBigImage(iconDir, nCups);
-  print(swag.existsSync());
-  process = Process.runSync(
-      'wszst',
-      [
-        'patch',
-        '--le-menu',
-        '--cup-icons',
-        path.join(packPath, 'Icons', 'merged.png'),
-        '--links',
-        path.join(packPath, 'Scene', 'MenuSingle.szs'),
-        '--overwrite',
-        '--dest',
-        path.join(packPath, 'Scene', 'MenuSingle.szs'),
-      ],
-      runInShell: false);
-  print(process.stdout);
-  print(process.stderr);
-  File(path.join(packPath, 'Icons', 'merged.png')).deleteSync();
+  try {
+    await createBigImage(iconDir, nCups).then((value) => {
+          Process.runSync(
+              'wszst',
+              [
+                'patch',
+                '--le-menu',
+                '--cup-icons',
+                path.join(packPath, 'Icons', 'merged.png'),
+                '--links',
+                path.join(packPath, 'Scene', 'MenuSingle.szs'),
+                '--overwrite',
+                '--dest',
+                path.join(packPath, 'Scene', 'MenuSingle.szs'),
+              ],
+              runInShell: false),
+          File(path.join(packPath, 'Icons', 'merged.png')).deleteSync()
+        });
+  } on Exception catch (_) {
+    logString(LogType.ERROR, _.toString());
+  }
 }
 
 int compareAlphamagically(File a, File b) {
@@ -533,7 +551,7 @@ class _PatchWindowState extends State<PatchWindow> {
     setState(() {
       progressText = "patching the game menu";
     });
-    await editMenuSingle(workspace, packPath); //TODO FIX, MAIN.DOL IS BROKEN
+    await editMenuSingle(workspace, packPath);
     //1.5 create and polulate Race/Common
     trackPathToCommon(workspace, packPath, trackList);
     Directory(path.join(packPath, 'Scene', 'MenuSingle_E.d'))
@@ -546,8 +564,7 @@ class _PatchWindowState extends State<PatchWindow> {
     //4b)wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
     //SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      progressText =
-          "copying the lecode loader "; //TODO IT SHOULD COPY ALL THE 4 BINS, NOT JUST 1
+      progressText = "copying the lecode loader ";
     });
 
     // String isoVersion = prefs.getString('isoVersion')!;
@@ -580,14 +597,13 @@ class _PatchWindowState extends State<PatchWindow> {
       progressText = "patching lecode loader with tracks";
     });
     for (GameVersion gv in fileMap.keys) {
-      if (gv != GameVersion.PAL) continue; //DEBUG TEST
+      //if (gv != GameVersion.PAL) continue; //DEBUG TEST
       Directory(path.join(packPath, 'Race', 'Course', 'tmp')).createSync();
       for (File szs in szsFileList) {
         szs.copySync(path.join(
             packPath, 'Race', 'Course', 'tmp', path.basename(szs.path)));
       }
 
-      print(gv.name);
       String isoVersion = gv.name;
       String lecodePath = path.join(
           path.dirname(Platform.resolvedExecutable),
@@ -600,7 +616,7 @@ class _PatchWindowState extends State<PatchWindow> {
           .copySync(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
       try {
         //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-        final process = Process.runSync(
+        Process.runSync(
             'wlect',
             [
               'patch',
@@ -622,6 +638,7 @@ class _PatchWindowState extends State<PatchWindow> {
         //print(process.stdout);
         //print(process.stderr);
       } on Exception catch (_) {
+        logString(LogType.ERROR, _.toString());
         //print(_);
       }
       //forse mettere
@@ -629,7 +646,7 @@ class _PatchWindowState extends State<PatchWindow> {
           .deleteSync(recursive: true);
       try {
         // wlect patch lecode-PAL.bin --lpar lpar.txt
-        final process = Process.runSync(
+        Process.runSync(
             'wlect',
             [
               'patch',
@@ -647,6 +664,7 @@ class _PatchWindowState extends State<PatchWindow> {
         // stdout.addStream(process.stdout);
         // stderr.addStream(process.stderr);
       } on Exception catch (_) {
+        logString(LogType.ERROR, _.toString());
         //print(_);
       }
     }
@@ -660,6 +678,9 @@ class _PatchWindowState extends State<PatchWindow> {
       String letter = getLetterFromGameVersion(gv);
       File dolFile = File(path.join(path.dirname(Platform.resolvedExecutable),
           "data", "flutter_assets", "assets", "dols", "$letter.dol"));
+      if (File(path.join(packPath, 'sys', letter, "main.dol")).existsSync()) {
+        File(path.join(packPath, 'sys', letter, "main.dol")).deleteSync();
+      }
       dolFile.copySync(path.join(packPath, 'sys', letter, "main.dol"));
       try {
         // wstrt patch --add-lecode main.dol
@@ -669,12 +690,11 @@ class _PatchWindowState extends State<PatchWindow> {
               'patch',
               '--add-lecode',
               path.join(packPath, 'sys', letter, "main.dol"),
-              '--add-ctcode',
+              '--add-section',
+              path.join(packPath, 'codes', fileMap[gv]),
               '--overwrite',
               '--dest',
               path.join(packPath, 'sys', letter, "main.dol"),
-              '--add-section',
-              path.join(packPath, 'codes', fileMap[gv])
             ],
             runInShell: false);
         final _ = await process.exitCode;
@@ -682,6 +702,7 @@ class _PatchWindowState extends State<PatchWindow> {
         // stderr.addStream(process.stderr);
       } on Exception catch (_) {
         //print(_);
+        logString(LogType.ERROR, _.toString());
       }
     }
 
@@ -706,7 +727,7 @@ class _PatchWindowState extends State<PatchWindow> {
       musicDir.deleteSync(recursive: true);
     }
     musicDir.createSync();
-
+    if (!musicTxt.existsSync()) return;
     List<String> tracksWithMusicHex = [];
     Directory workspaceMyMusic =
         Directory(path.join(path.dirname(path.dirname(packPath)), 'myMusic'));

@@ -65,29 +65,11 @@ class _GeckoCodesState extends State<GeckoCodes> {
   void loadCodes() {
     Directory codesFolder = Directory(path.join(widget.packPath, 'MyCodes'));
     if (!codesFolder.existsSync()) {
-      codesFolder.createSync();
-    }
-    String assetPath = path.join(path.dirname(Platform.resolvedExecutable),
-        "data", "flutter_assets", "assets");
-    File musicCheat1 =
-        File(path.join(assetPath, 'gecko', 'trackMusicExpander.json'));
-    File musicCheat2 =
-        File(path.join(assetPath, 'gecko', 'automaticBrsarPatching.json'));
-    if (!File(path.join(widget.packPath, "MyCodes", 'trackMusicExpander.json'))
-        .existsSync()) {
-      musicCheat1.copySync(
-          path.join(widget.packPath, "MyCodes", 'trackMusicExpander.json'));
-    }
-    if (!File(path.join(
-            widget.packPath, "MyCodes", 'automaticBrsarPatching.json'))
-        .existsSync()) {
-      musicCheat2.copySync(
-          path.join(widget.packPath, "MyCodes", 'automaticBrsarPatching.json'));
+      copyGeckoAssetsToPack(widget.packPath);
     }
     List<File> codeList = codesFolder.listSync().whereType<File>().toList();
     for (File code in codeList) {
       codes.add(fileToGeckoCode(code));
-      //process json e append codes
     }
   }
 

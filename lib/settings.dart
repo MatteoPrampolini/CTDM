@@ -79,35 +79,35 @@ class _SettingsState extends State<Settings> {
                   ),
                 ),
               ),
-              DropdownButton(
-                value: isoVersionNumber,
-                itemHeight: 50,
-                items: const [
-                  DropdownMenuItem(
-                    value: 0,
-                    child: Text("PAL"),
-                  ),
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text("USA"),
-                  ),
-                  DropdownMenuItem(
-                    value: 2,
-                    child: Text("JAP"),
-                  ),
-                  DropdownMenuItem(
-                    value: 3,
-                    child: Text("KOR"),
-                  )
-                ],
-                onChanged: (value) {
-                  isoVersionNumber = value!;
+              // DropdownButton(
+              //   value: isoVersionNumber,
+              //   itemHeight: 50,
+              //   items: const [
+              //     DropdownMenuItem(
+              //       value: 0,
+              //       child: Text("PAL"),
+              //     ),
+              //     DropdownMenuItem(
+              //       value: 1,
+              //       child: Text("USA"),
+              //     ),
+              //     DropdownMenuItem(
+              //       value: 2,
+              //       child: Text("JAP"),
+              //     ),
+              //     DropdownMenuItem(
+              //       value: 3,
+              //       child: Text("KOR"),
+              //     )
+              //   ],
+              //   onChanged: (value) {
+              //     isoVersionNumber = value!;
 
-                  prefs.setString(
-                      'isoVersion', VERSIONS.elementAt(isoVersionNumber));
-                  setState(() {});
-                },
-              )
+              //     prefs.setString(
+              //         'isoVersion', VERSIONS.elementAt(isoVersionNumber));
+              //     setState(() {});
+              //   },
+              // )
             ],
           ),
         ),

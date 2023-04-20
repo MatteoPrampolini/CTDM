@@ -27,8 +27,12 @@
 		<file disc="/Scene/UI/MenuSingle_G.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
 		<file disc="/Scene/UI/MenuSingle_I.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
 		<file disc="/Scene/UI/MenuSingle_S.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
+		<file disc="/Scene/UI/MenuSingle_M.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
+ 		<file disc="/Scene/UI/MenuSingle_Q.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
+  		<file disc="/Scene/UI/MenuSingle_U.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
+		<file disc="/Scene/UI/MenuSingle_J.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
+  		<file disc="/Scene/UI/MenuSingle_K.szs" external="/PACKNAME/Scene/MenuSingle_E.szs" />
 		<file disc="/Scene/UI/MenuSingle.szs" external="/PACKNAME/Scene/MenuSingle.szs" />
-		
 		<!--MY COMMONS-->
 		<!--END MY TRACKS-->
 

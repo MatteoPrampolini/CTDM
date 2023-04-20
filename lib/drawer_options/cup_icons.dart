@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ctdm/utils/log_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:url_launcher/url_launcher_string.dart';
@@ -50,6 +51,7 @@ int getNumberOfIconsFromConfig(String packPath) {
           .last
           .trim());
     } on Exception catch (_) {
+      logString(LogType.ERROR, _.toString());
       return -2;
     }
   }

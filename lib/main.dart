@@ -1,5 +1,6 @@
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
+
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,6 +10,8 @@ import 'pack_select.dart';
 import 'settings.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   final prefs = await SharedPreferences.getInstance();
   try {
     final _ = await Process.start('wlect', [], runInShell: false);
@@ -34,7 +37,6 @@ void main() async {
     prefs.setString('isoVersion', 'PAL');
   }
 
-  WidgetsFlutterBinding.ensureInitialized();
   await DesktopWindow.setMinWindowSize(const Size(1000, 1000));
   runApp(const MyApp());
 }
@@ -253,7 +255,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         padding: EdgeInsets.only(top: 8.0),
                         child: Text(
                           textAlign: TextAlign.center,
-                          "Your packs and other staff will be saved there.",
+                          "Your packs and other stuff will be saved there.",
                           style: TextStyle(color: Colors.white54),
                         ),
                       ),

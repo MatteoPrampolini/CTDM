@@ -36,6 +36,29 @@ void createEmptyGtcFiles(String codesPath) {
   }
 }
 
+void copyGeckoAssetsToPack(String packPath) {
+  Directory codesFolder = Directory(path.join(packPath, 'MyCodes'));
+  if (!codesFolder.existsSync()) {
+    codesFolder.createSync();
+  }
+  String assetPath = path.join(path.dirname(Platform.resolvedExecutable),
+      "data", "flutter_assets", "assets");
+  File musicCheat1 =
+      File(path.join(assetPath, 'gecko', 'trackMusicExpander.json'));
+  File musicCheat2 =
+      File(path.join(assetPath, 'gecko', 'automaticBrsarPatching.json'));
+  if (!File(path.join(packPath, "MyCodes", 'trackMusicExpander.json'))
+      .existsSync()) {
+    musicCheat1
+        .copySync(path.join(packPath, "MyCodes", 'trackMusicExpander.json'));
+  }
+  if (!File(path.join(packPath, "MyCodes", 'automaticBrsarPatching.json'))
+      .existsSync()) {
+    musicCheat2.copySync(
+        path.join(packPath, "MyCodes", 'automaticBrsarPatching.json'));
+  }
+}
+
 void updateGtcFiles(String packPath) {
   createEmptyGtcFiles(path.join(packPath, 'codes'));
   List<File> myGeckoFiles = Directory(path.join(packPath, 'myCodes'))
