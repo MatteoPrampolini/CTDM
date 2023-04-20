@@ -129,7 +129,7 @@ void createFolders(String packPath) {
   }
   if (!Directory(path.join(packPath, 'codes')).existsSync()) {
     Directory(path.join(packPath, 'codes')).createSync();
-    updateGtcFiles(packPath);
+    //updateGtcFiles(packPath);
   }
   for (var file in Directory(path.join(packPath, 'rel')).listSync()) {
     file.deleteSync(recursive: true);
@@ -521,7 +521,6 @@ class _PatchWindowState extends State<PatchWindow> {
     super.initState();
   }
 
-  void swag() {}
   void patch(String packPath) async {
     createFolders(packPath);
     setState(() {
