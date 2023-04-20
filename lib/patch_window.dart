@@ -127,6 +127,9 @@ void createFolders(String packPath) {
   if (!Directory(path.join(packPath, 'sys')).existsSync()) {
     Directory(path.join(packPath, 'sys')).createSync();
   }
+  if (!Directory(path.join(packPath, 'MyCodes')).existsSync()) {
+    copyGeckoAssetsToPack(packPath);
+  }
   if (!Directory(path.join(packPath, 'codes')).existsSync()) {
     Directory(path.join(packPath, 'codes')).createSync();
     //updateGtcFiles(packPath);
