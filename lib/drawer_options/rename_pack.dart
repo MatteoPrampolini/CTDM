@@ -53,16 +53,16 @@ void createXmlFile(String xmlPath) {
 void replaceParamsInXml(
     File xmlFile, String chosenName, String chosenId, String isoVersion) {
   String contents = xmlFile.readAsStringSync();
-  final versionRegex = RegExp(r'-[A-Z]+.bin');
+  // final versionRegex = RegExp(r'-[A-Z]+.bin');
 
-  contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
+  // contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
   String oldName = contents.split(RegExp(r'<section name='))[1];
   oldName =
       oldName.replaceRange(oldName.indexOf('>'), null, '').replaceAll('"', '');
   String oldId = contents.split(RegExp(r'patch id='))[1];
 
   oldId = oldId.replaceRange(oldId.indexOf(r'/'), null, '').replaceAll('"', '');
-  contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
+  //contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
   contents = contents.replaceAll(oldName, chosenName);
   contents = contents.replaceAll(oldId, chosenId);
   xmlFile.writeAsStringSync(contents, mode: FileMode.write);
