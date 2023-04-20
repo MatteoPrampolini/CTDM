@@ -61,7 +61,7 @@ void copyGeckoAssetsToPack(String packPath) {
 
 void updateGtcFiles(String packPath) {
   createEmptyGtcFiles(path.join(packPath, 'codes'));
-  List<File> myGeckoFiles = Directory(path.join(packPath, 'myCodes'))
+  List<File> myGeckoFiles = Directory(path.join(packPath, 'MyCodes'))
       .listSync()
       .whereType<File>()
       .toList();
