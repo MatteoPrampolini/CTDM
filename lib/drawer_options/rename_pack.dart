@@ -20,7 +20,6 @@ void saveAndRenamePack(
       .where((element) => element.path.endsWith('.xml'));
 
   if (xmlList.isEmpty) {
-    //1
     createXmlFile(path.join(packPath, 'Pack.xml'));
   }
   //2
@@ -40,11 +39,13 @@ void saveAndRenamePack(
 void createXmlFile(String xmlPath) {
   String assetPath = path.join(path.dirname(Platform.resolvedExecutable),
       "data", "flutter_assets", "assets");
-  Directory assetFolder = Directory(assetPath);
-  List<File> xmlFileList = assetFolder.listSync().whereType<File>().toList();
-  xmlFileList.retainWhere((element) => element.path.endsWith('xml'));
 
-  xmlFileList.first.copySync(xmlPath);
+  File(path.join(assetPath, 'Pack.xml')).copySync(xmlPath);
+  // Directory assetFolder = Directory(assetPath);
+  // List<File> xmlFileList = assetFolder.listSync().whereType<File>().toList();
+  // xmlFileList.retainWhere((element) => element.path.endsWith('xml'));
+
+  // xmlFileList.first.copySync(xmlPath);
   //final File xmlFile = File("assets/Pack.xml");
   //xmlFile.copySync(xmlPath);
 }
