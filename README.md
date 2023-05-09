@@ -1,5 +1,5 @@
 
-# Custom Track Distribution Manager
+# Custom Track Distribution Maker
 
 A modding tool for Mario Kart Wii. Multi-ISO modpack maker for [Riivolution](https://riivolution.github.io/).
 
