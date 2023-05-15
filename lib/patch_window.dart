@@ -70,6 +70,7 @@ void completeXmlFile(String packPath) {
   xmlFile.writeAsStringSync(contents, mode: FileMode.write);
 }
 
+/// Returns a list of lists, one containing the track names and the other containing their respective paths, for tracks that use common files.
 List getTracksDirWithCommons(String myTrackPath, List<String> configTrack) {
   Directory myTracks = Directory(myTrackPath);
   List<Directory> fsTracksFolder =
@@ -95,6 +96,7 @@ List getTracksDirWithCommons(String myTrackPath, List<String> configTrack) {
   return [baseNameWithCommonList, commonDirpathList];
 }
 
+/// Checks whether the files listed in [trackList] are actually present in the [trackPath] directory.
 List<String> checkTracklistInFolder(List<String> trackList, String trackPath) {
   Directory myTracks = Directory(trackPath);
   List<FileSystemEntity> fsTracks = myTracks.listSync(recursive: true);
@@ -111,6 +113,7 @@ List<String> checkTracklistInFolder(List<String> trackList, String trackPath) {
   return missingFiles;
 }
 
+///Checks if all necessary folders exist inside the [packPath] and creates them if they don't.
 void createFolders(String packPath) {
   if (!Directory(path.join(packPath, 'Race', 'Course')).existsSync()) {
     Directory(path.join(packPath, 'Race', 'Course')).createSync();
@@ -146,6 +149,9 @@ void createFolders(String packPath) {
   Directory(path.join(packPath, 'sys', 'K')).createSync();
 }
 
+/// Parses config.txt located in [packPath] and generates a list of all filenames without extension.
+///
+/// Note: config.txt file must be present.
 List<String> getTracksFilenamesFromConfig(String packPath) {
   List<String> dirtyTrackFilenames = [];
   List<String> trackFilenames = [];
@@ -162,6 +168,9 @@ List<String> getTracksFilenamesFromConfig(String packPath) {
   return trackFilenames;
 }
 
+/// Parses tracks.bmg.txt located in [packPath] and generates a list of all display names.
+///
+/// Note: tracks.bmg.txt file must be present.
 List<String> parseBMGList(String packPath) {
   File trackFile = File(path.join(packPath, 'tracks.bmg.txt'));
   String contents = trackFile.readAsStringSync();
@@ -177,14 +186,17 @@ List<String> parseBMGList(String packPath) {
   return cleanTracks;
 }
 
-Future<String> createBMGList(String packPath) async {
-  //genera tracks.bmg.txt
+/// Generates the tracks.bmg.txt file and returns its path.
+/// Otherwise, throws an exception.
+///
+/// Note: config.txt must exist.
+String createBMGList(String packPath) {
   File trackFile = File(path.join(packPath, 'Scene', 'tracks.bmg.txt'));
   if (trackFile.existsSync()) {
     trackFile.deleteSync();
   }
   try {
-    final process = await Process.start(
+    Process.runSync(
         'wctct',
         [
           'create',
@@ -196,10 +208,11 @@ Future<String> createBMGList(String packPath) async {
           path.join(packPath, 'Scene', 'tracks.bmg.txt')
         ],
         runInShell: false);
-    final _ = await process.exitCode;
+    return path.join(packPath, 'Scene', 'tracks.bmg.txt');
     //return parseBMGList(packPath);
   } on Exception catch (_) {
-    //return [];
+    logString(LogType.ERROR, _.toString());
+    rethrow;
   }
   // String contents = trackFile.readAsStringSync();
   // int begin = contents.lastIndexOf(RegExp(r'703e'));
@@ -208,32 +221,15 @@ Future<String> createBMGList(String packPath) async {
   //     "703e\t= All tracks\n703f\t= Original tracks\n7040\t= Custom tracks\n703e\t= New Tracks\n");
   // //contents.split(RegExp(r'703e.= '))[1].repl
   // contents = contents.replaceFirstMapped(
-  //     'beginner_course', (match) => 'Circuito Luigi bro');
+  //     'beginner_course', (match) => 'Luigi Circuit');
   //trackFile.writeAsStringSync(contents, mode: FileMode.write);
-  return path.join(packPath, 'Scene', 'tracks.bmg.txt');
-  //2 leggi tracks.bmg.txt da 7044
-  //3 controlla che i nomi siano nella cartella MyTracks
 }
 
-Future<void> editMenuSingle(String workspace, String packPath) async {
-  //crea icone
-  final File origSingle = File(path.join(
-      workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle.szs'));
-
-  origSingle.copySync(path.join(packPath, 'Scene', 'MenuSingle.szs'));
-
-  await patchIcons(packPath);
-
-  //return; //REMOVE THIS AFTER TEST
-  //1 copia menusingle_E
-  //2 crea track.bmg.txt
-  //3 decoda menusingle_E.szs-> common.txt
-  //4 szs->folder
-  //5 edita common.txt
-  //6 encoda common.txt -> common.bmg (piazzato in folder)
-  //7 folder ->szs
-
-  //1
+///Wrapper function. This function calls multiple functions.
+///
+///At the end of the execution MenuSingle_E.szs will be patched with the new bmgs.
+void editMenuSingle(String workspace, String packPath) {
+  //copy MenuSingle_E.szs
   final File origMenuFile = File(path.join(
       path.dirname(Platform.resolvedExecutable),
       "data",
@@ -241,16 +237,12 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
       "assets",
       "scene",
       "MenuSingle_E.szs"));
-  // final File origMenuFile = File(path.join(
-  //     workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle_E.szs'));
   origMenuFile.copySync(path.join(packPath, 'Scene', 'MenuSingle_E.szs'));
-  //2
-  String bmgFilePath = await createBMGList(packPath);
-  final File trackBmgTxt = File(bmgFilePath);
-  //3
+  //  wbmgt decode MenuSingle_E.szs --dest MenuSingle_E.txt
+  //create tracks.bmg.txt
+  final File trackBmgTxt = File(createBMGList(packPath));
   try {
-    //  wbmgt decode MenuSingle_E.szs
-    final process = await Process.start(
+    Process.runSync(
         'wbmgt',
         [
           'decode',
@@ -259,16 +251,13 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
           path.join(packPath, 'Scene', 'MenuSingle_E.txt'),
         ],
         runInShell: false);
-
-    final _ = await process.exitCode;
   } on Exception catch (_) {
     logString(LogType.ERROR, _.toString());
+    rethrow;
   }
-
-  //4
+  //MenuSingle_E.szs (file) extract  -> MenuSingle_E.d (folder)
   try {
-    // wszst extract MenuSingle_E.szs
-    final process = await Process.start(
+    Process.runSync(
         'wszst',
         [
           'extract',
@@ -277,19 +266,19 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
           path.join(packPath, 'Scene', 'MenuSingle_E.d'),
         ],
         runInShell: false);
-    final _ = await process.exitCode;
   } on Exception catch (_) {
     logString(LogType.ERROR, _.toString());
+    rethrow;
   }
-  //5
+  //edit MenuSingle_E.txt with tracks.bmg.txt content
   String contents = trackBmgTxt.readAsStringSync();
   contents = contents.replaceAll(RegExp(r'#BMG'), '');
   File editedMenuFile = File(path.join(packPath, 'Scene', 'MenuSingle_E.txt'));
-  editedMenuFile.writeAsString(contents, mode: FileMode.append);
-  //6
+  editedMenuFile.writeAsStringSync(contents, mode: FileMode.append);
+  //MenuSingle_E.txt -> Common.bmg (MenuSingle_E.d/Common.bmg)
   try {
     //  wbmgt encode MenuSingle_E.txt
-    final process = await Process.start(
+    Process.runSync(
         'wbmgt',
         [
           'encode',
@@ -300,13 +289,14 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
               packPath, 'Scene', 'MenuSingle_E.d', 'message', 'Common.bmg'),
         ],
         runInShell: false);
-    final _ = await process.exitCode;
   } on Exception catch (_) {
     logString(LogType.ERROR, _.toString());
+    rethrow;
   }
-  //7
+
+  //MenuSingle_E.szs (file) <- compact MenuSingle_E.d (folder)
   try {
-    final process = await Process.start(
+    Process.runSync(
         'wszst',
         [
           'create',
@@ -316,67 +306,24 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
           path.join(packPath, 'Scene', 'MenuSingle_E.szs'),
         ],
         runInShell: false);
-    final _ = await process.exitCode;
   } on Exception catch (_) {
     logString(LogType.ERROR, _.toString());
+    rethrow;
   }
 }
 
+///Returns the display name for a given filename from the config.txt
 String getBmgFromFileName(File configFile, String filePath) {
-  //print(path.basenameWithoutExtension(filePath));
   String contents = configFile.readAsStringSync();
   int begin = contents.indexOf(path.basenameWithoutExtension(filePath));
   contents = contents.replaceRange(0, begin, '');
   return contents.split(";")[1].replaceAll('"', '').trim();
-  //print(contents.split(RegExp(path.basenameWithoutExtension(filePath)))[1]);
-  //print(contents.allMatches(path.basenameWithoutExtension(filePath))_;
-  //print(
-  //    "####################\n${contents.split(path.basenameWithoutExtension(filePath)).removeAt(0)}\n\n");
-  //developer.log('log me', name: 'my.app.category');
-  //contents = contents.split(path.basenameWithoutExtension(filePath))[1];
-  //     .split(';')[1]
-  //     .replaceAll('"', '')
-  //     .trim();
-
-  //print("${path.basenameWithoutExtension(filePath)}: |$contents|");
 }
 
-// void singleTrackCopy(String workspace, String packPath, String szsPath) {
-//   bool isDir = path.basename(path.dirname(szsPath)) != "myTracks";
-//   if (isDir) {
-//     //print("$szsPath is in subdir");
-//     File configFile = File(path.join(packPath, 'config.txt'));
-//     //guarda il suo id da tracks.bmg.txt
-//     String id = getIdFromTracksBmgTxt(
-//         path.join(packPath, 'Scene', 'tracks.bmg.txt'),
-//         getBmgFromFileName(configFile, szsPath));
-//     // getIdFromTracksBmgTxt(path.join(packPath, 'Scene', 'tracks.bmg.txt'),
-//     //     path.basenameWithoutExtension(szsPath));
-
-//     Directory(path.join(packPath, 'Race', 'Common', id))
-//         .createSync(); //UNCOMMENT
-
-//     Directory(path.dirname(szsPath))
-//         .listSync()
-//         .whereType<File>()
-//         .forEach((file) {
-//       if (file.path.endsWith('.bin')) {
-//         file.copySync(path.join(
-//             packPath, 'Race', 'Common', id, path.basename(file.path)));
-//       }
-//     });
-//     //sposta tutti i file tranne il file szs in Race/Common/xxx/
-//   } else {
-//     //print("$szsPath is single file");
-//   }
-//   File(szsPath)
-//       .copySync(path.join(packPath, 'Race', 'Course', path.basename(szsPath)));
-// }
-
-List<String> getIdFromTracksBmgTxt(List<String> bmgLines, String trackName) {
+///Returns list of IDs [ex:700a] from bmg.txt's content
+List<String> getIdFromTracksBmgTxt(List<String> bmgContent, String trackName) {
   List<String> ids = [];
-  for (var line in bmgLines) {
-    //print(line);
+  for (var line in bmgContent) {
     if (line.contains(trackName)) {
       ids.add(line.trim().replaceRange(0, 1, '').replaceRange(3, null, ''));
     }
@@ -384,27 +331,31 @@ List<String> getIdFromTracksBmgTxt(List<String> bmgLines, String trackName) {
   return ids;
 }
 
-void trackPathToCommon(
-    String workspace, String packPath, List<String> configTrackList) {
+///Check if in [configTrackList] some tracks need a common folder. if so, create it.
+Future<void> trackPathToCommon(
+    String workspace, String packPath, List<String> configTrackList) async {
   File configFile = File(path.join(packPath, 'config.txt'));
-  //print(configTrackList);
+
+  //tracksWithCommon has size==2
   List tracksWithCommon = getTracksDirWithCommons(
       path.join(workspace, 'MyTracks'), configTrackList);
-  //print(tracksWithCommon);
   List<String> lines =
       File(path.join(packPath, 'Scene', 'tracks.bmg.txt')).readAsLinesSync();
 
   int i = 0;
+  //for each track basename with commons
   for (var trackBasename in tracksWithCommon[0]) {
     List<String> ids = getIdFromTracksBmgTxt(
         lines, getBmgFromFileName(configFile, trackBasename));
     for (String id in ids) {
+      //(the same display name can have multiple ids)
       createSingleCommon(packPath, id, tracksWithCommon[1][i]);
     }
     i++;
   }
 }
 
+///Creates common folder for specific track id in Race/Common/
 void createSingleCommon(String packPath, String id, String srcFolderPath) {
   Directory(path.join(packPath, 'Race', 'Common', id)).createSync();
 
@@ -417,33 +368,15 @@ void createSingleCommon(String packPath, String id, String srcFolderPath) {
   });
 }
 
-// void copyMyTracksToCourseFolder(
-//     String workspace, String packPath, List<String> configTrackList) {
-//   Directory myTracksDir = Directory(path.join(workspace, 'myTracks'));
-//   //List<FileSystemEntity> myTracksList = myTracksDir.listSync(recursive: true).;
-//   List<String> myTrackList = myTracksDir
-//       .listSync(recursive: true)
-//       .whereType<File>()
-//       .map((e) => e.path)
-//       .toList();
-//   //controllo che il nome base senza est della trackList sia nella directory myTrackList
-//   for (var configTrack in configTrackList) {
-//     if (myTrackList
-//         .map((e) => path.basenameWithoutExtension(e))
-//         .toList()
-//         .contains(configTrack)) {
-//       singleTrackCopy(
-//           workspace,
-//           packPath,
-//           myTrackList.firstWhere((element) =>
-//               path.basenameWithoutExtension(element) == configTrack));
-//     } else {
-//       //print("non trovato"); //impossible?
-//     }
-//   }
-// }
+///Patches MenuSingle.szs by modifying its icons.
+///
+///Note: Do not confuse MenuSingle.szs with MenuSingle_E.szs.
+Future<void> patchIcons(String workspace, String packPath) async {
+  final File origSingle = File(path.join(
+      workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle.szs'));
 
-Future<void> patchIcons(String packPath) async {
+  origSingle.copySync(path.join(packPath, 'Scene', 'MenuSingle.szs'));
+
   Directory iconDir = Directory(path.join(packPath, 'Icons'));
   int nCups = getNumberOfIconsFromConfig(packPath);
   if (iconDir.listSync().whereType<File>().length < nCups + 2) {
@@ -467,13 +400,16 @@ Future<void> patchIcons(String packPath) async {
                 path.join(packPath, 'Scene', 'MenuSingle.szs'),
               ],
               runInShell: false),
-          File(path.join(packPath, 'Icons', 'merged.png')).deleteSync()
         });
   } on Exception catch (_) {
     logString(LogType.ERROR, _.toString());
+    rethrow;
   }
 }
 
+/// Comparator function that sorts files in numerical order,
+///
+///  while taking into account the special cases of "0_r" and "0_l".
 int compareAlphamagically(File a, File b) {
   if (int.tryParse(path.basenameWithoutExtension(a.path)) == null &&
       int.tryParse(path.basenameWithoutExtension(a.path)) == null) {
@@ -491,6 +427,7 @@ int compareAlphamagically(File a, File b) {
       .compareTo(int.parse(path.basenameWithoutExtension(b.path)));
 }
 
+/// Combines all the icons located in [iconDir] directory and generates a new image file called "merged.png" that contains all the icons merged into a single image.
 Future<File> createBigImage(Directory iconDir, int nCups) async {
   List<ui.Image> imageList = [];
   List<File> iconFileList = iconDir.listSync().whereType<File>().toList();
@@ -525,64 +462,46 @@ class _PatchWindowState extends State<PatchWindow> {
   }
 
   void patch(String packPath) async {
+    patchStatus = PatchingStatus.running;
+    //create folders
     createFolders(packPath);
+
+    String workspace = path.dirname(path.dirname(packPath));
+    //create gecko codes
     setState(() {
       progressText = "creating gecko codes";
+      updateGtcFiles(packPath);
     });
-    updateGtcFiles(packPath);
-    patchStatus = PatchingStatus.running;
-    //1 CHECK TRACKS FILES
-    //wipeOldFiles(packPath);
-    setState(() {
-      progressText = "checking for missing tracks";
-    });
-    String workspace = path.dirname(path.dirname(packPath));
+    await Future.delayed(const Duration(seconds: 1));
+    //get list of track files
     List<String> trackList =
         getTracksFilenamesFromConfig(packPath).toSet().toList();
+    //check missing tracks
     setState(() {
+      progressText = "checking for missing tracks";
       missingTracks =
           checkTracklistInFolder(trackList, path.join(workspace, 'MyTracks'));
     });
-
+    await Future.delayed(const Duration(seconds: 1));
+    //if there are missing tracks, abort the patch.
     if (missingTracks.isNotEmpty) {
       patchStatus = PatchingStatus.aborted;
       return;
     }
-
-    //2 EDIT MENU_SINGLE
     setState(() {
       progressText = "patching the game menu";
     });
-    await editMenuSingle(workspace, packPath);
-    //1.5 create and polulate Race/Common
-    trackPathToCommon(workspace, packPath, trackList);
-    Directory(path.join(packPath, 'Scene', 'MenuSingle_E.d'))
-        .deleteSync(recursive: true);
+    //await Future.delayed(Duration(seconds: 1));
+    // patch MenuSingle.szs with icons.
+    await patchIcons(workspace, packPath);
 
-    File(path.join(packPath, 'Scene', 'MenuSingle_E.txt')).deleteSync();
-    File(path.join(packPath, 'Scene', 'tracks.bmg.txt')).deleteSync();
-    //4 FINALLY PATCHING
-    //4a)copy lecode-VER.bin in rel
-    //4b)wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-    //SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      progressText = "copying the lecode loader ";
-    });
+    //patch MenuSingle_E.szs with the new bmgs.
+    editMenuSingle(workspace, packPath);
 
-    // String isoVersion = prefs.getString('isoVersion')!;
-    // String lecodePath = path.join(
-    //     path.dirname(Platform.resolvedExecutable),
-    //     "data",
-    //     "flutter_assets",
-    //     "assets",
-    //     "lecode_build",
-    //     "lecode-$isoVersion.bin");
-    // File(lecodePath)
-    //     .copySync(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
+    //create Common/xxx folders
+    await trackPathToCommon(workspace, packPath, trackList);
 
-    setState(() {
-      progressText = "copying tracks";
-    });
+    //create list of szs files. the files will be copied into Race/Course/tmp
     List<File> szsFileList = Directory(path.join(workspace, 'MyTracks'))
         .listSync(recursive: true)
         .whereType<File>()
@@ -590,22 +509,19 @@ class _PatchWindowState extends State<PatchWindow> {
     szsFileList.retainWhere((element) => element.path.endsWith('.szs'));
     szsFileList.retainWhere((element) =>
         trackList.contains(path.basenameWithoutExtension(element.path)));
-    // Directory(path.join(packPath, 'Race', 'Course', 'tmp')).createSync();
-    // for (File szs in szsFileList) {
-    //   szs.copySync(path.join(
-    //       packPath, 'Race', 'Course', 'tmp', path.basename(szs.path)));
-    // }
+
+    //For each versions
     setState(() {
-      progressText = "patching lecode loader with tracks";
+      progressText = "copying tracks";
     });
     for (GameVersion gv in fileMap.keys) {
-      //if (gv != GameVersion.PAL) continue; //DEBUG TEST
+      //copy tracks to tmp
       Directory(path.join(packPath, 'Race', 'Course', 'tmp')).createSync();
       for (File szs in szsFileList) {
         szs.copySync(path.join(
             packPath, 'Race', 'Course', 'tmp', path.basename(szs.path)));
       }
-
+      //copy lecode-XXX.bin from assets
       String isoVersion = gv.name;
       String lecodePath = path.join(
           path.dirname(Platform.resolvedExecutable),
@@ -616,6 +532,7 @@ class _PatchWindowState extends State<PatchWindow> {
           "lecode-$isoVersion.bin");
       File(lecodePath)
           .copySync(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
+      //patch lecode with the new tracks
       try {
         //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
         Process.runSync(
@@ -632,47 +549,24 @@ class _PatchWindowState extends State<PatchWindow> {
               path.join(packPath, 'Race', 'Course'),
               '--copy-tracks',
               path.join(packPath, 'Race', 'Course', 'tmp'),
+              '--lpar', //added
+              path.join(packPath, 'lpar.txt'), //added
             ],
             runInShell: false);
         // final _ = await process.exitCode;
         //stdout.addStream(process.stdout);
         //stderr.addStream(process.stderr);
-        //print(process.stdout);
-        //print(process.stderr);
       } on Exception catch (_) {
         logString(LogType.ERROR, _.toString());
+        rethrow;
         //print(_);
       }
-      //forse mettere
+      //needed?
       Directory(path.join(packPath, 'Race', 'Course', 'tmp'))
           .deleteSync(recursive: true);
-      try {
-        // wlect patch lecode-PAL.bin --lpar lpar.txt
-        Process.runSync(
-            'wlect',
-            [
-              'patch',
-              path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
-              '--overwrite',
-              '--dest',
-              path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
-              '--lpar',
-              path.join(packPath, 'lpar.txt'),
-            ],
-            runInShell: false);
-        //final _ = await process.exitCode;
-        //print(process.stdout);
-        //print(process.stderr);
-        // stdout.addStream(process.stdout);
-        // stderr.addStream(process.stderr);
-      } on Exception catch (_) {
-        logString(LogType.ERROR, _.toString());
-        //print(_);
-      }
     }
-    //move main.dol and patch it
-    // File(path.join(workspace, 'ORIGINAL_DISC', 'sys', 'main.dol'))
-    //     .copySync(path.join(packPath, 'sys', 'main.dol'));
+
+    //move main.dol and patch it with gecko codes
     setState(() {
       progressText = "patching main.dol";
     });
@@ -686,7 +580,7 @@ class _PatchWindowState extends State<PatchWindow> {
       dolFile.copySync(path.join(packPath, 'sys', letter, "main.dol"));
       try {
         // wstrt patch --add-lecode main.dol
-        final process = await Process.start(
+        Process.runSync(
             'wstrt',
             [
               'patch',
@@ -699,30 +593,40 @@ class _PatchWindowState extends State<PatchWindow> {
               path.join(packPath, 'sys', letter, "main.dol"),
             ],
             runInShell: false);
-        final _ = await process.exitCode;
-        // stdout.addStream(process.stdout);
-        // stderr.addStream(process.stderr);
       } on Exception catch (_) {
         //print(_);
         logString(LogType.ERROR, _.toString());
+        rethrow;
       }
     }
 
     //copy music
     setState(() {
-      progressText = "copying music files";
+      progressText = "copying music files (if any)";
+      copyMusic(workspace, packPath);
     });
-    copyMusic(packPath);
+    await Future.delayed(const Duration(seconds: 1));
     setState(() {
       progressText = "editing xml file";
+      completeXmlFile(packPath);
     });
-    completeXmlFile(packPath);
+    setState(() {
+      progressText = "deleting tmp files";
+    });
+    await Future.delayed(const Duration(seconds: 1));
+    File(path.join(packPath, 'Icons', 'merged.png')).delete();
+    Directory(path.join(packPath, 'Scene', 'MenuSingle_E.d'))
+        .deleteSync(recursive: true);
+    File(path.join(packPath, 'Scene', 'MenuSingle_E.txt')).delete();
+    File(path.join(packPath, 'Scene', 'tracks.bmg.txt')).delete();
     setState(() {
       patchStatus = PatchingStatus.completed;
+      logString(LogType.INFO, "patch completed");
     });
   }
 
-  void copyMusic(packPath) {
+  ///Reads music.txt and copies both music files in mDir from myMusic/mDir to Pack/Music
+  void copyMusic(workspace, packPath) {
     File musicTxt = File(path.join(packPath, "music.txt"));
     Directory musicDir = Directory(path.join(packPath, 'Music'));
     if (musicDir.existsSync()) {
@@ -730,14 +634,13 @@ class _PatchWindowState extends State<PatchWindow> {
     }
     musicDir.createSync();
     if (!musicTxt.existsSync()) return;
-    List<String> tracksWithMusicHex = [];
-    Directory workspaceMyMusic =
-        Directory(path.join(path.dirname(path.dirname(packPath)), 'myMusic'));
+    List<String> tracksIdHex = [];
+
     for (String line in musicTxt.readAsLinesSync()) {
-      tracksWithMusicHex.add(line.substring(0, 3));
+      tracksIdHex.add(line.substring(0, 3)); //get id of track and add it
 
       Directory mDir =
-          Directory(path.join(workspaceMyMusic.path, line.substring(4)));
+          Directory(path.join(workspace, line.substring(4))); //get folder name
       File fastFile = mDir
           .listSync()
           .whereType<File>()
@@ -747,12 +650,11 @@ class _PatchWindowState extends State<PatchWindow> {
           .whereType<File>()
           .firstWhere((element) => !isFastBrstm(element.path));
 
-      //copia i due file
+      //copia both files
       normalFile
           .copySync(path.join(musicDir.path, '${line.substring(0, 3)}.brstm'));
       fastFile.copySync(
           path.join(musicDir.path, '${line.substring(0, 3)}_f.brstm'));
-      //File(path.join(workspaceMyMusic.path,)).copySync(musicDir.path, line.substring(0, 3));
     }
   }
 
@@ -772,10 +674,6 @@ class _PatchWindowState extends State<PatchWindow> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-              // Center(
-              //     child: Text(patchStatus == PatchingStatus.running
-              //         ? "patching..."
-              //         : "Patch Completed!")),
               Center(
                   child: Column(children: [
                 patchStatus == PatchingStatus.running

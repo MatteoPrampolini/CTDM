@@ -59,8 +59,8 @@ void copyGeckoAssetsToPack(String packPath) {
   }
 }
 
+/// This function reads the JSON files from MyCodes and generates 4 .gct files, one per region, within [packPath].
 void updateGtcFiles(String packPath) {
-  createEmptyGtcFiles(path.join(packPath, 'codes'));
   List<File> myGeckoFiles = Directory(path.join(packPath, 'MyCodes'))
       .listSync()
       .whereType<File>()

@@ -82,9 +82,8 @@ class _PackEditorState extends State<PackEditor> {
         //asynchronous delay
         if (mounted) {
           //checks if widget is still active and not disposed
-//tells the widget builder to rebuild again because ui has updated
+          //tells the widget builder to rebuild again because ui has updated
           setState(() => {checkResultVisibility = false});
-          //update the variable declare this under your class so its accessible for both your widget build and initState which is located under widget build{}
         }
       });
     }
@@ -216,10 +215,9 @@ class _PackEditorState extends State<PackEditor> {
                                           //asynchronous delay
                                           if (mounted) {
                                             //checks if widget is still active and not disposed
-//tells the widget builder to rebuild again because ui has updated
+                                            //tells the widget builder to rebuild again because ui has updated
                                             _scaffoldKey.currentState
                                                 ?.openDrawer();
-                                            //update the variable declare this under your class so its accessible for both your widget build and initState which is located under widget build{}
                                           }
                                         })
                                       }

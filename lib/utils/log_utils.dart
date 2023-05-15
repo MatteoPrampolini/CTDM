@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' as path;
 
+const String logfile = 'log.log';
 Future<File> createLogFile() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? workspace = prefs.getString('workspace');
@@ -10,7 +11,7 @@ Future<File> createLogFile() async {
   if (workspace == null) {
     workspace = "workspaceError";
   }
-  File logFile = File(path.join(workspace, 'error.log'));
+  File logFile = File(path.join(workspace, logfile));
 
   if (workspace != "workspaceError" && !logFile.existsSync()) {
     logFile.createSync();
