@@ -333,7 +333,7 @@ Future<void> trackPathToCommon(
 
   //tracksWithCommon has size==2
   List tracksWithCommon = getTracksDirWithCommons(
-      path.join(workspace, 'MyTracks'), configTrackList);
+      path.join(workspace, 'myTracks'), configTrackList);
   List<String> lines =
       File(path.join(packPath, 'Scene', 'tracks.bmg.txt')).readAsLinesSync();
 
@@ -475,7 +475,7 @@ class _PatchWindowState extends State<PatchWindow> {
     setState(() {
       progressText = "checking for missing tracks";
       missingTracks =
-          checkTracklistInFolder(trackList, path.join(workspace, 'MyTracks'));
+          checkTracklistInFolder(trackList, path.join(workspace, 'myTracks'));
     });
     await Future.delayed(const Duration(seconds: 1));
     //if there are missing tracks, abort the patch.
@@ -497,7 +497,7 @@ class _PatchWindowState extends State<PatchWindow> {
     await trackPathToCommon(workspace, packPath, trackList);
 
     //create list of szs files. the files will be copied into Race/Course/tmp
-    List<File> szsFileList = Directory(path.join(workspace, 'MyTracks'))
+    List<File> szsFileList = Directory(path.join(workspace, 'myTracks'))
         .listSync(recursive: true)
         .whereType<File>()
         .toList();
@@ -626,6 +626,9 @@ class _PatchWindowState extends State<PatchWindow> {
     if (!isFfmpegInstalled()) {
       return;
     }
+    if(Platform.isLinux){
+      giveExecPermissionToBrstmConverter();
+    }
     File musicTxt = File(path.join(packPath, "music.txt"));
     Directory musicDir = Directory(path.join(packPath, 'Music'));
     if (musicDir.existsSync()) {
@@ -746,7 +749,7 @@ class _PatchWindowState extends State<PatchWindow> {
                         child: Padding(
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
-                            "the following tracks were not found in MyTracks folder:",
+                            "the following tracks were not found in myTracks folder:",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.white70,

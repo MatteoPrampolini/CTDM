@@ -41,9 +41,27 @@ fileToBrstm(
       tmpFilePathFast, outputFolder, id, isFastBrstm(tmpFilePathFast));
 }
 
+giveExecPermissionToBrstmConverter(){
+    final String executablesFolder = File(path.join(
+          path.dirname(Platform.resolvedExecutable),
+          "data",
+          "flutter_assets",
+          "assets",
+          "executables"))
+      .path;
+    try {
+    Process.runSync('chmod',['+x', path.join(executablesFolder,'brstm_converter-amd64-linux')]);
+    return;
+    
+
+  } on Exception catch (_) {
+    logString(LogType.ERROR, "cannot give +x pemission to brstm_converter-amd64-linux");
+    return;
+  }
+}
 audioToWavAdpcm(String inputPath, String tmpFilePath) {
   try {
-    Process.runSync(
+  Process.runSync(
         'ffmpeg',
         [
           '-y',
@@ -57,10 +75,10 @@ audioToWavAdpcm(String inputPath, String tmpFilePath) {
           '44100',
           tmpFilePath
         ],
-        runInShell: false);
+        runInShell: true);
     return;
   } on Exception catch (_) {
-    logString(LogType.ERROR, "cannot convert file ${path.basename(inputPath)}");
+    logString(LogType.ERROR, "cannot convert file to adpcm ${path.basename(inputPath)}");
     return;
   }
 }
@@ -74,7 +92,7 @@ createFastCopy(String tmpFilePath, String tmpFilePathFast) {
           '-i',
           tmpFilePath,
           '-filter:a',
-          'atempo=1.1,',
+          'atempo=1.1',
           '-vn',
           tmpFilePathFast
         ],
@@ -115,7 +133,7 @@ callBrstmConverter(
       return;
     } on Exception catch (_) {
       logString(
-          LogType.ERROR, "cannot convert file ${path.basename(filePath)}");
+          LogType.ERROR, "cannot convert file ${path.basename(filePath)} to brstm");
       return;
     }
   } else if (Platform.isLinux) {
@@ -123,11 +141,11 @@ callBrstmConverter(
       Process.runSync(
           path.join(executablesFolder, 'brstm_converter-amd64-linux'),
           [filePath, '-o', path.join(outputFolder, "$id$extra.brstm")],
-          runInShell: false);
+          runInShell: true);
       return;
     } on Exception catch (_) {
       logString(
-          LogType.ERROR, "cannot convert file ${path.basename(filePath)}");
+          LogType.ERROR, "cannot convert file ${path.basename(filePath)} to brstm");
       return;
     }
   }
