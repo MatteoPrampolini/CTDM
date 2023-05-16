@@ -27,9 +27,11 @@ class CupTableRow extends StatefulWidget {
 class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController trackNameTextField;
   late TextEditingController trackslotTextField;
-  String? musicFolder = "select music";
+  late String? musicFolder = widget.track.musicFolder ?? "select music";
   late TextEditingController musicslotTextField;
-  final List<bool> _selectedMusicOption = <bool>[false, true];
+
+  late final List<bool> _selectedMusicOption =
+      musicFolder == "select music" ? <bool>[false, true] : <bool>[true, false];
   @override
   void initState() {
     setColor();
@@ -78,6 +80,7 @@ class _CupTableRowState extends State<CupTableRow> {
     //trackslotTextField.text = widget.track.slotId.toString();
     setColor();
     FilePickerResult? result;
+    FilePickerResult? musicRes;
     return Container(
       decoration: BoxDecoration(
           border: Border.all(color: Colors.black), color: widget.color),
@@ -180,7 +183,7 @@ class _CupTableRowState extends State<CupTableRow> {
                           allowedExtensions: ['szs'],
                           type: FileType.custom,
                           initialDirectory: path.join(
-                              widget.packPath, '..', '..', 'MyTracks')),
+                              widget.packPath, '..', '..', 'myTracks')),
                       if (result != null)
                         {
                           if (result?.files.single.path != null)
@@ -235,6 +238,12 @@ class _CupTableRowState extends State<CupTableRow> {
                                         i++)
                                       {
                                         _selectedMusicOption[i] = i == index,
+                                        if (_selectedMusicOption[1])
+                                          {
+                                            //if number-> remove musicFolder
+                                            widget.track.musicFolder = null,
+                                            musicFolder = "select music",
+                                          },
                                         setState(() => {}),
                                       }
                                   },
@@ -277,11 +286,20 @@ class _CupTableRowState extends State<CupTableRow> {
                           child: Expanded(
                             child: TextButton(
                               onPressed: () async => {
-                                musicFolder = await FilePicker.platform
-                                    .getDirectoryPath(
-                                        initialDirectory: path.dirname(
-                                            path.dirname(widget.packPath)),
-                                        dialogTitle: 'select music folder'),
+                                // musicFolder = await FilePicker.platform
+                                //     .getDirectoryPath(
+                                //         initialDirectory: path.dirname(
+                                //             path.dirname(widget.packPath)),
+                                //         dialogTitle: 'select music folder'),
+                                musicRes = await FilePicker.platform.pickFiles(
+                                    allowMultiple: false,
+                                    allowedExtensions: ['mp3', 'wav'],
+                                    type: FileType.custom,
+                                    initialDirectory: path.join(widget.packPath,
+                                        '..', '..', 'myMusic')),
+
+                                musicFolder = musicRes?.paths[0],
+
                                 if (musicFolder == null)
                                   {
                                     musicFolder = "select music",

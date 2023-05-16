@@ -114,6 +114,10 @@ flutter:
       - assets/gecko/automaticBrsarPatching.json
       - assets/scene/
       - assets/scene/MenuSingle_E.szs
+      - assets/executables/
+      - assets/executables/brstm_converter-amd64-linux
+      - assets/executables/brstm_converter-amd64-windows.exe
+      
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

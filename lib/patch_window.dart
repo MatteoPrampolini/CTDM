@@ -3,18 +3,13 @@ import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
+import 'package:ctdm/utils/music_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:merge_images/merge_images.dart';
 import 'package:path/path.dart' as path;
 
 //import 'package:image/image.dart' as img;
-
-bool isFastBrstm(String path) {
-  if (path.endsWith("_f.brstm")) return true;
-  if (path.endsWith("_F.brstm")) return true;
-  return false;
-}
 
 class PatchWindow extends StatefulWidget {
   final String packPath;
@@ -489,7 +484,7 @@ class _PatchWindowState extends State<PatchWindow> {
       return;
     }
     setState(() {
-      progressText = "patching the game menu";
+      progressText = "patching game menu";
     });
     //await Future.delayed(Duration(seconds: 1));
     // patch MenuSingle.szs with icons.
@@ -603,6 +598,7 @@ class _PatchWindowState extends State<PatchWindow> {
     //copy music
     setState(() {
       progressText = "copying music files (if any)";
+
       copyMusic(workspace, packPath);
     });
     await Future.delayed(const Duration(seconds: 1));
@@ -627,35 +623,49 @@ class _PatchWindowState extends State<PatchWindow> {
 
   ///Reads music.txt and copies both music files in mDir from myMusic/mDir to Pack/Music
   void copyMusic(workspace, packPath) {
+    if (!isFfmpegInstalled()) {
+      return;
+    }
     File musicTxt = File(path.join(packPath, "music.txt"));
     Directory musicDir = Directory(path.join(packPath, 'Music'));
     if (musicDir.existsSync()) {
       musicDir.deleteSync(recursive: true);
     }
     musicDir.createSync();
+    Directory tmpDir = Directory(path.join(packPath, 'Music', 'tmp'));
+    if (!tmpDir.existsSync()) {
+      tmpDir.createSync();
+    }
+
     if (!musicTxt.existsSync()) return;
     List<String> tracksIdHex = [];
 
     for (String line in musicTxt.readAsLinesSync()) {
       tracksIdHex.add(line.substring(0, 3)); //get id of track and add it
 
-      Directory mDir =
-          Directory(path.join(workspace, line.substring(4))); //get folder name
-      File fastFile = mDir
-          .listSync()
-          .whereType<File>()
-          .firstWhere((element) => isFastBrstm(element.path));
-      File normalFile = mDir
-          .listSync()
-          .whereType<File>()
-          .firstWhere((element) => !isFastBrstm(element.path));
+      // Directory mDir =
+      //     Directory(path.join(workspace, line.substring(4))); //get folder name
+      //   File fastFile = mDir
+      //       .listSync()
+      //       .whereType<File>()
+      //       .firstWhere((element) => isFastBrstm(element.path));
+      //   File normalFile = mDir
+      //       .listSync()
+      //       .whereType<File>()
+      //       .firstWhere((element) => !isFastBrstm(element.path));
 
-      //copia both files
-      normalFile
-          .copySync(path.join(musicDir.path, '${line.substring(0, 3)}.brstm'));
-      fastFile.copySync(
-          path.join(musicDir.path, '${line.substring(0, 3)}_f.brstm'));
+      //   //copia both files
+      //   normalFile
+      //       .copySync(path.join(musicDir.path, '${line.substring(0, 3)}.brstm'));
+      //   fastFile.copySync(
+      //       path.join(musicDir.path, '${line.substring(0, 3)}_f.brstm'));
+      fileToBrstm(
+          path.join(workspace, "myMusic", line.substring(4)),
+          path.join(packPath, "Music", "tmp"),
+          path.join(packPath, "Music"),
+          line.substring(0, 3));
     }
+    tmpDir.deleteSync(recursive: true);
   }
 
   @override
