@@ -12,6 +12,8 @@ A modding tool for Mario Kart Wii. Multi-ISO modpack maker for [Riivolution](htt
  - [Wiimms SZS Toolset](https://szs.wiimm.de/)
  - [Wiimms ISO Tools](https://wit.wiimm.de/)
  - [Custom Mario Kart Wiiki](https://wiki.tockdom.com/)
+ - [OpenRevolution](https://github.com/ic-scm/openrevolution)
+ - [FFmpeg](https://ffmpeg.org/)
  - DaYosh, for his help in developing and beta testing.
 
 ## Installation
@@ -31,7 +33,7 @@ TEXT: TODO
 
 - Multi-ISO patching [PAL, NTCS-U, NTCS-J, NTCS-K]
 - Graphical Interface
-- Cross platform [Windows, Linux, macOS]
+- Cross platform [Windows, Linux, MacOS]
 - Handles custom tracks, gecko code, LE-CODE, custom music and icons.
 ## Feedback
 
@@ -49,11 +51,11 @@ Prampo2810#7088
 
 ## Roadmap
 
-- Built-in audio file to brstm converter
+- Built-in audio file to brstm converter [:heavy_check_mark:]
 
-- Enable online play via Wiimmfi
+- Enable online play via Wiimmfi [ ]
 
-- Custom characters GUI
+- Custom characters GUI [ ]
 
 ## License
 

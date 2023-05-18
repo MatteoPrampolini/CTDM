@@ -623,10 +623,7 @@ class _PatchWindowState extends State<PatchWindow> {
 
   ///Reads music.txt and copies both music files in mDir from myMusic/mDir to Pack/Music
   void copyMusic(workspace, packPath) {
-    if (!isFfmpegInstalled()) {
-      return;
-    }
-    if(Platform.isLinux){
+    if (Platform.isLinux) {
       giveExecPermissionToBrstmConverter();
     }
     File musicTxt = File(path.join(packPath, "music.txt"));
@@ -644,7 +641,8 @@ class _PatchWindowState extends State<PatchWindow> {
     List<String> tracksIdHex = [];
 
     for (String line in musicTxt.readAsLinesSync()) {
-      tracksIdHex.add(line.substring(0, 3)); //get id of track and add it
+      String id = line.substring(0, 3);
+      tracksIdHex.add(id); //get id of track and add it
 
       // Directory mDir =
       //     Directory(path.join(workspace, line.substring(4))); //get folder name
@@ -662,11 +660,36 @@ class _PatchWindowState extends State<PatchWindow> {
       //       .copySync(path.join(musicDir.path, '${line.substring(0, 3)}.brstm'));
       //   fastFile.copySync(
       //       path.join(musicDir.path, '${line.substring(0, 3)}_f.brstm'));
-      fileToBrstm(
-          path.join(workspace, "myMusic", line.substring(4)),
-          path.join(packPath, "Music", "tmp"),
-          path.join(packPath, "Music"),
-          line.substring(0, 3));
+      String filepath = line.substring(4);
+      if (!filepath.endsWith("brstm") && Platform.isMacOS) {
+        logString(LogType.ERROR, "cannot convert audio file on MacOS");
+        return;
+      }
+      if (filepath.endsWith(".brstm")) {
+        if (isFastBrstm(filepath)) {
+          //if fast file-> normal_file
+          final fastPart = RegExp(r'_[f,F]');
+          filepath = filepath.replaceFirst(fastPart, '');
+        }
+        File normalFile = File(path.join(workspace, 'myMusic', filepath));
+        normalFile.copySync(path.join(musicDir.path, '$id.brstm'));
+
+        File fastFile = Directory(path
+                .join(path.join(workspace, 'myMusic', path.dirname(filepath))))
+            .listSync()
+            .whereType<File>()
+            .firstWhere((element) =>
+                isFastBrstm(element.path) &&
+                element.path.contains(path.basenameWithoutExtension(filepath)));
+
+        fastFile.copySync(path.join(musicDir.path, '${id}_f.brstm'));
+      } else {
+        fileToBrstm(
+            path.join(workspace, "myMusic", filepath),
+            path.join(packPath, "Music", "tmp"),
+            path.join(packPath, "Music"),
+            id);
+      }
     }
     tmpDir.deleteSync(recursive: true);
   }

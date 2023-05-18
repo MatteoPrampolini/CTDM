@@ -216,12 +216,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       if (witFound)
                         Padding(
-                          padding: EdgeInsets.only(top: 20.0),
+                          padding: const EdgeInsets.only(top: 20.0),
                           child: Text(
                             Platform.isWindows
                                 ? "(Remember to reboot your PC after)"
                                 : "",
-                            style: TextStyle(color: Colors.white54),
+                            style: const TextStyle(color: Colors.white54),
                           ),
                         )
                     ],

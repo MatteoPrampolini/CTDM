@@ -293,7 +293,7 @@ class _CupTableRowState extends State<CupTableRow> {
                                 //         dialogTitle: 'select music folder'),
                                 musicRes = await FilePicker.platform.pickFiles(
                                     allowMultiple: false,
-                                    allowedExtensions: ['mp3', 'wav'],
+                                    allowedExtensions: ['mp3', 'wav', 'brstm'],
                                     type: FileType.custom,
                                     initialDirectory: path.join(widget.packPath,
                                         '..', '..', 'myMusic')),
@@ -306,8 +306,17 @@ class _CupTableRowState extends State<CupTableRow> {
                                   }
                                 else
                                   {
+                                    // widget.track.musicFolder = path.relative(
+                                    //     path.join(widget.packPath, '..', '..',
+                                    //         'myMusic'),
+                                    //     from: musicFolder),
+                                    // print(path.join(widget.packPath, '..', '..',
+                                    //     'myMusic')),
+                                    // print(musicFolder)
                                     widget.track.musicFolder =
-                                        path.basename(musicFolder!)
+                                        musicFolder?.replaceFirst(
+                                            RegExp(r'^.*[\\,\/]myMusic*.'), ''),
+                                    //path.basename(musicFolder!)
                                   },
                                 RowChangedValue(widget.track, widget.cupIndex,
                                         widget.rowIndex)
