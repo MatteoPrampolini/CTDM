@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/drawer_options/lpar_config.dart';
 import 'package:ctdm/drawer_options/rename_pack.dart';
+import 'package:ctdm/drawer_options/select_gecko.dart';
 //import 'package:ctdm/drawer_options/track_config.dart';
 import 'package:ctdm/drawer_options/track_config_gui.dart';
 //import 'package:ctdm/drawer_options/track_config_gui.dart';
 import 'package:flutter/material.dart';
 
-import 'drawer_options/gecko_codes.dart';
+//import 'drawer_options/gecko_codes.dart';
 import 'main.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -111,7 +112,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => GeckoCodes(widget.packPath)));
+                    builder: (context) => SelectGecko(widget.packPath)));
+            //GeckoCodes(widget.packPath)));
             // Update the state of the app.
             // ...
           },

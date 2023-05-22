@@ -16,6 +16,40 @@ class Gecko {
   bool mandatory;
   Gecko(this.name, this.pal, this.usa, this.kor, this.jap, this.author,
       this.desc, this.baseName, this.mandatory);
+
+  @override
+  String toString() {
+    return name;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Gecko &&
+        name == other.name &&
+        author == other.author &&
+        pal == other.pal &&
+        usa == other.usa &&
+        jap == other.jap &&
+        kor == other.kor &&
+        desc == other.desc &&
+        baseName == other.baseName &&
+        mandatory == other.mandatory;
+  }
+
+  @override
+  int get hashCode {
+    return name.hashCode ^
+        author.hashCode ^
+        pal.hashCode ^
+        usa.hashCode ^
+        jap.hashCode ^
+        kor.hashCode ^
+        desc.hashCode ^
+        baseName.hashCode ^
+        mandatory.hashCode;
+  }
 }
 
 // ignore: constant_identifier_names
@@ -37,7 +71,7 @@ void createEmptyGtcFiles(String codesPath) {
 }
 
 void copyGeckoAssetsToPack(String packPath) {
-  Directory codesFolder = Directory(path.join(packPath, 'MyCodes'));
+  Directory codesFolder = Directory(path.join(packPath, "..", "..", 'myCodes'));
   if (!codesFolder.existsSync()) {
     codesFolder.createSync();
   }
@@ -47,24 +81,32 @@ void copyGeckoAssetsToPack(String packPath) {
       File(path.join(assetPath, 'gecko', 'trackMusicExpander.json'));
   File musicCheat2 =
       File(path.join(assetPath, 'gecko', 'automaticBrsarPatching.json'));
-  if (!File(path.join(packPath, "MyCodes", 'trackMusicExpander.json'))
+  if (!File(
+          path.join(packPath, "..", "..", 'myCodes', 'trackMusicExpander.json'))
       .existsSync()) {
-    musicCheat1
-        .copySync(path.join(packPath, "MyCodes", 'trackMusicExpander.json'));
+    musicCheat1.copySync(
+        path.join(packPath, "..", "..", 'myCodes', 'trackMusicExpander.json'));
   }
-  if (!File(path.join(packPath, "MyCodes", 'automaticBrsarPatching.json'))
+  if (!File(path.join(
+          packPath, "..", "..", 'myCodes', 'automaticBrsarPatching.json'))
       .existsSync()) {
-    musicCheat2.copySync(
-        path.join(packPath, "MyCodes", 'automaticBrsarPatching.json'));
+    musicCheat2.copySync(path.join(
+        packPath, "..", "..", 'myCodes', 'automaticBrsarPatching.json'));
   }
 }
 
-/// This function reads the JSON files from MyCodes and generates 4 .gct files, one per region, within [packPath].
-void updateGtcFiles(String packPath) {
-  List<File> myGeckoFiles = Directory(path.join(packPath, 'MyCodes'))
-      .listSync()
-      .whereType<File>()
-      .toList();
+/// This function reads the JSON files from myCodes and generates 4 .gct files, one per region, within [packPath].
+void updateGtcFiles(String packPath, File geckoTxt) {
+  List<File> myGeckoFiles = [];
+  if (!geckoTxt.existsSync()) {
+    createGeckoTxt(packPath);
+  }
+
+  List<String> cheatsFiles = geckoTxt.readAsLinesSync();
+  for (String filepath in cheatsFiles) {
+    File tmp = File(path.join(packPath, "..", "..", "myCodes", filepath));
+    myGeckoFiles.add(tmp);
+  }
 
   //write header
   for (GameVersion version in fileMap.keys) {
@@ -139,4 +181,58 @@ Uint8List hexToUint8List(String hex) {
     result[i] = x;
   }
   return result;
+}
+
+int compareGecko(Gecko a, Gecko b) {
+  final specialStrings = [
+    "automaticBrsarPatching.json",
+    "trackMusicExpander.json"
+  ];
+  final isASpecial = specialStrings.contains(a.baseName);
+  final isBSpecial = specialStrings.contains(b.baseName);
+
+  if (isASpecial && isBSpecial) {
+    return specialStrings
+        .indexOf(a.baseName)
+        .compareTo(specialStrings.indexOf(b.baseName));
+  } else if (isASpecial) {
+    return -1;
+  } else if (isBSpecial) {
+    return 1;
+  } else {
+    return b.baseName.compareTo(a.baseName);
+  }
+}
+
+File createGeckoTxt(String packPath) {
+  File geckoTxt = File(path.join(packPath, "gecko.txt"));
+  if (!geckoTxt.existsSync()) {
+    geckoTxt.createSync();
+  }
+  return geckoTxt;
+}
+
+List<Gecko> parseGeckoTxt(String packPath, File geckoTxt) {
+  if (!geckoTxt.existsSync()) {
+    createGeckoTxt(packPath);
+    return [];
+  }
+  List<Gecko> list = [];
+
+  List<String> cheatsFiles = geckoTxt.readAsLinesSync();
+  for (String filepath in cheatsFiles) {
+    File tmp = File(path.join(packPath, "..", "..", "myCodes", filepath));
+    list.add(fileToGeckoCode(tmp));
+  }
+  return list;
+}
+
+writeGeckoTxt(List<Gecko> cheats, File geckoTxt) {
+  if (!geckoTxt.existsSync()) createGeckoTxt(path.dirname(geckoTxt.path));
+
+  String contents = "";
+  for (Gecko cheat in cheats) {
+    contents += "${cheat.baseName}\n";
+  }
+  geckoTxt.writeAsStringSync(contents, mode: FileMode.write);
 }

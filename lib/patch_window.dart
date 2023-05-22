@@ -125,7 +125,7 @@ void createFolders(String packPath) {
   if (!Directory(path.join(packPath, 'sys')).existsSync()) {
     Directory(path.join(packPath, 'sys')).createSync();
   }
-  if (!Directory(path.join(packPath, 'MyCodes')).existsSync()) {
+  if (!Directory(path.join(packPath, "..", "..", 'myCodes')).existsSync()) {
     copyGeckoAssetsToPack(packPath);
   }
   if (!Directory(path.join(packPath, 'codes')).existsSync()) {
@@ -185,13 +185,13 @@ List<String> parseBMGList(String packPath) {
 /// Otherwise, throws an exception.
 ///
 /// Note: config.txt must exist.
-String createBMGList(String packPath) {
+Future<String> createBMGList(String packPath) async {
   File trackFile = File(path.join(packPath, 'Scene', 'tracks.bmg.txt'));
-  if (trackFile.existsSync()) {
-    trackFile.deleteSync();
+  if (await trackFile.exists()) {
+    await trackFile.delete();
   }
   try {
-    Process.runSync(
+    await Process.run(
         'wctct',
         [
           'create',
@@ -223,7 +223,7 @@ String createBMGList(String packPath) {
 ///Wrapper function. This function calls multiple functions.
 ///
 ///At the end of the execution MenuSingle_E.szs will be patched with the new bmgs.
-void editMenuSingle(String workspace, String packPath) {
+Future<void> editMenuSingle(String workspace, String packPath) async {
   //copy MenuSingle_E.szs
   final File origMenuFile = File(path.join(
       path.dirname(Platform.resolvedExecutable),
@@ -232,12 +232,12 @@ void editMenuSingle(String workspace, String packPath) {
       "assets",
       "scene",
       "MenuSingle_E.szs"));
-  origMenuFile.copySync(path.join(packPath, 'Scene', 'MenuSingle_E.szs'));
-  //  wbmgt decode MenuSingle_E.szs --dest MenuSingle_E.txt
+  await origMenuFile.copy(path.join(packPath, 'Scene', 'MenuSingle_E.szs'));
   //create tracks.bmg.txt
-  final File trackBmgTxt = File(createBMGList(packPath));
+  final File trackBmgTxt = File(await createBMGList(packPath));
   try {
-    Process.runSync(
+    //  wbmgt decode MenuSingle_E.szs --dest MenuSingle_E.txt
+    await Process.run(
         'wbmgt',
         [
           'decode',
@@ -246,13 +246,8 @@ void editMenuSingle(String workspace, String packPath) {
           path.join(packPath, 'Scene', 'MenuSingle_E.txt'),
         ],
         runInShell: false);
-  } on Exception catch (_) {
-    logString(LogType.ERROR, _.toString());
-    rethrow;
-  }
-  //MenuSingle_E.szs (file) extract  -> MenuSingle_E.d (folder)
-  try {
-    Process.runSync(
+    //MenuSingle_E.szs (file) extract  -> MenuSingle_E.d (folder)
+    await Process.run(
         'wszst',
         [
           'extract',
@@ -261,19 +256,16 @@ void editMenuSingle(String workspace, String packPath) {
           path.join(packPath, 'Scene', 'MenuSingle_E.d'),
         ],
         runInShell: false);
-  } on Exception catch (_) {
-    logString(LogType.ERROR, _.toString());
-    rethrow;
-  }
-  //edit MenuSingle_E.txt with tracks.bmg.txt content
-  String contents = trackBmgTxt.readAsStringSync();
-  contents = contents.replaceAll(RegExp(r'#BMG'), '');
-  File editedMenuFile = File(path.join(packPath, 'Scene', 'MenuSingle_E.txt'));
-  editedMenuFile.writeAsStringSync(contents, mode: FileMode.append);
-  //MenuSingle_E.txt -> Common.bmg (MenuSingle_E.d/Common.bmg)
-  try {
+    //edit MenuSingle_E.txt with tracks.bmg.txt content
+    String contents = await trackBmgTxt.readAsString();
+    contents = contents.replaceAll(RegExp(r'#BMG'), '');
+    File editedMenuFile =
+        File(path.join(packPath, 'Scene', 'MenuSingle_E.txt'));
+    await editedMenuFile.writeAsString(contents, mode: FileMode.append);
+    //MenuSingle_E.txt -> Common.bmg (MenuSingle_E.d/Common.bmg)
     //  wbmgt encode MenuSingle_E.txt
-    Process.runSync(
+
+    await Process.run(
         'wbmgt',
         [
           'encode',
@@ -284,14 +276,8 @@ void editMenuSingle(String workspace, String packPath) {
               packPath, 'Scene', 'MenuSingle_E.d', 'message', 'Common.bmg'),
         ],
         runInShell: false);
-  } on Exception catch (_) {
-    logString(LogType.ERROR, _.toString());
-    rethrow;
-  }
-
-  //MenuSingle_E.szs (file) <- compact MenuSingle_E.d (folder)
-  try {
-    Process.runSync(
+    //MenuSingle_E.szs (file) <- compact MenuSingle_E.d (folder)
+    await Process.run(
         'wszst',
         [
           'create',
@@ -465,7 +451,7 @@ class _PatchWindowState extends State<PatchWindow> {
     //create gecko codes
     setState(() {
       progressText = "creating gecko codes";
-      updateGtcFiles(packPath);
+      updateGtcFiles(packPath, File(path.join(packPath, 'gecko.txt')));
     });
     await Future.delayed(const Duration(seconds: 1));
     //get list of track files
@@ -484,14 +470,16 @@ class _PatchWindowState extends State<PatchWindow> {
       return;
     }
     setState(() {
-      progressText = "patching game menu";
+      progressText = "patching icons";
     });
     //await Future.delayed(Duration(seconds: 1));
     // patch MenuSingle.szs with icons.
     await patchIcons(workspace, packPath);
-
+    setState(() {
+      progressText = "patching singleplayer menu";
+    });
     //patch MenuSingle_E.szs with the new bmgs.
-    editMenuSingle(workspace, packPath);
+    await editMenuSingle(workspace, packPath);
 
     //create Common/xxx folders
     await trackPathToCommon(workspace, packPath, trackList);
@@ -511,9 +499,9 @@ class _PatchWindowState extends State<PatchWindow> {
     });
     for (GameVersion gv in fileMap.keys) {
       //copy tracks to tmp
-      Directory(path.join(packPath, 'Race', 'Course', 'tmp')).createSync();
+      await Directory(path.join(packPath, 'Race', 'Course', 'tmp')).create();
       for (File szs in szsFileList) {
-        szs.copySync(path.join(
+        await szs.copy(path.join(
             packPath, 'Race', 'Course', 'tmp', path.basename(szs.path)));
       }
       //copy lecode-XXX.bin from assets
@@ -525,12 +513,12 @@ class _PatchWindowState extends State<PatchWindow> {
           "assets",
           "lecode_build",
           "lecode-$isoVersion.bin");
-      File(lecodePath)
-          .copySync(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
+      await File(lecodePath)
+          .copy(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
       //patch lecode with the new tracks
       try {
         //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-        Process.runSync(
+        await Process.run(
             'wlect',
             [
               'patch',
@@ -557,8 +545,8 @@ class _PatchWindowState extends State<PatchWindow> {
         //print(_);
       }
       //needed?
-      Directory(path.join(packPath, 'Race', 'Course', 'tmp'))
-          .deleteSync(recursive: true);
+      await Directory(path.join(packPath, 'Race', 'Course', 'tmp'))
+          .delete(recursive: true);
     }
 
     //move main.dol and patch it with gecko codes
@@ -569,13 +557,13 @@ class _PatchWindowState extends State<PatchWindow> {
       String letter = getLetterFromGameVersion(gv);
       File dolFile = File(path.join(path.dirname(Platform.resolvedExecutable),
           "data", "flutter_assets", "assets", "dols", "$letter.dol"));
-      if (File(path.join(packPath, 'sys', letter, "main.dol")).existsSync()) {
-        File(path.join(packPath, 'sys', letter, "main.dol")).deleteSync();
+      if (await File(path.join(packPath, 'sys', letter, "main.dol")).exists()) {
+        await File(path.join(packPath, 'sys', letter, "main.dol")).delete();
       }
-      dolFile.copySync(path.join(packPath, 'sys', letter, "main.dol"));
+      await dolFile.copy(path.join(packPath, 'sys', letter, "main.dol"));
       try {
         // wstrt patch --add-lecode main.dol
-        Process.runSync(
+        await Process.run(
             'wstrt',
             [
               'patch',
@@ -597,11 +585,10 @@ class _PatchWindowState extends State<PatchWindow> {
 
     //copy music
     setState(() {
-      progressText = "copying music files (if any)";
-
-      copyMusic(workspace, packPath);
+      progressText = "creating music files (if any)";
     });
-    await Future.delayed(const Duration(seconds: 1));
+    await copyMusic(workspace, packPath);
+    //await Future.delayed(const Duration(seconds: 1));
     setState(() {
       progressText = "editing xml file";
       completeXmlFile(packPath);
@@ -622,44 +609,28 @@ class _PatchWindowState extends State<PatchWindow> {
   }
 
   ///Reads music.txt and copies both music files in mDir from myMusic/mDir to Pack/Music
-  void copyMusic(workspace, packPath) {
+  Future<void> copyMusic(workspace, packPath) async {
     if (Platform.isLinux) {
-      giveExecPermissionToBrstmConverter();
+      await giveExecPermissionToBrstmConverter();
     }
     File musicTxt = File(path.join(packPath, "music.txt"));
     Directory musicDir = Directory(path.join(packPath, 'Music'));
-    if (musicDir.existsSync()) {
-      musicDir.deleteSync(recursive: true);
+    if (await musicDir.exists()) {
+      await musicDir.delete(recursive: true);
     }
-    musicDir.createSync();
+    await musicDir.create();
     Directory tmpDir = Directory(path.join(packPath, 'Music', 'tmp'));
-    if (!tmpDir.existsSync()) {
-      tmpDir.createSync();
+    if (!await tmpDir.exists()) {
+      await tmpDir.create();
     }
 
-    if (!musicTxt.existsSync()) return;
+    if (!await musicTxt.exists()) return;
     List<String> tracksIdHex = [];
 
-    for (String line in musicTxt.readAsLinesSync()) {
+    for (String line in await musicTxt.readAsLines()) {
       String id = line.substring(0, 3);
       tracksIdHex.add(id); //get id of track and add it
 
-      // Directory mDir =
-      //     Directory(path.join(workspace, line.substring(4))); //get folder name
-      //   File fastFile = mDir
-      //       .listSync()
-      //       .whereType<File>()
-      //       .firstWhere((element) => isFastBrstm(element.path));
-      //   File normalFile = mDir
-      //       .listSync()
-      //       .whereType<File>()
-      //       .firstWhere((element) => !isFastBrstm(element.path));
-
-      //   //copia both files
-      //   normalFile
-      //       .copySync(path.join(musicDir.path, '${line.substring(0, 3)}.brstm'));
-      //   fastFile.copySync(
-      //       path.join(musicDir.path, '${line.substring(0, 3)}_f.brstm'));
       String filepath = line.substring(4);
       if (!filepath.endsWith("brstm") && Platform.isMacOS) {
         logString(LogType.ERROR, "cannot convert audio file on MacOS");
@@ -672,7 +643,7 @@ class _PatchWindowState extends State<PatchWindow> {
           filepath = filepath.replaceFirst(fastPart, '');
         }
         File normalFile = File(path.join(workspace, 'myMusic', filepath));
-        normalFile.copySync(path.join(musicDir.path, '$id.brstm'));
+        await normalFile.copy(path.join(musicDir.path, '$id.brstm'));
 
         File fastFile = Directory(path
                 .join(path.join(workspace, 'myMusic', path.dirname(filepath))))
@@ -682,16 +653,16 @@ class _PatchWindowState extends State<PatchWindow> {
                 isFastBrstm(element.path) &&
                 element.path.contains(path.basenameWithoutExtension(filepath)));
 
-        fastFile.copySync(path.join(musicDir.path, '${id}_f.brstm'));
+        await fastFile.copy(path.join(musicDir.path, '${id}_f.brstm'));
       } else {
-        fileToBrstm(
+        await fileToBrstm(
             path.join(workspace, "myMusic", filepath),
             path.join(packPath, "Music", "tmp"),
             path.join(packPath, "Music"),
             id);
       }
     }
-    tmpDir.deleteSync(recursive: true);
+    await tmpDir.delete(recursive: true);
   }
 
   @override

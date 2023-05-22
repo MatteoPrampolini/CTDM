@@ -73,8 +73,11 @@ class _PackEditorState extends State<PackEditor> {
               2 ==
           getNumberOfIconsFromConfig(widget.packPath);
     }
-    checks[4] =
-        Directory(path.join(widget.packPath, 'MyCodes')).listSync().length > 2;
+    checks[4] = parseGeckoTxt(
+                widget.packPath, File(path.join(widget.packPath, 'gecko.txt')))
+            .length >
+        2;
+
     canPatch = checks.take(optIndex).every((element) => element == true);
     if (!checkResultVisibility && !canPatch) {
       checkResultVisibility = true;
@@ -102,8 +105,9 @@ class _PackEditorState extends State<PackEditor> {
   }
 
   void loadSettings() async {
-    if (!Directory(path.join(widget.packPath, 'MyCodes')).existsSync()) {
-      Directory(path.join(widget.packPath, 'MyCodes')).createSync();
+    if (!Directory(path.join(widget.packPath, "..", "..", 'myCodes'))
+        .existsSync()) {
+      Directory(path.join(widget.packPath, "..", "..", 'myCodes')).createSync();
       copyGeckoAssetsToPack(widget.packPath);
     }
 

@@ -36,7 +36,9 @@ class _GeckoCodesState extends State<GeckoCodes> {
 
   @override
   void initState() {
+    super.initState();
     loadCodes();
+    codes.sort(compareGecko);
 
     _nameController = TextEditingController();
     _authorController = TextEditingController();
@@ -45,8 +47,6 @@ class _GeckoCodesState extends State<GeckoCodes> {
     _usaController = TextEditingController();
     _japController = TextEditingController();
     _korController = TextEditingController();
-
-    super.initState();
   }
 
   @override
@@ -63,7 +63,9 @@ class _GeckoCodesState extends State<GeckoCodes> {
   }
 
   void loadCodes() {
-    Directory codesFolder = Directory(path.join(widget.packPath, 'MyCodes'));
+    codes = [];
+    Directory codesFolder =
+        Directory(path.join(widget.packPath, "..", "..", 'myCodes'));
     if (!codesFolder.existsSync()) {
       copyGeckoAssetsToPack(widget.packPath);
     }
@@ -81,8 +83,8 @@ class _GeckoCodesState extends State<GeckoCodes> {
   }
 
   void saveCode() {
-    File oldSelectedFile = File(
-        path.join(widget.packPath, 'MyCodes', codes[selectedCode].baseName));
+    File oldSelectedFile = File(path.join(
+        widget.packPath, "..", "..", 'myCodes', codes[selectedCode].baseName));
     if (oldSelectedFile.existsSync()) {
       oldSelectedFile.deleteSync();
     }
@@ -105,23 +107,28 @@ class _GeckoCodesState extends State<GeckoCodes> {
       'KOR': codes[selectedCode].kor.replaceAll(RegExp(r'[\n\r\s]+'), '')
     });
 
-    File selectedFile = File(
-        path.join(widget.packPath, 'MyCodes', codes[selectedCode].baseName));
+    File selectedFile = File(path.join(
+        widget.packPath, "..", "..", 'myCodes', codes[selectedCode].baseName));
 
     selectedFile.writeAsStringSync(content, mode: FileMode.write);
-    setState(() {});
+    writeGeckoTxt(codes, File(path.join(widget.packPath, 'gecko.txt')));
+
+    loadCodes();
+    codes.sort(compareGecko);
   }
 
   void deleteCode() {
-    codes.removeAt(selectedCode);
-    selectedCode = selectedCode - 1;
-    File selectedFile = File(
-        path.join(widget.packPath, 'MyCodes', codes[selectedCode].baseName));
+    File selectedFile = File(path.join(
+        widget.packPath, "..", "..", 'myCodes', codes[selectedCode].baseName));
     if (selectedFile.existsSync()) {
       selectedFile.deleteSync();
     }
-
-    setState(() {});
+    setState(() {
+      codes.removeAt(selectedCode);
+      selectedCode = selectedCode - 1;
+      loadCodes();
+      codes.sort(compareGecko);
+    });
   }
 
   @override
@@ -276,7 +283,7 @@ class _GeckoCodesState extends State<GeckoCodes> {
                                         Colors.amberAccent)),
                                 onPressed: codes[selectedCode].mandatory
                                     ? null
-                                    : () => {saveCode()},
+                                    : () => {saveCode(), setState(() {})},
                                 child: const Text(
                                   "Save",
                                   style: TextStyle(color: Colors.black87),

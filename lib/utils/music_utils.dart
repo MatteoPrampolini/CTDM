@@ -23,8 +23,8 @@ bool isFfmpegInstalled() {
 ///Takes an audio file (mp3,wav) and converts it in 2 brstm files.
 ///
 ///id is the hex id of the track associated with this music
-fileToBrstm(
-    String inputPath, String tmpFolder, String outputFolder, String id) {
+Future<void> fileToBrstm(
+    String inputPath, String tmpFolder, String outputFolder, String id) async {
   if (!Platform.isWindows && !Platform.isLinux) {
     logString(LogType.ERROR, "Cannot convert file. Use windows or linux.");
     return;
@@ -34,34 +34,37 @@ fileToBrstm(
 
   String tmpFilePathFast =
       "${path.join(tmpFolder, path.basenameWithoutExtension(inputPath))}_f.wav";
-  audioToWavAdpcm(inputPath, tmpFilePath);
-  createFastCopy(tmpFilePath, tmpFilePathFast);
-  callBrstmConverter(tmpFilePath, outputFolder, id, isFastBrstm(tmpFilePath));
-  callBrstmConverter(
+
+  await audioToWavAdpcm(inputPath, tmpFilePath);
+  await createFastCopy(tmpFilePath, tmpFilePathFast);
+  await callBrstmConverter(
+      tmpFilePath, outputFolder, id, isFastBrstm(tmpFilePath));
+  await callBrstmConverter(
       tmpFilePathFast, outputFolder, id, isFastBrstm(tmpFilePathFast));
 }
 
-giveExecPermissionToBrstmConverter(){
-    final String executablesFolder = File(path.join(
+giveExecPermissionToBrstmConverter() async {
+  final String executablesFolder = File(path.join(
           path.dirname(Platform.resolvedExecutable),
           "data",
           "flutter_assets",
           "assets",
           "executables"))
       .path;
-    try {
-    Process.runSync('chmod',['+x', path.join(executablesFolder,'brstm_converter-amd64-linux')]);
+  try {
+    await Process.run('chmod',
+        ['+x', path.join(executablesFolder, 'brstm_converter-amd64-linux')]);
     return;
-    
-
   } on Exception catch (_) {
-    logString(LogType.ERROR, "cannot give +x pemission to brstm_converter-amd64-linux");
+    logString(LogType.ERROR,
+        "cannot give +x pemission to brstm_converter-amd64-linux");
     return;
   }
 }
-audioToWavAdpcm(String inputPath, String tmpFilePath) {
+
+Future<void> audioToWavAdpcm(String inputPath, String tmpFilePath) async {
   try {
-  Process.runSync(
+    await Process.run(
         'ffmpeg',
         [
           '-y',
@@ -78,14 +81,15 @@ audioToWavAdpcm(String inputPath, String tmpFilePath) {
         runInShell: true);
     return;
   } on Exception catch (_) {
-    logString(LogType.ERROR, "cannot convert file to adpcm ${path.basename(inputPath)}");
+    logString(LogType.ERROR,
+        "cannot convert file to adpcm ${path.basename(inputPath)}");
     return;
   }
 }
 
-createFastCopy(String tmpFilePath, String tmpFilePathFast) {
+Future<void> createFastCopy(String tmpFilePath, String tmpFilePathFast) async {
   try {
-    Process.runSync(
+    Process.run(
         'ffmpeg',
         [
           '-y',
@@ -105,8 +109,8 @@ createFastCopy(String tmpFilePath, String tmpFilePathFast) {
   }
 }
 
-callBrstmConverter(
-    String filePath, String outputFolder, String id, bool isFast) {
+Future<void> callBrstmConverter(
+    String filePath, String outputFolder, String id, bool isFast) async {
   String extra = "";
   if (isFast) extra = "_f";
   final String executablesFolder = File(path.join(
@@ -118,7 +122,7 @@ callBrstmConverter(
       .path;
   if (Platform.isWindows) {
     try {
-      Process.runSync(
+      await Process.run(
           'set',
           [
             '__COMPAT_LAYER=Win8RTM',
@@ -132,20 +136,20 @@ callBrstmConverter(
 
       return;
     } on Exception catch (_) {
-      logString(
-          LogType.ERROR, "cannot convert file ${path.basename(filePath)} to brstm");
+      logString(LogType.ERROR,
+          "cannot convert file ${path.basename(filePath)} to brstm");
       return;
     }
   } else if (Platform.isLinux) {
     try {
-      Process.runSync(
+      await Process.run(
           path.join(executablesFolder, 'brstm_converter-amd64-linux'),
           [filePath, '-o', path.join(outputFolder, "$id$extra.brstm")],
           runInShell: true);
       return;
     } on Exception catch (_) {
-      logString(
-          LogType.ERROR, "cannot convert file ${path.basename(filePath)} to brstm");
+      logString(LogType.ERROR,
+          "cannot convert file ${path.basename(filePath)} to brstm");
       return;
     }
   }
