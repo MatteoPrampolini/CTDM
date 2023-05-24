@@ -155,11 +155,14 @@ List<String> getTracksFilenamesFromConfig(String packPath) {
   contents = contents.split(RegExp('N N.*WII'))[1];
 
   dirtyTrackFilenames = contents.split('\n');
+
   for (var dirty in dirtyTrackFilenames) {
     if (';'.allMatches(dirty).length == 5 && !dirty.contains((r'0x02;'))) {
+      //is track
       trackFilenames.add(dirty.split(';')[3].replaceAll(r'"', '').trimLeft());
     }
   }
+  //print(trackFilenames);
   return trackFilenames;
 }
 

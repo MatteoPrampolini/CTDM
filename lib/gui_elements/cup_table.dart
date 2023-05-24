@@ -12,7 +12,8 @@ class CupTable extends StatefulWidget {
   late int cupIndex;
   late String packPath;
   late List<Track> cup;
-  CupTable(this.cupIndex, this.cup, this.packPath, {super.key});
+  late String cupName;
+  CupTable(this.cupIndex, this.cupName, this.cup, this.packPath, {super.key});
 
   @override
   State<CupTable> createState() => _CupTableState();
@@ -20,6 +21,22 @@ class CupTable extends StatefulWidget {
 
 class _CupTableState extends State<CupTable> {
   late bool canDelete = false;
+  late TextEditingController cupNameTextField;
+  @override
+  void initState() {
+    super.initState();
+    cupNameTextField = TextEditingController();
+    cupNameTextField.text = widget.cupName != ""
+        ? widget.cupName.replaceAll(r'"', '')
+        : "Cup #${widget.cupIndex}";
+  }
+
+  @override
+  void dispose() {
+    cupNameTextField.dispose();
+    super.dispose();
+  }
+
   int i = 0;
   bool changeDeleteMode(DeleteModeUpdated n) {
     canDelete = n.shouldDelete;
@@ -45,7 +62,6 @@ class _CupTableState extends State<CupTable> {
     return val + 1;
   }
 
-  void askChildForValues() {}
   @override
   Widget build(BuildContext context) {
     i = 0;
@@ -55,6 +71,22 @@ class _CupTableState extends State<CupTable> {
         child: NotificationListener<DeleteModeUpdated>(
             onNotification: changeDeleteMode,
             child: Column(children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+                  child: SizedBox(
+                      width: 250,
+                      child: TextField(
+                        controller: cupNameTextField,
+                        onChanged: (value) => {
+                          widget.cupName = value,
+                          CupNameChangedValue(widget.cupIndex, value)
+                              .dispatch(context)
+                        },
+                      )),
+                ),
+              ),
               CupTableHeader(widget.cupIndex, widget.packPath),
               for (var track in widget.cup)
                 track.type == TrackType.base

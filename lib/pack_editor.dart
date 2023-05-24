@@ -86,7 +86,7 @@ class _PackEditorState extends State<PackEditor> {
         if (mounted) {
           //checks if widget is still active and not disposed
           //tells the widget builder to rebuild again because ui has updated
-          setState(() => {checkResultVisibility = false});
+          setState(() => checkResultVisibility = false);
         }
       });
     }

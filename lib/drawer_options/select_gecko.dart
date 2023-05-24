@@ -114,11 +114,11 @@ class _SelectGeckoState extends State<SelectGecko> {
                     Container(
                         decoration: BoxDecoration(
                             border: Border.all(), color: Colors.red),
-                        child: ListTile(
+                        child: const ListTile(
                             title: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
-                                children: const [
+                                children: [
                               Text("Name"),
                               Text("Enabled"),
                             ]))),

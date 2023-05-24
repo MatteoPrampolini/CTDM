@@ -116,9 +116,9 @@ class _PackSelectState extends State<PackSelect> {
                           isoExtracted = await Directory(
                                   path.join(workspace, 'ORIGINAL_DISC'))
                               .exists(),
-                          setState(() => {
-                                isLoading = false,
-                              }),
+                          setState(
+                            () => isLoading = false,
+                          ),
                         }
                     },
                     child: Text(

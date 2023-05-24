@@ -109,9 +109,9 @@ class _LparConfigState extends State<LparConfig> {
                                             child: const Text("yes, reset."))
                                       ],
                                       title: const Text('Are you sure?'),
-                                      content: SingleChildScrollView(
+                                      content: const SingleChildScrollView(
                                         child: ListBody(
-                                          children: const <Widget>[
+                                          children: <Widget>[
                                             Text(
                                                 'the operation is irreversible.'),
                                             Text(

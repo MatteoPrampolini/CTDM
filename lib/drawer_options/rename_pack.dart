@@ -195,10 +195,11 @@ class _RenamePackState extends State<RenamePack> {
                             child: TextField(
                                 onChanged: (newvalue) => {
                                       packNameChosen = newvalue,
-                                      setState(() => {
-                                            enableSaveBtn = checkValidTextfield(
+                                      setState(
+                                        () => enableSaveBtn =
+                                            checkValidTextfield(
                                                 packNameChosen, packIdChosen),
-                                          }),
+                                      ),
                                     },
                                 style: const TextStyle(color: Colors.redAccent),
                                 textAlign: TextAlign.center,
@@ -235,10 +236,9 @@ class _RenamePackState extends State<RenamePack> {
                               // onSubmitted: (value) => print('submitted'),
                               onChanged: (newvalue) => {
                                     packIdChosen = newvalue,
-                                    setState(() => {
-                                          enableSaveBtn = checkValidTextfield(
-                                              packNameChosen, packIdChosen)
-                                        }),
+                                    setState(() => enableSaveBtn =
+                                        checkValidTextfield(
+                                            packNameChosen, packIdChosen)),
                                   },
                               style: const TextStyle(color: Colors.redAccent),
                               textAlign: TextAlign.center,

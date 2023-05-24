@@ -25,6 +25,16 @@ class Track {
   }
 }
 
+class Cup {
+  late String cupName;
+  late List<Track> tracks;
+  Cup(this.cupName, this.tracks);
+  @override
+  String toString() {
+    return cupName;
+  }
+}
+
 class AdjustableScrollController extends ScrollController {
   AdjustableScrollController([int extraScrollSpeed = 40]) {
     super.addListener(() {
@@ -59,6 +69,12 @@ class RowChangedValue extends Notification {
   final int rowIndex;
   final Track track;
   RowChangedValue(this.track, this.cupIndex, this.rowIndex);
+}
+
+class CupNameChangedValue extends Notification {
+  final int cupIndex;
+  final String cupName;
+  CupNameChangedValue(this.cupIndex, this.cupName);
 }
 
 class AddTrackRequest extends Notification {

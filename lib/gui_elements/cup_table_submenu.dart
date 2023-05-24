@@ -126,9 +126,7 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
                         BoxDecoration(border: Border.all(color: Colors.black)),
                     child: Center(
                       child: InkWell(
-                        onTap: () => {
-                          setState(() => {expanded = !expanded})
-                        },
+                        onTap: () => {setState(() => expanded = !expanded)},
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -140,9 +138,8 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
                               ),
                             ),
                             IconButton(
-                                onPressed: () => {
-                                      setState(() => {expanded = !expanded})
-                                    },
+                                onPressed: () =>
+                                    {setState(() => expanded = !expanded)},
                                 icon: const Icon(
                                   Icons.expand_more,
                                   color: Colors.red,

@@ -12,7 +12,6 @@ Future<String> loadAsset(String assetPath) async {
 
 List<Track> splitCupListsFromText(String str) {
   List<Track> trackList = [];
-  //print(str);
   for (String line in str.split("\n")) {
     //print("line:|${line.trim()}|");
     trackList.add(parseTrackLine(line));
@@ -71,7 +70,8 @@ class TrackConfigGui extends StatefulWidget {
 }
 
 class _TrackConfigGuiState extends State<TrackConfigGui> {
-  late List<List<Track>> cups = [];
+  //late List<List<Track>> cups = [];
+  late List<Cup> cups = [];
   @override
   void initState() {
     super.initState();
@@ -92,8 +92,8 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     for (String line in musicTxt.readAsLinesSync()) {
       String hex = line.substring(0, 3);
       int i = 0;
-      for (List<Track> cup in cups) {
-        for (Track track in cup) {
+      for (Cup cup in cups) {
+        for (Track track in cup.tracks) {
           if (int.parse(hex, radix: 16) == i) {
             track.musicFolder = line.substring(4);
           }
@@ -125,22 +125,38 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   }
 
   void parseConfig(String configPath) {
-    List<List<Track>> cups = [];
+    //List<List<Track>> cups = [];
+    List<Cup> cups = [];
     File configFile = File(configPath);
     String contents = configFile.readAsStringSync();
     List<String> cupList = contents
         .split(r"N$F_WII")[1]
         .split(RegExp(r'^C.*[0-9]?', multiLine: true));
 
+    List<String> cupNames = contents
+        .split(r"N$F_WII")[1]
+        .split("\n")
+        .where((element) => element.startsWith('C'))
+        .toList();
+
     cupList.removeAt(0);
-    for (var cup in cupList) {
-      cups.add(splitCupListsFromText(cup.trim()));
+
+    int i = 0;
+    String tmpName = "";
+    for (String cupString in cupList) {
+      if (cupNames[i].length > 1) {
+        tmpName = cupNames[i].replaceRange(0, 2, '');
+      } else {
+        tmpName = "";
+      }
+      cups.add(Cup(tmpName, splitCupListsFromText(cupString.trim())));
+      i++;
     }
     this.cups = cups;
   }
 
   void deleteRow(int cupIndex, int rowIndex) {
-    cups[cupIndex - 1].removeAt(rowIndex - 1);
+    cups[cupIndex - 1].tracks.removeAt(rowIndex - 1);
     setState(() {});
   }
 
@@ -149,8 +165,13 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     return true;
   }
 
+  bool updateCupName(CupNameChangedValue n) {
+    cups[n.cupIndex - 1].cupName = r'"' + n.cupName.replaceAll(r'"', '') + r'"';
+    return true;
+  }
+
   bool rowChangedValue(RowChangedValue n) {
-    cups[n.cupIndex - 1][n.rowIndex - 1] = n.track;
+    cups[n.cupIndex - 1].tracks[n.rowIndex - 1] = n.track;
     return true;
   }
 
@@ -160,14 +181,15 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       if (n.lastHiddenIndex == null) {
         if (n.type == TrackType.base) {
           cups[n.cupIndex - 1]
+              .tracks
               .add(Track('', 11, 11, "-----ADD TRACK-----", n.type));
         }
         if (n.type == TrackType.menu) {
-          cups[n.cupIndex - 1].add(Track('', 11, 11, "temp", n.type));
+          cups[n.cupIndex - 1].tracks.add(Track('', 11, 11, "temp", n.type));
         }
       } else {
         //print("lastHidden:${n.lastHiddenIndex}");
-        cups[n.cupIndex - 1].insert(n.lastHiddenIndex!,
+        cups[n.cupIndex - 1].tracks.insert(n.lastHiddenIndex!,
             Track('', 11, 11, "-----ADD TRACK-----", n.type));
       }
     });
@@ -177,7 +199,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
   bool deleteHeaderPressed(DeleteModeUpdated n) {
     if (n.destroyCupIndex! > 0 &&
-        cups[n.destroyCupIndex! - 1].isEmpty &&
+        cups[n.destroyCupIndex! - 1].tracks.isEmpty &&
         n.shouldDelete == true) {
       cups.removeAt(n.destroyCupIndex! - 1);
     }
@@ -265,7 +287,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     String content = "";
     int i = 0;
     for (var cup in cups) {
-      for (Track track in cup) {
+      for (Track track in cup.tracks) {
         if (track.musicFolder != null && track.type != TrackType.menu) {
           content +=
               "${i.toRadixString(16).padLeft(3, '0')};${track.musicFolder!}\n";
@@ -276,7 +298,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     musicTxt.writeAsStringSync(content, mode: FileMode.write);
   }
 
-  void updateConfigContent(List<List<Track>> cups, File configTxt) {
+  void updateConfigContent(List<Cup> cups, File configTxt) {
     String content = r"""#CT-CODE
 
 [RACING-TRACK-LIST]
@@ -291,11 +313,11 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 N N$NONE | N$F_WII
 
 """;
-    int i = 1;
+
     for (var cup in cups) {
-      content = "${content}C $i\n";
-      i++;
-      for (var track in cup) {
+      content = "${content}C ${cup.cupName}\n";
+
+      for (var track in cup.tracks) {
         content = content + trackToString(track);
       }
       content = "$content\n";
@@ -349,88 +371,95 @@ N N$NONE | N$F_WII
                   onNotification: deleteHeaderPressed,
                   child: NotificationListener<AddTrackRequest>(
                     onNotification: addEmptyRow,
-                    child: NotificationListener<RowDeletePressed>(
-                      onNotification: rowAskedForDeletionNotification,
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (int i = 0; i < cups.length; i++)
-                              CupTable(i + 1, cups[i], widget.packPath),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                  left: MediaQuery.of(context).size.width / 2 -
-                                      140,
-                                  right: MediaQuery.of(context).size.width / 2 -
-                                      140,
-                                  bottom: 60),
-                              child: SizedBox(
-                                height: 60,
-                                child: Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    ElevatedButton(
-                                      child: const Text("Add cup"),
-                                      onPressed: () => {
-                                        setState(() => {cups.add([])})
-                                      },
-                                    ),
-                                    Expanded(
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 8.0),
-                                        child: ElevatedButton(
-                                          style: const ButtonStyle(
-                                              backgroundColor:
-                                                  MaterialStatePropertyAll(
-                                                      Colors.amberAccent)),
-                                          child: const Text(
-                                            "Save config",
-                                            style: TextStyle(
-                                                color: Colors.black87),
+                    child: NotificationListener<CupNameChangedValue>(
+                      onNotification: updateCupName,
+                      child: NotificationListener<RowDeletePressed>(
+                        onNotification: rowAskedForDeletionNotification,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (int i = 0; i < cups.length; i++)
+                                CupTable(i + 1, cups[i].cupName, cups[i].tracks,
+                                    widget.packPath),
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    left:
+                                        MediaQuery.of(context).size.width / 2 -
+                                            140,
+                                    right:
+                                        MediaQuery.of(context).size.width / 2 -
+                                            140,
+                                    bottom: 60),
+                                child: SizedBox(
+                                  height: 60,
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      ElevatedButton(
+                                        child: const Text("Add cup"),
+                                        onPressed: () => {
+                                          setState(() => cups.add(Cup(
+                                              'Cup #${cups.length + 1}', [])))
+                                        },
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child: ElevatedButton(
+                                            style: const ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStatePropertyAll(
+                                                        Colors.amberAccent)),
+                                            child: const Text(
+                                              "Save config",
+                                              style: TextStyle(
+                                                  color: Colors.black87),
+                                            ),
+                                            onPressed: () => {
+                                              saveConfig(),
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (context) {
+                                                    Future.delayed(
+                                                        const Duration(
+                                                            milliseconds: 500),
+                                                        () {
+                                                      Navigator.of(context)
+                                                          .pop(true);
+                                                    });
+                                                    return const AlertDialog(
+                                                      content: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Text("Saved"),
+                                                          Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    left: 8.0),
+                                                            child: Icon(
+                                                                Icons.thumb_up),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  })
+                                            },
                                           ),
-                                          onPressed: () => {
-                                            saveConfig(),
-                                            showDialog(
-                                                context: context,
-                                                builder: (context) {
-                                                  Future.delayed(
-                                                      const Duration(
-                                                          milliseconds: 500),
-                                                      () {
-                                                    Navigator.of(context)
-                                                        .pop(true);
-                                                  });
-                                                  return AlertDialog(
-                                                    content: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: const [
-                                                        Text("Saved"),
-                                                        Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  left: 8.0),
-                                                          child: Icon(
-                                                              Icons.thumb_up),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  );
-                                                })
-                                          },
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )
-                          ]),
+                              )
+                            ]),
+                      ),
                     ),
                   ),
                 ),

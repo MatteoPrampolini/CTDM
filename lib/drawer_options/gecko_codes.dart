@@ -173,7 +173,7 @@ class _GeckoCodesState extends State<GeckoCodes> {
                     title: Text(codes[i].name),
                     onTap: () => {
                       setState(
-                        () => {selectedCode = i},
+                        () => selectedCode = i,
                       )
                     },
                   ),
