@@ -13,7 +13,8 @@ import 'package:path/path.dart' as path;
 
 class PatchWindow extends StatefulWidget {
   final String packPath;
-  const PatchWindow(this.packPath, {super.key});
+  final bool? fastPatch;
+  const PatchWindow(this.packPath, {super.key, this.fastPatch});
 
   @override
   State<PatchWindow> createState() => _PatchWindowState();
@@ -110,6 +111,20 @@ List<String> checkTracklistInFolder(List<String> trackList, String trackPath) {
 
 ///Checks if all necessary folders exist inside the [packPath] and creates them if they don't.
 void createFolders(String packPath) {
+  if (!Directory(path.join(packPath, 'thp')).existsSync()) {
+    Directory(path.join(
+      packPath,
+      'thp',
+    )).createSync();
+    final File emptyVideo = File(path.join(
+        path.dirname(Platform.resolvedExecutable),
+        "data",
+        "flutter_assets",
+        "assets",
+        "misc",
+        "empty.thp"));
+    emptyVideo.copy(path.join(packPath, 'thp', 'empty.thp'));
+  }
   if (!Directory(path.join(packPath, 'Race', 'Course')).existsSync()) {
     Directory(path.join(packPath, 'Race', 'Course')).createSync();
   }
@@ -587,11 +602,22 @@ class _PatchWindowState extends State<PatchWindow> {
     }
 
     //copy music
+
     setState(() {
-      progressText = "creating music files (if any)";
+      progressText = widget.fastPatch != true
+          ? "creating music files (if any)"
+          : "skipping music (FAST PATCHING)";
     });
-    await copyMusic(workspace, packPath);
-    //await Future.delayed(const Duration(seconds: 1));
+    if (widget.fastPatch != true) {
+      await copyMusic(workspace, packPath);
+    } else {
+      Directory musicDir = Directory(path.join(packPath, 'Music'));
+      if (await musicDir.exists()) {
+        await musicDir.delete(recursive: true);
+      }
+      await Future.delayed(const Duration(seconds: 1));
+    }
+
     setState(() {
       progressText = "editing xml file";
       completeXmlFile(packPath);

@@ -45,7 +45,7 @@ void main() async {
     prefs.setString('isoVersion', 'PAL');
   }
 
-  await DesktopWindow.setMinWindowSize(const Size(1000, 1000));
+  await DesktopWindow.setMinWindowSize(const Size(1100, 1100));
   runApp(const MyApp());
 }
 

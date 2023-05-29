@@ -36,7 +36,15 @@
 		
 		<!--MY COMMONS-->
 		<!--END MY TRACKS-->
-
+		<file disc="/thp/video.thp" external="/PACKNAME//thp/empty.thp" create="true" />
+		<file disc="/thp/course/cup_select.thp" external="/PACKNAME/thp/empty.thp" create="true" />
+		<file disc="/thp/course/flower.thp" external="/PACKNAME/thp/empty.thp" create="true" />
+		<file disc="/thp/course/kinoko.thp" external="/PACKNAME/thp/empty.thp" create="true" />
+		<file disc="/thp/course/konoha.thp" external="/PACKNAME/thp/empty.thp" create="true" />
+		<file disc="/thp/course/koura.thp" external="/PACKNAME/thp/empty.thp" create="true" />
+		<file disc="/thp/course/special.thp" external="/PACKNAME/thp/empty.thp" create="true" />
+		<file disc="/thp/course/star.thp" external="/PACKNAME/thp/empty.thp" create="true" />
+		<file disc="/thp/course/thunder.thp" external="/PACKNAME/thp/empty.thp" create="true" />
 	</patch>
 
 </wiidisc>

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ctdm/custom_drawer.dart';
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/patch_window.dart';
+import 'package:ctdm/utils/excel.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:flutter/material.dart';
@@ -175,7 +176,7 @@ class _PackEditorState extends State<PackEditor> {
                     child: GridView.count(
                         crossAxisCount: 1,
                         shrinkWrap: true,
-                        childAspectRatio: 1 / 0.09,
+                        childAspectRatio: 1 / 0.086,
                         children: <Widget>[
                           for (var step in steps)
                             ListTile(
@@ -247,6 +248,48 @@ class _PackEditorState extends State<PackEditor> {
                                       }
                                   : null,
                               child: Text("PATCH!",
+                                  style: TextStyle(
+                                      color: canPatch
+                                          ? Colors.black
+                                          : Colors.white)),
+                            )),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green),
+                              onPressed: () => {exportToExcel(widget.packPath)},
+                              child: const Text("EXPORT XLSX")),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.amberAccent),
+                              onPressed: canPatch
+                                  ? () => {
+                                        wipeOldFiles(widget.packPath),
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    PatchWindow(
+                                                      widget.packPath,
+                                                      fastPatch: true,
+                                                    )))
+                                      }
+                                  : null,
+                              child: Text("NO MUSIC PATCH!",
                                   style: TextStyle(
                                       color: canPatch
                                           ? Colors.black
