@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
+import 'package:ctdm/drawer_options/multiplayer.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:ctdm/utils/music_utils.dart';
@@ -580,20 +581,41 @@ class _PatchWindowState extends State<PatchWindow> {
       }
       await dolFile.copy(path.join(packPath, 'sys', letter, "main.dol"));
       try {
-        // wstrt patch --add-lecode main.dol
-        await Process.run(
-            'wstrt',
-            [
-              'patch',
-              '--add-lecode',
-              path.join(packPath, 'sys', letter, "main.dol"),
-              '--add-section',
-              path.join(packPath, 'codes', fileMap[gv]),
-              '--overwrite',
-              '--dest',
-              path.join(packPath, 'sys', letter, "main.dol"),
-            ],
-            runInShell: false);
+        String regionContent = readRegionFile(packPath);
+        if (regionContent != "" && regionContent.split(";").last == "true") {
+          //TODO NEEDS MORE TESTING
+          await Process.run(
+              'wstrt',
+              [
+                'patch',
+                '--add-lecode',
+                '--region',
+                regionContent.split(";").first,
+                '--wiimmfi',
+                path.join(packPath, 'sys', letter, "main.dol"),
+                '--add-section',
+                path.join(packPath, 'codes', fileMap[gv]),
+                '--overwrite',
+                '--dest',
+                path.join(packPath, 'sys', letter, "main.dol"),
+              ],
+              runInShell: false);
+        } else {
+          // wstrt patch --add-lecode main.dol
+          await Process.run(
+              'wstrt',
+              [
+                'patch',
+                '--add-lecode',
+                path.join(packPath, 'sys', letter, "main.dol"),
+                '--add-section',
+                path.join(packPath, 'codes', fileMap[gv]),
+                '--overwrite',
+                '--dest',
+                path.join(packPath, 'sys', letter, "main.dol"),
+              ],
+              runInShell: false);
+        }
       } on Exception catch (_) {
         //print(_);
         logString(LogType.ERROR, _.toString());

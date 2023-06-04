@@ -403,7 +403,7 @@ N N$NONE | N$F_WII
                                         child: const Text("Add cup"),
                                         onPressed: () => {
                                           setState(() => cups.add(Cup(
-                                              'Cup #${cups.length + 1}', [])))
+                                              '"Cup #${cups.length + 1}"', [])))
                                         },
                                       ),
                                       Expanded(

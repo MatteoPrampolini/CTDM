@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:ctdm/drawer_options/cup_icons.dart';
+import 'package:ctdm/drawer_options/custom_characters.dart';
 import 'package:ctdm/drawer_options/lpar_config.dart';
+import 'package:ctdm/drawer_options/multiplayer.dart';
 import 'package:ctdm/drawer_options/rename_pack.dart';
 import 'package:ctdm/drawer_options/select_gecko.dart';
 //import 'package:ctdm/drawer_options/track_config.dart';
@@ -113,6 +115,32 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => SelectGecko(widget.packPath)));
+            //GeckoCodes(widget.packPath)));
+            // Update the state of the app.
+            // ...
+          },
+        ),
+        ListTile(
+          enabled: widget.xmlExist,
+          title: const Text('Custom characters'),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CustomCharacters(widget.packPath)));
+            //GeckoCodes(widget.packPath)));
+            // Update the state of the app.
+            // ...
+          },
+        ),
+        ListTile(
+          enabled: widget.xmlExist,
+          title: const Text('Multiplayer'),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Multiplayer(widget.packPath)));
             //GeckoCodes(widget.packPath)));
             // Update the state of the app.
             // ...

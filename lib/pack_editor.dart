@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 
 import 'package:path/path.dart' as path;
 
+import 'drawer_options/multiplayer.dart';
+
 class PackEditor extends StatefulWidget {
   final String packPath;
   const PackEditor(this.packPath, {super.key});
@@ -55,8 +57,8 @@ class _PackEditorState extends State<PackEditor> {
     'lpar config',
     'cup icons',
     'gecko codes',
-    'custom character',
-    'online patch'
+    'custom characters',
+    'multiplayer'
   ];
   void checkEverything() async {
     checks[0] = !widget.packPath.contains('tmp_pack_');
@@ -78,6 +80,11 @@ class _PackEditorState extends State<PackEditor> {
                 widget.packPath, File(path.join(widget.packPath, 'gecko.txt')))
             .length >
         2;
+
+    String regionContent = readRegionFile(widget.packPath);
+    if (regionContent != "") {
+      checks[6] = regionContent.split(";").last == "true";
+    }
 
     canPatch = checks.take(optIndex).every((element) => element == true);
     if (!checkResultVisibility && !canPatch) {
