@@ -15,6 +15,7 @@
 		<file disc="/rel/lecode-USA.bin" external="/PACKNAME/rel/lecode-USA.bin" create="true" />
 		<file disc="/rel/lecode-JAP.bin" external="/PACKNAME/rel/lecode-JAP.bin" create="true" />
 		<file disc="/rel/lecode-KOR.bin" external="/PACKNAME/rel/lecode-KOR.bin" create="true" />
+		<file disc="/rel/StaticR.rel" external="/PACKNAME/static/{$__region}/StaticR.rel" />
 		<folder external="/PACKNAME/sys/{$__region}" recursive="false" />
 		<folder external="/PACKNAME/sys/{$__region}" disc="/" />
 		<folder external="/PACKNAME/codes" disc="/codes" create="true"/>

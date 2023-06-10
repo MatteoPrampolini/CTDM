@@ -222,7 +222,9 @@ List<Gecko> parseGeckoTxt(String packPath, File geckoTxt) {
   List<String> cheatsFiles = geckoTxt.readAsLinesSync();
   for (String filepath in cheatsFiles) {
     File tmp = File(path.join(packPath, "..", "..", "myCodes", filepath));
-    list.add(fileToGeckoCode(tmp));
+    if (tmp.existsSync()) {
+      list.add(fileToGeckoCode(tmp));
+    }
   }
   return list;
 }

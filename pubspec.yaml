@@ -110,6 +110,11 @@ flutter:
       - assets/dols/K.dol
       - assets/dols/P.dol
       - assets/dols/E.dol
+      - assets/statics/
+      - assets/statics/J.rel
+      - assets/statics/K.rel
+      - assets/statics/P.rel
+      - assets/statics/E.rel
       - assets/gecko/
       - assets/gecko/trackMusicExpander.json
       - assets/gecko/automaticBrsarPatching.json

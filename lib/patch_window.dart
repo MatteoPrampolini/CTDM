@@ -135,6 +135,9 @@ void createFolders(String packPath) {
   if (!Directory(path.join(packPath, 'rel')).existsSync()) {
     Directory(path.join(packPath, 'rel')).createSync();
   }
+  if (!Directory(path.join(packPath, 'static')).existsSync()) {
+    Directory(path.join(packPath, 'static')).createSync();
+  }
   if (!Directory(path.join(packPath, 'Scene')).existsSync()) {
     Directory(path.join(packPath, 'Scene')).createSync();
   }
@@ -151,6 +154,9 @@ void createFolders(String packPath) {
   for (var file in Directory(path.join(packPath, 'rel')).listSync()) {
     file.deleteSync(recursive: true);
   }
+  for (var file in Directory(path.join(packPath, 'static')).listSync()) {
+    file.deleteSync(recursive: true);
+  }
   for (var file in Directory(path.join(packPath, 'sys')).listSync()) {
     file.deleteSync(recursive: true);
   }
@@ -158,6 +164,10 @@ void createFolders(String packPath) {
   Directory(path.join(packPath, 'sys', 'E')).createSync();
   Directory(path.join(packPath, 'sys', 'J')).createSync();
   Directory(path.join(packPath, 'sys', 'K')).createSync();
+  Directory(path.join(packPath, 'static', 'P')).createSync();
+  Directory(path.join(packPath, 'static', 'E')).createSync();
+  Directory(path.join(packPath, 'static', 'J')).createSync();
+  Directory(path.join(packPath, 'static', 'K')).createSync();
 }
 
 /// Parses config.txt located in [packPath] and generates a list of all filenames without extension.
@@ -579,7 +589,21 @@ class _PatchWindowState extends State<PatchWindow> {
       if (await File(path.join(packPath, 'sys', letter, "main.dol")).exists()) {
         await File(path.join(packPath, 'sys', letter, "main.dol")).delete();
       }
+      File staticFile = File(path.join(
+          path.dirname(Platform.resolvedExecutable),
+          "data",
+          "flutter_assets",
+          "assets",
+          "statics",
+          "$letter.rel"));
+      if (await File(path.join(packPath, 'static', letter, "StaticR.rel"))
+          .exists()) {
+        await File(path.join(packPath, 'static', letter, "StaticR.rel"))
+            .delete();
+      }
       await dolFile.copy(path.join(packPath, 'sys', letter, "main.dol"));
+      await staticFile
+          .copy(path.join(packPath, 'static', letter, "StaticR.rel"));
       try {
         String regionContent = readRegionFile(packPath);
         if (regionContent != "" && regionContent.split(";").last == "true") {
@@ -598,6 +622,20 @@ class _PatchWindowState extends State<PatchWindow> {
                 '--overwrite',
                 '--dest',
                 path.join(packPath, 'sys', letter, "main.dol"),
+              ],
+              runInShell: false);
+
+          await Process.run(
+              'wstrt',
+              [
+                'patch',
+                '--region',
+                regionContent.split(";").first,
+                '--wiimmfi',
+                path.join(packPath, 'static', letter, "StaticR.rel"),
+                '--overwrite',
+                '--dest',
+                path.join(packPath, 'static', letter, "StaticR.rel"),
               ],
               runInShell: false);
         } else {

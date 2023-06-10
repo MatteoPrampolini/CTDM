@@ -149,11 +149,18 @@ class _PackEditorState extends State<PackEditor> {
     super.dispose();
   }
 
+  bool checkEverythingAfterNotification(DrawerOnExit n) {
+    checkEverything();
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: CustomDrawer(widget.packPath, xmlExist),
+      drawer: NotificationListener<DrawerOnExit>(
+          onNotification: checkEverythingAfterNotification,
+          child: CustomDrawer(widget.packPath, xmlExist)),
       appBar: AppBar(
         iconTheme: IconThemeData(
           color: Colors.red.shade700, //change your color here

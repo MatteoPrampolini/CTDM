@@ -69,7 +69,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => RenamePack(widget.packPath)));
+                    builder: (context) => RenamePack(widget.packPath))).then(
+                (value) => setState(() => DrawerOnExit().dispatch(context)));
           },
         ),
         ListTile(
@@ -79,7 +80,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => TrackConfigGui(widget.packPath)));
+                    builder: (context) =>
+                        TrackConfigGui(widget.packPath))).then(
+                (value) => setState(() => DrawerOnExit().dispatch(context)));
           },
         ),
         ListTile(
@@ -89,7 +92,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => LparConfig(widget.packPath)));
+                    builder: (context) => LparConfig(widget.packPath))).then(
+                (value) => setState(() => DrawerOnExit().dispatch(context)));
             // Update the state of the app.
             // ...
           },
@@ -101,7 +105,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => CupIconsWindow(widget.packPath)));
+                    builder: (context) =>
+                        CupIconsWindow(widget.packPath))).then(
+                (value) => setState(() => DrawerOnExit().dispatch(context)));
+
             // Update the state of the app.
             // ...
           },
@@ -114,7 +121,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SelectGecko(widget.packPath)));
+                    builder: (context) => SelectGecko(widget.packPath))).then(
+                (value) => setState(() => DrawerOnExit().dispatch(context)));
+
             //GeckoCodes(widget.packPath)));
             // Update the state of the app.
             // ...
@@ -127,7 +136,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => CustomCharacters(widget.packPath)));
+                    builder: (context) =>
+                        CustomCharacters(widget.packPath))).then(
+                (value) => setState(() => DrawerOnExit().dispatch(context)));
             //GeckoCodes(widget.packPath)));
             // Update the state of the app.
             // ...
@@ -140,7 +151,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => Multiplayer(widget.packPath)));
+                    builder: (context) => Multiplayer(widget.packPath))).then(
+                (value) => setState(() => DrawerOnExit().dispatch(context)));
+
             //GeckoCodes(widget.packPath)));
             // Update the state of the app.
             // ...
@@ -149,4 +162,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
       ],
     ));
   }
+}
+
+class DrawerOnExit extends Notification {
+  DrawerOnExit();
 }

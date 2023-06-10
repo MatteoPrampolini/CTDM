@@ -114,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => const Settings()),
-                        )
+                        ).then((value) => {loadSettings(), setState(() => {})})
                       },
                   icon: const Icon(
                     Icons.settings_applications,
