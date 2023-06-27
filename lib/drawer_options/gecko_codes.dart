@@ -123,12 +123,20 @@ class _GeckoCodesState extends State<GeckoCodes> {
     if (selectedFile.existsSync()) {
       selectedFile.deleteSync();
     }
+    deleteLineFromFile(codes[selectedCode].baseName,
+        File(path.join(widget.packPath, 'gecko.txt')));
     setState(() {
       codes.removeAt(selectedCode);
       selectedCode = selectedCode - 1;
       loadCodes();
       codes.sort(compareGecko);
     });
+  }
+
+  deleteLineFromFile(String match, File file) {
+    List<String> contents = file.readAsLinesSync();
+    contents.removeWhere((element) => element.contains(match));
+    file.writeAsStringSync(contents.join('\n'));
   }
 
   @override

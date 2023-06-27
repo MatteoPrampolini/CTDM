@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:ctdm/utils/log_utils.dart';
 import 'package:path/path.dart' as path;
 
 class Gecko {
@@ -105,7 +106,12 @@ void updateGtcFiles(String packPath, File geckoTxt) {
   List<String> cheatsFiles = geckoTxt.readAsLinesSync();
   for (String filepath in cheatsFiles) {
     File tmp = File(path.join(packPath, "..", "..", "myCodes", filepath));
-    myGeckoFiles.add(tmp);
+    if (tmp.existsSync()) {
+      myGeckoFiles.add(tmp);
+    } else {
+      logString(LogType.ERROR,
+          "gecko.txt contains cheat: $filepath, but json file was not found in myCodes folder.");
+    }
   }
 
   //write header
@@ -223,6 +229,7 @@ List<Gecko> parseGeckoTxt(String packPath, File geckoTxt) {
   for (String filepath in cheatsFiles) {
     File tmp = File(path.join(packPath, "..", "..", "myCodes", filepath));
     if (tmp.existsSync()) {
+      //print(tmp);
       list.add(fileToGeckoCode(tmp));
     }
   }

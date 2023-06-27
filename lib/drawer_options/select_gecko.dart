@@ -47,19 +47,15 @@ class SelectGecko extends StatefulWidget {
 }
 
 class _SelectGeckoState extends State<SelectGecko> {
+  late List<Gecko> geckoListAll = getCodes();
+  // ignore: prefer_final_fields
+  late List<bool> _selectedOptions;
+
   @override
   void initState() {
     super.initState();
     copyGeckoAssetsToPack(widget.packPath);
   }
-
-  late List<Gecko> geckoListAll = getCodes();
-  // ignore: prefer_final_fields
-  late List<bool> _selectedOptions;
-  // late List<bool> _selectedOptions = generateSelectedOptions(
-  //     geckoListAll,
-  //     parseGeckoTxt(
-  //         widget.packPath, File(path.join(widget.packPath, 'gecko.txt'))));
 
   List<Gecko> getCodes() {
     List<Gecko> tmp = List.from(
@@ -75,6 +71,13 @@ class _SelectGeckoState extends State<SelectGecko> {
   Widget build(BuildContext context) {
     //print(geckoList);
     geckoListAll = getCodes();
+    late List<String> cheatsNameFromConfig =
+        File(path.join(widget.packPath, 'gecko.txt')).readAsLinesSync();
+    List<String> missingGecko = cheatsNameFromConfig
+        .where((element) =>
+            geckoListAll.map((e) => e.baseName).contains(element) == false)
+        .toList();
+
     _selectedOptions = generateSelectedOptions(
         geckoListAll,
         parseGeckoTxt(
@@ -168,6 +171,23 @@ class _SelectGeckoState extends State<SelectGecko> {
                         );
                       },
                     ),
+                    ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemCount: missingGecko.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(),
+                              color: Colors.black,
+                            ),
+                            child: ListTile(
+                              title: Text(
+                                  '"${missingGecko[index]}" is in gecko.txt, but file was deleted.'),
+                              trailing: const Icon(Icons.error),
+                            ),
+                          );
+                        }),
                     Padding(
                       padding: const EdgeInsets.only(top: 40.0),
                       child: Align(
@@ -181,7 +201,7 @@ class _SelectGeckoState extends State<SelectGecko> {
                                             GeckoCodes(widget.packPath)))
                                 .then((value) => setState(() => {}))),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),

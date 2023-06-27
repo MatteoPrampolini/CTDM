@@ -31,7 +31,7 @@ TEXT: TODO
 
 ## Features
 
-- Multi-ISO patching [PAL, NTCS-U, NTCS-J, NTCS-K]
+- Multi-ISO patching [PAL, NTSC-U, NTSC-J, NTSC-K]
 - Graphical Interface
 - Cross platform [Windows, Linux, MacOS]
 - Handles custom tracks, gecko code, LE-CODE, custom music and icons.
