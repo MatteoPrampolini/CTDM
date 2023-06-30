@@ -53,7 +53,7 @@ Prampo2810#7088
 
 - Built-in audio file to brstm converter [:heavy_check_mark:]
 
-- Enable online play via Wiimmfi [ ]
+- Enable online play via Wiimmfi [:heavy_check_mark:]
 
 - Custom characters GUI [ ]
 
