@@ -23,7 +23,7 @@ class PatchWindow extends StatefulWidget {
 
 enum PatchingStatus { aborted, running, completed }
 
-void completeXmlFile(String packPath) {
+void completeXmlFile(String packPath, bool isOnline, String regionId) {
   String packName = path.basename(packPath);
   File xmlFile = File(path.join(packPath, "$packName.xml"));
   String contents = xmlFile.readAsStringSync();
@@ -58,9 +58,11 @@ void completeXmlFile(String packPath) {
   //         '<file external="/$packName/Music/${path.basename(music.path)}" disc="/sound/strm/${path.basename(music.path)}" create="true"/>\n\t\t';
   //   }
   // }
+  String onlinePart =
+      isOnline ? '<memory offset="0x800017C4" value="$regionId"/>' : '';
   contents = contents.replaceFirst(
       RegExp(r'<!--MY COMMONS-->.*<!--END MY TRACKS-->', dotAll: true),
-      '<!--MY COMMONS-->\n\t\t$commonBigString$courseBigString<!--END MY TRACKS-->\t\t');
+      '<!--MY COMMONS-->\n\t\t$commonBigString$courseBigString$onlinePart<!--END MY TRACKS-->\t\t');
   //print(contents);
   //print(commonBigString);
   //print(courseBigString);
@@ -582,6 +584,9 @@ class _PatchWindowState extends State<PatchWindow> {
     setState(() {
       progressText = "patching main.dol";
     });
+    String regionContent = readRegionFile(packPath);
+    bool isOnline = regionContent.split(";").last == "true";
+    String regionId = regionContent.split(";").first;
     for (GameVersion gv in fileMap.keys) {
       String letter = getLetterFromGameVersion(gv);
       File dolFile = File(path.join(path.dirname(Platform.resolvedExecutable),
@@ -604,17 +609,17 @@ class _PatchWindowState extends State<PatchWindow> {
       await dolFile.copy(path.join(packPath, 'sys', letter, "main.dol"));
       await staticFile
           .copy(path.join(packPath, 'static', letter, "StaticR.rel"));
+
       try {
         String regionContent = readRegionFile(packPath);
-        if (regionContent != "" && regionContent.split(";").last == "true") {
-          //TODO NEEDS MORE TESTING
+        if (regionContent != "" && isOnline) {
           await Process.run(
               'wstrt',
               [
                 'patch',
                 '--add-lecode',
                 '--region',
-                regionContent.split(";").first,
+                regionId,
                 '--wiimmfi',
                 path.join(packPath, 'sys', letter, "main.dol"),
                 '--add-section',
@@ -680,7 +685,7 @@ class _PatchWindowState extends State<PatchWindow> {
 
     setState(() {
       progressText = "editing xml file";
-      completeXmlFile(packPath);
+      completeXmlFile(packPath, isOnline, regionId);
     });
     setState(() {
       progressText = "deleting tmp files";

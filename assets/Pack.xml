@@ -46,6 +46,7 @@
 		<file disc="/thp/course/special.thp" external="/PACKNAME/thp/empty.thp" create="true" />
 		<file disc="/thp/course/star.thp" external="/PACKNAME/thp/empty.thp" create="true" />
 		<file disc="/thp/course/thunder.thp" external="/PACKNAME/thp/empty.thp" create="true" />
+
 	</patch>
 
 </wiidisc>
