@@ -91,8 +91,10 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
                                     onPressed: () => {
                                           //print("sono row: ${widget.rowIndex}"),
                                           //setState(() => {canDelete = !canDelete}),
-                                          RowDeletePressed(widget.cupIndex,
-                                                  widget.rowIndex)
+                                          RowDeletePressed(
+                                                  widget.cupIndex,
+                                                  widget.rowIndex,
+                                                  widget.tracks.length)
                                               .dispatch(context)
                                         },
                                     icon: const Icon(Icons.delete_forever,
@@ -164,8 +166,8 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
                           widget.packPath, widget.canDeleteTracks),
                     ElevatedButton(
                       child: const Text("Add hidden"),
-                      onPressed: () => AddTrackRequest(
-                              TrackType.hidden, widget.cupIndex, i)
+                      onPressed: () => AddTrackRequest(TrackType.hidden,
+                              widget.cupIndex, widget.rowIndex)
                           .dispatch(
                               context), //aggiungere parametro che indica last index delle hidden track, credo sia semplicemente i?
                     ),

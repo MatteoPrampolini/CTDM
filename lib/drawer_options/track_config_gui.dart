@@ -161,7 +161,15 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   }
 
   bool rowAskedForDeletionNotification(RowDeletePressed n) {
-    deleteRow(n.cupIndex, n.rowIndex);
+    int nChildren = 1;
+    if (n.nChildren == null) {
+      nChildren = 1;
+    } else {
+      nChildren = n.nChildren!;
+    }
+    for (int i = 0; i < nChildren; i++) {
+      deleteRow(n.cupIndex, n.rowIndex);
+    }
     return true;
   }
 
@@ -177,8 +185,9 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
   bool addEmptyRow(AddTrackRequest n) {
     //print(n.cupIndex);
+
     setState(() {
-      if (n.lastHiddenIndex == null) {
+      if (n.submenuIndex == null) {
         if (n.type == TrackType.base) {
           cups[n.cupIndex - 1]
               .tracks
@@ -187,10 +196,13 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         if (n.type == TrackType.menu) {
           cups[n.cupIndex - 1].tracks.add(Track('', 11, 11, "temp", n.type));
         }
+        //if i have to insert a basetrack inside a specific submenu
       } else {
         //print("lastHidden:${n.lastHiddenIndex}");
-        cups[n.cupIndex - 1].tracks.insert(n.lastHiddenIndex!,
-            Track('', 11, 11, "-----ADD TRACK-----", n.type));
+        int rightPlace = n.submenuIndex!;
+
+        cups[n.cupIndex - 1].tracks.insert(
+            rightPlace, Track('', 11, 11, "-----ADD TRACK-----", n.type));
       }
     });
     //print(cups[n.cupIndex - 1]);

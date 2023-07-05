@@ -104,6 +104,9 @@ class _MyHomePageState extends State<MyHomePage> {
             backgroundColor: Colors.amber,
             actionsIconTheme:
                 IconThemeData(color: Colors.red.shade700, size: 40),
+            iconTheme: IconThemeData(
+              color: Colors.red.shade700, //change your color here
+            ),
             actions: [
               IconButton(
                   iconSize: 40,

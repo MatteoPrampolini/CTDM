@@ -55,7 +55,8 @@ class AdjustableScrollController extends ScrollController {
 class RowDeletePressed extends Notification {
   final int cupIndex;
   final int rowIndex;
-  RowDeletePressed(this.cupIndex, this.rowIndex);
+  final int? nChildren;
+  RowDeletePressed(this.cupIndex, this.rowIndex, [this.nChildren]);
 }
 
 class DeleteModeUpdated extends Notification {
@@ -80,6 +81,6 @@ class CupNameChangedValue extends Notification {
 class AddTrackRequest extends Notification {
   final TrackType type;
   final int cupIndex;
-  final int? lastHiddenIndex;
-  AddTrackRequest(this.type, this.cupIndex, [this.lastHiddenIndex]);
+  final int? submenuIndex;
+  AddTrackRequest(this.type, this.cupIndex, [this.submenuIndex]);
 }

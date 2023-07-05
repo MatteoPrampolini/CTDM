@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:ctdm/main.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,6 +39,18 @@ class _SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (workspace != "" && Directory(workspace).existsSync()) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MyHomePage()));
+              } else {
+                Navigator.pop(context);
+              }
+            }),
         iconTheme: IconThemeData(
           color: Colors.red.shade700, //change your color here
         ),

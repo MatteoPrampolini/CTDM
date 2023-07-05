@@ -14,7 +14,6 @@ class CupTableRow extends StatefulWidget {
   late int cupIndex = -1;
   late int rowIndex = -1;
   late bool canDeleteTracks = false;
-
   late MaterialAccentColor color = Colors.purpleAccent;
   CupTableRow(this.track, this.cupIndex, this.rowIndex, this.packPath,
       this.canDeleteTracks,

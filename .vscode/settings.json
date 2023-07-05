@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "${workspaceFolder}/linux"
+    "cmake.sourceDirectory": "${workspaceFolder}/linux",
+    "editor.fontFamily": "Cousine Nerd, 'Courier New', monospace"
 }

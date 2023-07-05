@@ -76,11 +76,12 @@ class _PackEditorState extends State<PackEditor> {
               2 ==
           getNumberOfIconsFromConfig(widget.packPath);
     }
-    checks[4] = parseGeckoTxt(
-                widget.packPath, File(path.join(widget.packPath, 'gecko.txt')))
-            .length >
-        2;
-
+    if (!widget.packPath.contains("tmp_pack_")) {
+      checks[4] = parseGeckoTxt(widget.packPath,
+                  File(path.join(widget.packPath, 'gecko.txt')))
+              .length >
+          2;
+    }
     String regionContent = readRegionFile(widget.packPath);
     if (regionContent != "") {
       checks[6] = regionContent.split(";").last == "true";

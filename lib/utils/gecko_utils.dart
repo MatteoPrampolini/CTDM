@@ -214,6 +214,8 @@ File createGeckoTxt(String packPath) {
   File geckoTxt = File(path.join(packPath, "gecko.txt"));
   if (!geckoTxt.existsSync()) {
     geckoTxt.createSync();
+    String contents = "automaticBrsarPatching.json\ntrackMusicExpander.json\n";
+    geckoTxt.writeAsStringSync(contents);
   }
   return geckoTxt;
 }
