@@ -140,12 +140,13 @@ void updateGtcFiles(String packPath, File geckoTxt) {
 
 Gecko fileToGeckoCode(File jsonFile) {
   var json = jsonDecode(jsonFile.readAsStringSync());
+
   return Gecko(
       json['name'],
       json['PAL'],
       json['USA'],
-      json['JAP'],
       json['KOR'],
+      json['JAP'],
       json['author'],
       json['desc'],
       path.basename(jsonFile.path),
