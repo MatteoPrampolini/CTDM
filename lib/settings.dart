@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ctdm/main.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -66,6 +67,13 @@ class _SettingsState extends State<Settings> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const Align(
+                alignment: Alignment.topRight,
+                child: Text(
+                  "CTDM v0.8",
+                  style: TextStyle(color: Colors.white54, fontSize: 20),
+                ),
+              ),
               SizedBox(
                   width: 200,
                   height: 50,
@@ -94,39 +102,80 @@ class _SettingsState extends State<Settings> {
                   ),
                 ),
               ),
-              // DropdownButton(
-              //   value: isoVersionNumber,
-              //   itemHeight: 50,
-              //   items: const [
-              //     DropdownMenuItem(
-              //       value: 0,
-              //       child: Text("PAL"),
-              //     ),
-              //     DropdownMenuItem(
-              //       value: 1,
-              //       child: Text("USA"),
-              //     ),
-              //     DropdownMenuItem(
-              //       value: 2,
-              //       child: Text("JAP"),
-              //     ),
-              //     DropdownMenuItem(
-              //       value: 3,
-              //       child: Text("KOR"),
-              //     )
-              //   ],
-              //   onChanged: (value) {
-              //     isoVersionNumber = value!;
-
-              //     prefs.setString(
-              //         'isoVersion', VERSIONS.elementAt(isoVersionNumber));
-              //     setState(() {});
-              //   },
-              // )
+              const FractionallySizedBox(widthFactor: 0.65, child: Divider()),
+              Card(
+                child: FractionallySizedBox(
+                  widthFactor: 0.65,
+                  child: Column(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8.0),
+                        child: Text("Need help?"),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0, bottom: 20),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              SocialCard(Icons.discord, "Discord",
+                                  Uri.parse("https://discord.gg/DFTnFMreAT")),
+                              SocialCard(
+                                  Icons.code,
+                                  "Github",
+                                  Uri.parse(
+                                      "https://github.com/MatteoPrampolini/CTDM")),
+                              SocialCard(
+                                  Icons.menu_book,
+                                  "Tockdom wiki",
+                                  Uri.parse(
+                                      "https://wiki.tockdom.com/wiki/Custom_Track_Distribution_Maker"))
+                            ]),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+// ignore: must_be_immutable
+class SocialCard extends StatelessWidget {
+  IconData icon;
+  String text;
+  Uri url;
+  SocialCard(this.icon, this.text, this.url, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 100,
+      height: 120,
+      child: Column(
+        children: [
+          IconButton(
+            iconSize: 80,
+            color: Colors.amberAccent,
+            onPressed: () => _launchUrl(url),
+            icon: Icon(
+              icon,
+              //size: 80,
+              //color: Colors.amberAccent,
+            ),
+          ),
+          Text(text)
+        ],
+      ),
+    );
+  }
+}
+
+Future<void> _launchUrl(Uri url) async {
+  if (!await launchUrl(url)) {
+    throw Exception('Could not launch $url');
   }
 }
