@@ -35,7 +35,9 @@ class _LparConfigState extends State<LparConfig> {
   }
 
   void resetLparFile(String packPath) {
-    File(path.join(packPath, 'lpar.txt')).deleteSync();
+    if (File(path.join(packPath, 'lpar.txt')).existsSync()) {
+      File(path.join(packPath, 'lpar.txt')).deleteSync();
+    }
     createLparFile(packPath);
   }
 

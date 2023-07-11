@@ -114,13 +114,13 @@ class _MultiplayerState extends State<Multiplayer> {
                                           ),
                                           decoration:
                                               const InputDecoration.collapsed(
-                                                  hintText: '0000'),
+                                                  hintText: '000000'),
                                           controller: regionTextField,
                                           keyboardType: TextInputType.number,
                                           inputFormatters: <TextInputFormatter>[
                                             FilteringTextInputFormatter
                                                 .digitsOnly,
-                                            LengthLimitingTextInputFormatter(4),
+                                            LengthLimitingTextInputFormatter(6),
                                             FilteringTextInputFormatter.allow(
                                                 RegExp(r'[0-9]'))
                                           ]),

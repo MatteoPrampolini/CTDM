@@ -10,8 +10,6 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:merge_images/merge_images.dart';
 import 'package:path/path.dart' as path;
 
-//import 'package:image/image.dart' as img;
-
 class PatchWindow extends StatefulWidget {
   final String packPath;
   final bool? fastPatch;
@@ -221,25 +219,25 @@ Future<String> createBMGList(String packPath) async {
   if (await trackFile.exists()) {
     await trackFile.delete();
   }
-  try {
-    await Process.run(
-        'wctct',
-        [
-          'create',
-          'bmg',
-          '--le-code',
-          '--long',
-          path.join(packPath, 'config.txt'),
-          '--dest',
-          path.join(packPath, 'Scene', 'tracks.bmg.txt')
-        ],
-        runInShell: false);
-    return path.join(packPath, 'Scene', 'tracks.bmg.txt');
-    //return parseBMGList(packPath);
-  } on Exception catch (_) {
-    logString(LogType.ERROR, _.toString());
-    rethrow;
-  }
+  // try {
+  await Process.run(
+      'wctct',
+      [
+        'create',
+        'bmg',
+        '--le-code',
+        '--long',
+        path.join(packPath, 'config.txt'),
+        '--dest',
+        path.join(packPath, 'Scene', 'tracks.bmg.txt')
+      ],
+      runInShell: false);
+  return path.join(packPath, 'Scene', 'tracks.bmg.txt');
+  //return parseBMGList(packPath);
+  // } on Exception catch (_) {
+  //   logString(LogType.ERROR, _.toString());
+  //   rethrow;
+  // }
   // String contents = trackFile.readAsStringSync();
   // int begin = contents.lastIndexOf(RegExp(r'703e'));
   // int end = contents.lastIndexOf(RegExp(r'7041'));
@@ -266,62 +264,60 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
   await origMenuFile.copy(path.join(packPath, 'Scene', 'MenuSingle_E.szs'));
   //create tracks.bmg.txt
   final File trackBmgTxt = File(await createBMGList(packPath));
-  try {
-    //  wbmgt decode MenuSingle_E.szs --dest MenuSingle_E.txt
-    await Process.run(
-        'wbmgt',
-        [
-          'decode',
-          path.join(packPath, 'Scene', 'MenuSingle_E.szs'),
-          '--dest',
-          path.join(packPath, 'Scene', 'MenuSingle_E.txt'),
-        ],
-        runInShell: false);
-    //MenuSingle_E.szs (file) extract  -> MenuSingle_E.d (folder)
-    await Process.run(
-        'wszst',
-        [
-          'extract',
-          path.join(packPath, 'Scene', 'MenuSingle_E.szs'),
-          '--dest',
-          path.join(packPath, 'Scene', 'MenuSingle_E.d'),
-        ],
-        runInShell: false);
-    //edit MenuSingle_E.txt with tracks.bmg.txt content
-    String contents = await trackBmgTxt.readAsString();
-    contents = contents.replaceAll(RegExp(r'#BMG'), '');
-    File editedMenuFile =
-        File(path.join(packPath, 'Scene', 'MenuSingle_E.txt'));
-    await editedMenuFile.writeAsString(contents, mode: FileMode.append);
-    //MenuSingle_E.txt -> Common.bmg (MenuSingle_E.d/Common.bmg)
-    //  wbmgt encode MenuSingle_E.txt
+  // try {
+  //  wbmgt decode MenuSingle_E.szs --dest MenuSingle_E.txt
+  await Process.run(
+      'wbmgt',
+      [
+        'decode',
+        path.join(packPath, 'Scene', 'MenuSingle_E.szs'),
+        '--dest',
+        path.join(packPath, 'Scene', 'MenuSingle_E.txt'),
+      ],
+      runInShell: false);
+  //MenuSingle_E.szs (file) extract  -> MenuSingle_E.d (folder)
+  await Process.run(
+      'wszst',
+      [
+        'extract',
+        path.join(packPath, 'Scene', 'MenuSingle_E.szs'),
+        '--dest',
+        path.join(packPath, 'Scene', 'MenuSingle_E.d'),
+      ],
+      runInShell: false);
+  //edit MenuSingle_E.txt with tracks.bmg.txt content
+  String contents = await trackBmgTxt.readAsString();
+  contents = contents.replaceAll(RegExp(r'#BMG'), '');
+  File editedMenuFile = File(path.join(packPath, 'Scene', 'MenuSingle_E.txt'));
+  await editedMenuFile.writeAsString(contents, mode: FileMode.append);
+  //MenuSingle_E.txt -> Common.bmg (MenuSingle_E.d/Common.bmg)
+  //  wbmgt encode MenuSingle_E.txt
 
-    await Process.run(
-        'wbmgt',
-        [
-          'encode',
-          path.join(packPath, 'Scene', 'MenuSingle_E.txt'),
-          '--overwrite',
-          '--dest',
-          path.join(
-              packPath, 'Scene', 'MenuSingle_E.d', 'message', 'Common.bmg'),
-        ],
-        runInShell: false);
-    //MenuSingle_E.szs (file) <- compact MenuSingle_E.d (folder)
-    await Process.run(
-        'wszst',
-        [
-          'create',
-          path.join(packPath, 'Scene', 'MenuSingle_E.d'),
-          '--overwrite',
-          '--dest',
-          path.join(packPath, 'Scene', 'MenuSingle_E.szs'),
-        ],
-        runInShell: false);
-  } on Exception catch (_) {
-    logString(LogType.ERROR, _.toString());
-    rethrow;
-  }
+  await Process.run(
+      'wbmgt',
+      [
+        'encode',
+        path.join(packPath, 'Scene', 'MenuSingle_E.txt'),
+        '--overwrite',
+        '--dest',
+        path.join(packPath, 'Scene', 'MenuSingle_E.d', 'message', 'Common.bmg'),
+      ],
+      runInShell: false);
+  //MenuSingle_E.szs (file) <- compact MenuSingle_E.d (folder)
+  await Process.run(
+      'wszst',
+      [
+        'create',
+        path.join(packPath, 'Scene', 'MenuSingle_E.d'),
+        '--overwrite',
+        '--dest',
+        path.join(packPath, 'Scene', 'MenuSingle_E.szs'),
+      ],
+      runInShell: false);
+  // } on Exception catch (_) {
+  //   logString(LogType.ERROR, _.toString());
+  //   rethrow;
+  // }
 }
 
 ///Returns the display name for a given filename from the config.txt
@@ -396,27 +392,27 @@ Future<void> patchIcons(String workspace, String packPath) async {
     return;
   }
   //wszst patch MenuSingle.szs --le-menu --cup-icons ./icons.tpl --links
-  try {
-    await createBigImage(iconDir, nCups).then((value) => {
-          Process.runSync(
-              'wszst',
-              [
-                'patch',
-                '--le-menu',
-                '--cup-icons',
-                path.join(packPath, 'Icons', 'merged.png'),
-                '--links',
-                path.join(packPath, 'Scene', 'MenuSingle.szs'),
-                '--overwrite',
-                '--dest',
-                path.join(packPath, 'Scene', 'MenuSingle.szs'),
-              ],
-              runInShell: false),
-        });
-  } on Exception catch (_) {
-    logString(LogType.ERROR, _.toString());
-    rethrow;
-  }
+  // try {
+  await createBigImage(iconDir, nCups).then((value) => {
+        Process.runSync(
+            'wszst',
+            [
+              'patch',
+              '--le-menu',
+              '--cup-icons',
+              path.join(packPath, 'Icons', 'merged.png'),
+              '--links',
+              path.join(packPath, 'Scene', 'MenuSingle.szs'),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'Scene', 'MenuSingle.szs'),
+            ],
+            runInShell: false),
+      });
+  // } on Exception catch (_) {
+  //   logString(LogType.ERROR, _.toString());
+  //   rethrow;
+  // }
 }
 
 /// Comparator function that sorts files in numerical order,
@@ -428,7 +424,7 @@ int compareAlphamagically(File a, File b) {
     return a.path.compareTo(b.path);
   }
   if (int.tryParse(path.basenameWithoutExtension(a.path)) == null &&
-      int.tryParse(path.basenameWithoutExtension(b.path)) != null) {
+      num.tryParse(path.basenameWithoutExtension(b.path)) != null) {
     return -1;
   }
   if (int.tryParse(path.basenameWithoutExtension(a.path)) != null &&
@@ -469,15 +465,24 @@ class _PatchWindowState extends State<PatchWindow> {
   String progressText = 'creating folder';
   @override
   void initState() {
+    // try {
     patch(widget.packPath);
+    // } on Exception catch (_) {
+    //   logString(LogType.ERROR, _.toString());
+    //   rethrow;
+    // }
     super.initState();
   }
 
   void patch(String packPath) async {
     patchStatus = PatchingStatus.running;
     //create folders
+    //// try {
     createFolders(packPath);
-
+    // } on Exception catch (_) {
+    //   logString(LogType.ERROR, _.toString());
+    //   rethrow;
+    // }
     String workspace = path.dirname(path.dirname(packPath));
     //create gecko codes
     setState(() {
@@ -547,34 +552,34 @@ class _PatchWindowState extends State<PatchWindow> {
       await File(lecodePath)
           .copy(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
       //patch lecode with the new tracks
-      try {
-        //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-        await Process.run(
-            'wlect',
-            [
-              'patch',
-              path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
-              '--overwrite',
-              '--dest',
-              path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
-              '--le-define',
-              path.join(packPath, 'config.txt'),
-              '--track-dir',
-              path.join(packPath, 'Race', 'Course'),
-              '--copy-tracks',
-              path.join(packPath, 'Race', 'Course', 'tmp'),
-              '--lpar', //added
-              path.join(packPath, 'lpar.txt'), //added
-            ],
-            runInShell: false);
-        // final _ = await process.exitCode;
-        //stdout.addStream(process.stdout);
-        //stderr.addStream(process.stderr);
-      } on Exception catch (_) {
-        logString(LogType.ERROR, _.toString());
-        rethrow;
-        //print(_);
-      }
+      // // try {
+      //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
+      await Process.run(
+          'wlect',
+          [
+            'patch',
+            path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
+            '--overwrite',
+            '--dest',
+            path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
+            '--le-define',
+            path.join(packPath, 'config.txt'),
+            '--track-dir',
+            path.join(packPath, 'Race', 'Course'),
+            '--copy-tracks',
+            path.join(packPath, 'Race', 'Course', 'tmp'),
+            '--lpar', //added
+            path.join(packPath, 'lpar.txt'), //added
+          ],
+          runInShell: false);
+      // final _ = await process.exitCode;
+      //stdout.addStream(process.stdout);
+      //stderr.addStream(process.stderr);
+      // } on Exception catch (_) {
+      //   logString(LogType.ERROR, _.toString());
+      //   rethrow;
+      //   //print(_);
+      // }
       //needed?
       await Directory(path.join(packPath, 'Race', 'Course', 'tmp'))
           .delete(recursive: true);
@@ -610,60 +615,60 @@ class _PatchWindowState extends State<PatchWindow> {
       await staticFile
           .copy(path.join(packPath, 'static', letter, "StaticR.rel"));
 
-      try {
-        String regionContent = readRegionFile(packPath);
-        if (regionContent != "" && isOnline) {
-          await Process.run(
-              'wstrt',
-              [
-                'patch',
-                '--add-lecode',
-                '--region',
-                regionId,
-                '--wiimmfi',
-                path.join(packPath, 'sys', letter, "main.dol"),
-                '--add-section',
-                path.join(packPath, 'codes', fileMap[gv]),
-                '--overwrite',
-                '--dest',
-                path.join(packPath, 'sys', letter, "main.dol"),
-              ],
-              runInShell: false);
+      // // try {
+      String regionContent = readRegionFile(packPath);
+      if (regionContent != "" && isOnline) {
+        await Process.run(
+            'wstrt',
+            [
+              'patch',
+              '--add-lecode',
+              '--region',
+              regionId,
+              '--wiimmfi',
+              path.join(packPath, 'sys', letter, "main.dol"),
+              '--add-section',
+              path.join(packPath, 'codes', fileMap[gv]),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'sys', letter, "main.dol"),
+            ],
+            runInShell: false);
 
-          await Process.run(
-              'wstrt',
-              [
-                'patch',
-                '--region',
-                regionContent.split(";").first,
-                '--wiimmfi',
-                path.join(packPath, 'static', letter, "StaticR.rel"),
-                '--overwrite',
-                '--dest',
-                path.join(packPath, 'static', letter, "StaticR.rel"),
-              ],
-              runInShell: false);
-        } else {
-          // wstrt patch --add-lecode main.dol
-          await Process.run(
-              'wstrt',
-              [
-                'patch',
-                '--add-lecode',
-                path.join(packPath, 'sys', letter, "main.dol"),
-                '--add-section',
-                path.join(packPath, 'codes', fileMap[gv]),
-                '--overwrite',
-                '--dest',
-                path.join(packPath, 'sys', letter, "main.dol"),
-              ],
-              runInShell: false);
-        }
-      } on Exception catch (_) {
-        //print(_);
-        logString(LogType.ERROR, _.toString());
-        rethrow;
+        await Process.run(
+            'wstrt',
+            [
+              'patch',
+              '--region',
+              regionContent.split(";").first,
+              '--wiimmfi',
+              path.join(packPath, 'static', letter, "StaticR.rel"),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'static', letter, "StaticR.rel"),
+            ],
+            runInShell: false);
+      } else {
+        // wstrt patch --add-lecode main.dol
+        await Process.run(
+            'wstrt',
+            [
+              'patch',
+              '--add-lecode',
+              path.join(packPath, 'sys', letter, "main.dol"),
+              '--add-section',
+              path.join(packPath, 'codes', fileMap[gv]),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'sys', letter, "main.dol"),
+            ],
+            runInShell: false);
       }
+      // } on Exception catch (_) {
+      //   //print(_);
+      //   logString(LogType.ERROR, _.toString());
+      //   rethrow;
+      // }
     }
 
     //copy music

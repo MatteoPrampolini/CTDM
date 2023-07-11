@@ -15,9 +15,9 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   late SharedPreferences prefs;
   late String workspace = "";
-  late int isoVersionNumber = 1;
+  //late int isoVersionNumber = 1;
   // ignore: non_constant_identifier_names
-  final List<String> VERSIONS = ["PAL", "USA", "JAP", "KOR"];
+  //final List<String> VERSIONS = ["PAL", "USA", "JAP", "KOR"];
 
   @override
   void initState() {
@@ -29,10 +29,9 @@ class _SettingsState extends State<Settings> {
     prefs = await SharedPreferences.getInstance();
     setState(() {
       workspace = prefs.getString('workspace')!;
-      String? tmp = prefs.getString('isoVersion');
-      if (tmp != null) {
-        isoVersionNumber = VERSIONS.indexOf(tmp);
-      }
+      // String? tmp = prefs.getString('isoVersion');
+      // if (tmp != null) {
+      //isoVersionNumber = VERSIONS.indexOf(tmp);
     });
   }
 
@@ -85,7 +84,7 @@ class _SettingsState extends State<Settings> {
                       })
                     },
                     child: const Text(
-                      "wipe",
+                      "reset",
                       style: TextStyle(fontSize: 30),
                     ),
                   )),

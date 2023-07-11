@@ -9,11 +9,16 @@ Future<File> createLogFile() async {
   String? workspace = prefs.getString('workspace');
   // ignore: prefer_conditional_assignment
   if (workspace == null) {
-    workspace = "workspaceError";
+    workspace = "workspaceError##################";
   }
+  if (!Directory(workspace).existsSync()) {
+    throw Exception("workspace doesn't exist");
+  }
+
   File logFile = File(path.join(workspace, logfile));
 
-  if (workspace != "workspaceError" && !logFile.existsSync()) {
+  if (workspace != "workspaceError##################" &&
+      !logFile.existsSync()) {
     logFile.createSync();
   }
   return logFile;
@@ -23,7 +28,12 @@ Future<File> createLogFile() async {
 enum LogType { ERROR, INFO }
 
 Future<void> logString(LogType type, String text) async {
-  File logFile = await createLogFile();
+  File logFile;
+  try {
+    logFile = await createLogFile();
+  } on Exception catch (_) {
+    return;
+  }
   if (!logFile.existsSync()) return; //error creating logfile
   DateTime now = DateTime.now();
   DateTime date =

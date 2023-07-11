@@ -1,3 +1,4 @@
+import 'package:ctdm/utils/log_utils.dart';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +21,7 @@ void main() async {
   } on Exception catch (_) {
     //print("Wiimms' szs toolset not found");
     prefs.setBool('szs', false);
+    logString(LogType.ERROR, "Wiimms' szs toolset not found");
   }
   try {
     final _ = await Process.start('wit', [], runInShell: false);
@@ -27,6 +29,7 @@ void main() async {
     prefs.setBool('wit', true);
   } on Exception catch (_) {
     //print("Wiimms' wit toolset not found");
+    logString(LogType.ERROR, "Wiimms' wit toolset not found");
     prefs.setBool('wit', false);
   }
   try {
@@ -35,18 +38,24 @@ void main() async {
     prefs.setBool('ffmpeg', true);
   } on Exception catch (_) {
     //print("Wiimms' wit toolset not found");
+    logString(LogType.ERROR, "Wiimms' wit toolset not found");
     prefs.setBool('ffmpeg', false);
   }
 
   if (!prefs.containsKey('workspace')) {
     prefs.setString('workspace', '');
   }
-  if (!prefs.containsKey('isoVersion')) {
-    prefs.setString('isoVersion', 'PAL');
-  }
+  // if (!prefs.containsKey('isoVersion')) {
+  //   prefs.setString('isoVersion', 'PAL');
+  // }
 
   await DesktopWindow.setMinWindowSize(const Size(1100, 1100));
-  runApp(const MyApp());
+  try {
+    runApp(const MyApp());
+  } on Exception catch (_) {
+    logString(LogType.ERROR, _.toString());
+    rethrow;
+  }
 }
 
 class MyApp extends StatelessWidget {
