@@ -123,6 +123,13 @@ class _PackEditorState extends State<PackEditor> {
     if (!await Directory(path.join(widget.packPath, 'Scene')).exists()) {
       Directory(path.join(widget.packPath, 'Scene')).create();
     }
+    if (!await Directory(path.join(widget.packPath, 'Scene', 'UI')).exists()) {
+      Directory(path.join(widget.packPath, 'Scene', 'UI')).create();
+    }
+    // if (!await Directory(path.join(widget.packPath, 'Scene', 'Model'))
+    //     .exists()) {
+    //   Directory(path.join(widget.packPath, 'Scene', 'UI', 'Model')).create();
+    // }
     if (!await Directory(path.join(widget.packPath, 'sys')).exists()) {
       Directory(path.join(widget.packPath, 'sys')).create();
       if (!await Directory(path.join(widget.packPath, 'sys')).exists()) {

@@ -31,7 +31,7 @@ class _MultiplayerState extends State<Multiplayer> {
     regionTextField = TextEditingController();
     String regionFileContent = readRegionFile(widget.packPath);
     if (regionFileContent == "") {
-      regionTextField.text = "0000";
+      regionTextField.text = "000000";
       onlineEnabled = false;
     } else {
       regionTextField.text = regionFileContent.split(';').first;

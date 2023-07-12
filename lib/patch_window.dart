@@ -35,13 +35,13 @@ void completeXmlFile(String packPath, bool isOnline, String regionId) {
         '<folder external="/$packName/Race/Common/${path.basename(common.path)}" disc="/Race/Common/${path.basename(common.path)}/" create="true"/>\n\t\t';
   }
   //2 course dir
-  Directory courseDir = Directory(path.join(packPath, 'Race', 'Course'));
-  String courseBigString = "";
-  List<File> courseDirList = courseDir.listSync().whereType<File>().toList();
-  for (File course in courseDirList) {
-    courseBigString +=
-        '<file external="/$packName/Race/Course/${path.basename(course.path)}" disc="/Race/Course/${path.basename(course.path)}" create="true"/>\n\t\t';
-  }
+  //Directory courseDir = Directory(path.join(packPath, 'Race', 'Course'));
+  // String courseBigString = "";
+  // List<File> courseDirList = courseDir.listSync().whereType<File>().toList();
+  // for (File course in courseDirList) {
+  //   courseBigString +=
+  //       '<file external="/$packName/Race/Course/${path.basename(course.path)}" disc="/Race/Course/${path.basename(course.path)}" create="true"/>\n\t\t';
+  // }
   // //3 music dir
   // Directory musicDir = Directory(path.join(packPath, 'Music'));
   // String musicBigString = "";
@@ -60,7 +60,7 @@ void completeXmlFile(String packPath, bool isOnline, String regionId) {
       isOnline ? '<memory offset="0x800017C4" value="$regionId"/>' : '';
   contents = contents.replaceFirst(
       RegExp(r'<!--MY COMMONS-->.*<!--END MY TRACKS-->', dotAll: true),
-      '<!--MY COMMONS-->\n\t\t$commonBigString$courseBigString$onlinePart<!--END MY TRACKS-->\t\t');
+      '<!--MY COMMONS-->\n\t\t$commonBigString$onlinePart<!--END MY TRACKS-->\t\t');
   //print(contents);
   //print(commonBigString);
   //print(courseBigString);
@@ -141,6 +141,9 @@ void createFolders(String packPath) {
   if (!Directory(path.join(packPath, 'Scene')).existsSync()) {
     Directory(path.join(packPath, 'Scene')).createSync();
   }
+  if (!Directory(path.join(packPath, 'Scene', 'UI')).existsSync()) {
+    Directory(path.join(packPath, 'Scene', 'UI')).createSync();
+  }
   if (!Directory(path.join(packPath, 'sys')).existsSync()) {
     Directory(path.join(packPath, 'sys')).createSync();
   }
@@ -215,7 +218,7 @@ List<String> parseBMGList(String packPath) {
 ///
 /// Note: config.txt must exist.
 Future<String> createBMGList(String packPath) async {
-  File trackFile = File(path.join(packPath, 'Scene', 'tracks.bmg.txt'));
+  File trackFile = File(path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt'));
   if (await trackFile.exists()) {
     await trackFile.delete();
   }
@@ -229,10 +232,10 @@ Future<String> createBMGList(String packPath) async {
         '--long',
         path.join(packPath, 'config.txt'),
         '--dest',
-        path.join(packPath, 'Scene', 'tracks.bmg.txt')
+        path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt')
       ],
       runInShell: false);
-  return path.join(packPath, 'Scene', 'tracks.bmg.txt');
+  return path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt');
   //return parseBMGList(packPath);
   // } on Exception catch (_) {
   //   logString(LogType.ERROR, _.toString());
@@ -261,7 +264,8 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
       "assets",
       "scene",
       "MenuSingle_E.szs"));
-  await origMenuFile.copy(path.join(packPath, 'Scene', 'MenuSingle_E.szs'));
+  await origMenuFile
+      .copy(path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.szs'));
   //create tracks.bmg.txt
   final File trackBmgTxt = File(await createBMGList(packPath));
   // try {
@@ -270,9 +274,9 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
       'wbmgt',
       [
         'decode',
-        path.join(packPath, 'Scene', 'MenuSingle_E.szs'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.szs'),
         '--dest',
-        path.join(packPath, 'Scene', 'MenuSingle_E.txt'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.txt'),
       ],
       runInShell: false);
   //MenuSingle_E.szs (file) extract  -> MenuSingle_E.d (folder)
@@ -280,15 +284,16 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
       'wszst',
       [
         'extract',
-        path.join(packPath, 'Scene', 'MenuSingle_E.szs'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.szs'),
         '--dest',
-        path.join(packPath, 'Scene', 'MenuSingle_E.d'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.d'),
       ],
       runInShell: false);
   //edit MenuSingle_E.txt with tracks.bmg.txt content
   String contents = await trackBmgTxt.readAsString();
   contents = contents.replaceAll(RegExp(r'#BMG'), '');
-  File editedMenuFile = File(path.join(packPath, 'Scene', 'MenuSingle_E.txt'));
+  File editedMenuFile =
+      File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.txt'));
   await editedMenuFile.writeAsString(contents, mode: FileMode.append);
   //MenuSingle_E.txt -> Common.bmg (MenuSingle_E.d/Common.bmg)
   //  wbmgt encode MenuSingle_E.txt
@@ -297,10 +302,11 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
       'wbmgt',
       [
         'encode',
-        path.join(packPath, 'Scene', 'MenuSingle_E.txt'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.txt'),
         '--overwrite',
         '--dest',
-        path.join(packPath, 'Scene', 'MenuSingle_E.d', 'message', 'Common.bmg'),
+        path.join(
+            packPath, 'Scene', 'UI', 'MenuSingle_E.d', 'message', 'Common.bmg'),
       ],
       runInShell: false);
   //MenuSingle_E.szs (file) <- compact MenuSingle_E.d (folder)
@@ -308,10 +314,10 @@ Future<void> editMenuSingle(String workspace, String packPath) async {
       'wszst',
       [
         'create',
-        path.join(packPath, 'Scene', 'MenuSingle_E.d'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.d'),
         '--overwrite',
         '--dest',
-        path.join(packPath, 'Scene', 'MenuSingle_E.szs'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.szs'),
       ],
       runInShell: false);
   // } on Exception catch (_) {
@@ -348,7 +354,8 @@ Future<void> trackPathToCommon(
   List tracksWithCommon = getTracksDirWithCommons(
       path.join(workspace, 'myTracks'), configTrackList);
   List<String> lines =
-      File(path.join(packPath, 'Scene', 'tracks.bmg.txt')).readAsLinesSync();
+      File(path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt'))
+          .readAsLinesSync();
 
   int i = 0;
   //for each track basename with commons
@@ -383,7 +390,7 @@ Future<void> patchIcons(String workspace, String packPath) async {
   final File origSingle = File(path.join(
       workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle.szs'));
 
-  origSingle.copySync(path.join(packPath, 'Scene', 'MenuSingle.szs'));
+  origSingle.copySync(path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs'));
 
   Directory iconDir = Directory(path.join(packPath, 'Icons'));
   int nCups = getNumberOfIconsFromConfig(packPath);
@@ -402,10 +409,10 @@ Future<void> patchIcons(String workspace, String packPath) async {
               '--cup-icons',
               path.join(packPath, 'Icons', 'merged.png'),
               '--links',
-              path.join(packPath, 'Scene', 'MenuSingle.szs'),
+              path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs'),
               '--overwrite',
               '--dest',
-              path.join(packPath, 'Scene', 'MenuSingle.szs'),
+              path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs'),
             ],
             runInShell: false),
       });
@@ -697,10 +704,10 @@ class _PatchWindowState extends State<PatchWindow> {
     });
     await Future.delayed(const Duration(seconds: 1));
     File(path.join(packPath, 'Icons', 'merged.png')).delete();
-    Directory(path.join(packPath, 'Scene', 'MenuSingle_E.d'))
+    Directory(path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.d'))
         .deleteSync(recursive: true);
-    File(path.join(packPath, 'Scene', 'MenuSingle_E.txt')).delete();
-    File(path.join(packPath, 'Scene', 'tracks.bmg.txt')).delete();
+    File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.txt')).delete();
+    File(path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt')).delete();
     setState(() {
       patchStatus = PatchingStatus.completed;
       logString(LogType.INFO, "patch completed");

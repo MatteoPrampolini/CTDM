@@ -9,8 +9,105 @@ import 'package:file_picker/file_picker.dart';
 
 import 'pack_select.dart';
 import 'settings.dart';
+import 'dart:async';
 
-void main() async {
+void main() {
+  runZonedGuarded(() => _main(), (error, stackTrace) {
+    logString(LogType.ERROR, error.toString());
+    logString(LogType.ERROR, stackTrace.toString());
+    runApp(NotifyErrorWidget(
+      error: error.toString(),
+      stacktrace: stackTrace.toString(),
+    ));
+  });
+}
+
+class NotifyErrorWidget extends StatelessWidget {
+  final String error;
+  final String stacktrace;
+
+  const NotifyErrorWidget(
+      {super.key, required this.error, required this.stacktrace});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'CTDM',
+      theme: ThemeData(
+          primarySwatch: Colors.red,
+          brightness: Brightness.dark,
+          fontFamily: 'MarioMaker'),
+      home: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.amber,
+          actionsIconTheme: IconThemeData(color: Colors.red.shade700, size: 40),
+          iconTheme: IconThemeData(
+            color: Colors.red.shade700, //change your color here
+          ),
+          title: const Text('CTDM error page',
+              style: TextStyle(color: Colors.black87)),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.only(top: 30.0),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Column(
+              children: [
+                Text(
+                  "AN ERROR OCCURRED",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      backgroundColor: Colors.red,
+                      fontSize:
+                          Theme.of(context).textTheme.headlineMedium?.fontSize),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    error,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.fontSize),
+                  ),
+                ),
+                Container(
+                  height: 300,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.redAccent)),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Text(
+                          stacktrace,
+                          style: const TextStyle(color: Colors.white54),
+                        )),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 20.0),
+                  child: Text(
+                    'Check the "log.log" file inside your workspace.',
+                    style: TextStyle(
+                      color: Colors.amberAccent,
+                      fontSize: 20,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
@@ -50,12 +147,8 @@ void main() async {
   // }
 
   await DesktopWindow.setMinWindowSize(const Size(1100, 1100));
-  try {
-    runApp(const MyApp());
-  } on Exception catch (_) {
-    logString(LogType.ERROR, _.toString());
-    rethrow;
-  }
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

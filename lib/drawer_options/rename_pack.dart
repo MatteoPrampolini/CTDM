@@ -6,8 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
 
-void saveAndRenamePack(
-    String packPath, String chosenName, String chosenId, String isoVersion) {
+void saveAndRenamePack(String packPath, String chosenName, String chosenId) {
   //1: se non esiste xml-> copia Pack.xml
   //2 crivo contenuto xml
   //3: rinomina xml
@@ -29,7 +28,7 @@ void saveAndRenamePack(
       .whereType<File>()
       .where((element) => element.path.endsWith('.xml'));
   File xmlFile = xmlList.first;
-  replaceParamsInXml(xmlFile, chosenName, chosenId, isoVersion);
+  replaceParamsInXml(xmlFile, chosenName, chosenId);
   //3
   xmlFile.renameSync(path.join(packPath, "$chosenName.xml"));
   //4
@@ -50,8 +49,7 @@ void createXmlFile(String xmlPath) {
   //xmlFile.copySync(xmlPath);
 }
 
-void replaceParamsInXml(
-    File xmlFile, String chosenName, String chosenId, String isoVersion) {
+void replaceParamsInXml(File xmlFile, String chosenName, String chosenId) {
   String contents = xmlFile.readAsStringSync();
   // final versionRegex = RegExp(r'-[A-Z]+.bin');
 
@@ -95,12 +93,12 @@ class _RenamePackState extends State<RenamePack> {
   late TextEditingController _chosenNameController;
   late TextEditingController _chosenIdController;
   late SharedPreferences prefs;
-  late String isoVersion = 'PAL';
+  //late String isoVersion = 'PAL';
 
-  void getIsoVersion() async {
-    prefs = await SharedPreferences.getInstance();
-    isoVersion = prefs.getString('isoVersion')!;
-  }
+  // // void getIsoVersion() async {
+  //   prefs = await SharedPreferences.getInstance();
+  //   isoVersion = prefs.getString('isoVersion')!;
+  // }
 
   @override
   void initState() {
@@ -139,7 +137,7 @@ class _RenamePackState extends State<RenamePack> {
       ),
     );
 
-    getIsoVersion();
+    //getIsoVersion();
   }
 
   @override
@@ -268,7 +266,7 @@ class _RenamePackState extends State<RenamePack> {
                         onPressed: enableSaveBtn
                             ? () => {
                                   saveAndRenamePack(widget.packPath,
-                                      packNameChosen, packIdChosen, isoVersion),
+                                      packNameChosen, packIdChosen),
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
