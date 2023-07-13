@@ -6,7 +6,6 @@ A modding tool for Mario Kart Wii. Multi-ISO modpack maker for [Riivolution](htt
 
 
 
-
 ## Acknowledgements
 
  - [Wiimms SZS Toolset](https://szs.wiimm.de/)
@@ -22,10 +21,12 @@ A modding tool for Mario Kart Wii. Multi-ISO modpack maker for [Riivolution](htt
 
 
 ## Documentation
-VIDEO: https://youtu.be/LMqPX21z4cE
+* [Tockdom Wiki](https://wiki.tockdom.com/wiki/Custom_Track_Distribution_Maker)
+* Wiki Tutorial Page WIP
+* [Video Guide](https://youtu.be/LMqPX21z4cE)
 
 
-TEXT: TODO
+Tutorial: ON THE MAKING
 
 
 
@@ -37,8 +38,7 @@ TEXT: TODO
 - Handles custom tracks, gecko code, LE-CODE, custom music and icons.
 ## Feedback
 
-If you have any feedback, please reach out to me on Discord 
-Prampo2810#7088
+If you have any feedback or problem, you can reach me out on [Discord](https://discord.gg/DFTnFMreAT)
 
 ## Screenshots
 
