@@ -26,10 +26,6 @@ A modding tool for Mario Kart Wii. Multi-ISO modpack maker for [Riivolution](htt
 * [Video Guide](https://youtu.be/LMqPX21z4cE)
 
 
-Tutorial: ON THE MAKING
-
-
-
 ## Features
 
 - Multi-ISO patching [PAL, NTSC-U, NTSC-J, NTSC-K]
