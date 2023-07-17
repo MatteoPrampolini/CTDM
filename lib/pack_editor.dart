@@ -68,6 +68,10 @@ class _PackEditorState extends State<PackEditor> {
     if (!Directory(path.join(widget.packPath, 'Icons')).existsSync()) {
       checks[3] = false;
     } else {
+      if (File(path.join(widget.packPath, 'Icons', 'merged.png'))
+          .existsSync()) {
+        File(path.join(widget.packPath, 'Icons', 'merged.png')).deleteSync();
+      }
       checks[3] = Directory(path.join(widget.packPath, 'Icons'))
                   .listSync()
                   .whereType<File>()

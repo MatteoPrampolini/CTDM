@@ -743,12 +743,24 @@ class _PatchWindowState extends State<PatchWindow> {
         return;
       }
       if (filepath.endsWith(".brstm")) {
+        //if brstm file pair
         if (isFastBrstm(filepath)) {
+          //if fast path
           //if fast file-> normal_file
-          final fastPart = RegExp(r'_[f,F]');
-          filepath = filepath.replaceFirst(fastPart, '');
+          // final fastPart = RegExp(r'_[f,F]');
+          // filepath = filepath.replaceFirst(fastPart, '');
         }
-        File normalFile = File(path.join(workspace, 'myMusic', filepath));
+        // File normalFile = File(path.join(workspace, 'myMusic', filepath));
+        // await normalFile.copy(path.join(musicDir.path, '$id.brstm'));
+        File normalFile = Directory(path
+                .join(path.join(workspace, 'myMusic', path.dirname(filepath))))
+            .listSync()
+            .whereType<File>()
+            .firstWhere((element) =>
+                !isFastBrstm(element.path) &&
+                element.path.contains(path
+                    .basename(filepath)
+                    .replaceFirst(RegExp(r'_?[a-zA-Z]?\.brstm$'), '')));
         await normalFile.copy(path.join(musicDir.path, '$id.brstm'));
 
         File fastFile = Directory(path
@@ -757,7 +769,9 @@ class _PatchWindowState extends State<PatchWindow> {
             .whereType<File>()
             .firstWhere((element) =>
                 isFastBrstm(element.path) &&
-                element.path.contains(path.basenameWithoutExtension(filepath)));
+                element.path.contains(path
+                    .basename(filepath)
+                    .replaceFirst(RegExp(r'_?[a-zA-Z]?\.brstm$'), '')));
 
         await fastFile.copy(path.join(musicDir.path, '${id}_f.brstm'));
       } else {

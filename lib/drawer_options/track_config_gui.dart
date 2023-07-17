@@ -99,6 +99,11 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
           }
 
           i++;
+          if (i == 32) {
+            //if in bmg.txt index>32, we are in battle slot. which is not good.
+            // skip to custom tracks slots at 044 and beyond.
+            i = 68;
+          }
         }
       }
     }
@@ -305,6 +310,11 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
               "${i.toRadixString(16).padLeft(3, '0')};${track.musicFolder!}\n";
         }
         i++;
+        if (i == 32) {
+          //if in bmg.txt index>32, we are in battle slot. which is not good.
+          // skip to custom tracks slots at 044 and beyond.
+          i = 68;
+        }
       }
     }
     musicTxt.writeAsStringSync(content, mode: FileMode.write);
