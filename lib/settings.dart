@@ -69,7 +69,7 @@ class _SettingsState extends State<Settings> {
               const Align(
                 alignment: Alignment.topRight,
                 child: Text(
-                  "CTDM v0.9",
+                  "CTDM v0.8.1",
                   style: TextStyle(color: Colors.white54, fontSize: 20),
                 ),
               ),

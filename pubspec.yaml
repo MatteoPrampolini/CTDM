@@ -46,7 +46,6 @@ dependencies:
   image: ^4.0.15
   merge_images: ^2.0.0-nullsafety
   excel: ^2.1.0
-  tuple: ^2.0.2
 
 dev_dependencies:
   flutter_lints: ^2.0.1
