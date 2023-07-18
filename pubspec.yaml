@@ -118,13 +118,25 @@ flutter:
       - assets/gecko/
       - assets/gecko/trackMusicExpander.json
       - assets/gecko/automaticBrsarPatching.json
-      - assets/scene/
-      - assets/scene/MenuSingle_E.szs
       - assets/executables/
       - assets/executables/brstm_converter-amd64-linux
       - assets/executables/brstm_converter-amd64-windows.exe
       - assets/misc/
       - assets/misc/empty.thp
+      - assets/scene/
+      - assets/scene/Award_U.szs
+      - assets/scene/Channel_U.szs
+      - assets/scene/Event_U.szs
+      - assets/scene/Globe_U.szs
+      - assets/scene/MenuMulti_U.szs
+      - assets/scene/MenuOther_U.szs
+      - assets/scene/MenuSingle_U.szs
+      - assets/scene/Present_U.szs
+      - assets/scene/Race_U.szs
+      - assets/scene/Title_U.szs
+
+
+
       
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

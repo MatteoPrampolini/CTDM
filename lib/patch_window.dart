@@ -254,70 +254,70 @@ Future<String> createBMGList(String packPath) async {
 
 ///Wrapper function. This function calls multiple functions.
 ///
-///At the end of the execution MenuSingle_E.szs will be patched with the new bmgs.
+///At the end of the execution MenuSingle_U.szs will be patched with the new bmgs.
 Future<void> editMenuSingle(String workspace, String packPath) async {
-  //copy MenuSingle_E.szs
+  //copy MenuSingle_U.szs
   final File origMenuFile = File(path.join(
       path.dirname(Platform.resolvedExecutable),
       "data",
       "flutter_assets",
       "assets",
       "scene",
-      "MenuSingle_E.szs"));
+      "MenuSingle_U.szs"));
   await origMenuFile
-      .copy(path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.szs'));
+      .copy(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'));
   //create tracks.bmg.txt
   final File trackBmgTxt = File(await createBMGList(packPath));
   // try {
-  //  wbmgt decode MenuSingle_E.szs --dest MenuSingle_E.txt
+  //  wbmgt decode MenuSingle_U.szs --dest MenuSingle_U.txt
   await Process.run(
       'wbmgt',
       [
         'decode',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.szs'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
         '--dest',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.txt'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'),
       ],
       runInShell: false);
-  //MenuSingle_E.szs (file) extract  -> MenuSingle_E.d (folder)
+  //MenuSingle_U.szs (file) extract  -> MenuSingle_U.d (folder)
   await Process.run(
       'wszst',
       [
         'extract',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.szs'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
         '--dest',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.d'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d'),
       ],
       runInShell: false);
-  //edit MenuSingle_E.txt with tracks.bmg.txt content
+  //edit MenuSingle_U.txt with tracks.bmg.txt content
   String contents = await trackBmgTxt.readAsString();
   contents = contents.replaceAll(RegExp(r'#BMG'), '');
   File editedMenuFile =
-      File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.txt'));
+      File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'));
   await editedMenuFile.writeAsString(contents, mode: FileMode.append);
-  //MenuSingle_E.txt -> Common.bmg (MenuSingle_E.d/Common.bmg)
-  //  wbmgt encode MenuSingle_E.txt
+  //MenuSingle_U.txt -> Common.bmg (MenuSingle_U.d/Common.bmg)
+  //  wbmgt encode MenuSingle_U.txt
 
   await Process.run(
       'wbmgt',
       [
         'encode',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.txt'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'),
         '--overwrite',
         '--dest',
         path.join(
-            packPath, 'Scene', 'UI', 'MenuSingle_E.d', 'message', 'Common.bmg'),
+            packPath, 'Scene', 'UI', 'MenuSingle_U.d', 'message', 'Common.bmg'),
       ],
       runInShell: false);
-  //MenuSingle_E.szs (file) <- compact MenuSingle_E.d (folder)
+  //MenuSingle_U.szs (file) <- compact MenuSingle_U.d (folder)
   await Process.run(
       'wszst',
       [
         'create',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.d'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d'),
         '--overwrite',
         '--dest',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.szs'),
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
       ],
       runInShell: false);
   // } on Exception catch (_) {
@@ -385,7 +385,7 @@ void createSingleCommon(String packPath, String id, String srcFolderPath) {
 
 ///Patches MenuSingle.szs by modifying its icons.
 ///
-///Note: Do not confuse MenuSingle.szs with MenuSingle_E.szs.
+///Note: Do not confuse MenuSingle.szs with MenuSingle_U.szs.
 Future<void> patchIcons(String workspace, String packPath) async {
   final File origSingle = File(path.join(
       workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle.szs'));
@@ -517,11 +517,13 @@ class _PatchWindowState extends State<PatchWindow> {
     });
     //await Future.delayed(Duration(seconds: 1));
     // patch MenuSingle.szs with icons.
+    //TODO FIX if myUI has MenuSingle.szs
     await patchIcons(workspace, packPath);
     setState(() {
       progressText = "patching singleplayer menu";
     });
-    //patch MenuSingle_E.szs with the new bmgs.
+    //patch MenuSingle_U.szs with the new bmgs.
+    //TODO FIX if myUI has MenuSingle_U.szs
     await editMenuSingle(workspace, packPath);
 
     //create Common/xxx folders
@@ -704,9 +706,9 @@ class _PatchWindowState extends State<PatchWindow> {
     });
     await Future.delayed(const Duration(seconds: 1));
     File(path.join(packPath, 'Icons', 'merged.png')).delete();
-    Directory(path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.d'))
+    Directory(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d'))
         .deleteSync(recursive: true);
-    File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_E.txt')).delete();
+    File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt')).delete();
     File(path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt')).delete();
     setState(() {
       patchStatus = PatchingStatus.completed;
