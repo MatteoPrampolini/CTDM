@@ -10,6 +10,8 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:merge_images/merge_images.dart';
 import 'package:path/path.dart' as path;
 
+import 'drawer_options/custom_ui.dart';
+
 class PatchWindow extends StatefulWidget {
   final String packPath;
   final bool? fastPatch;
@@ -21,7 +23,8 @@ class PatchWindow extends StatefulWidget {
 
 enum PatchingStatus { aborted, running, completed }
 
-void completeXmlFile(String packPath, bool isOnline, String regionId) {
+void completeXmlFile(
+    String packPath, bool isOnline, String regionId, List<bool> customUI) {
   String packName = path.basename(packPath);
   File xmlFile = File(path.join(packPath, "$packName.xml"));
   String contents = xmlFile.readAsStringSync();
@@ -58,9 +61,11 @@ void completeXmlFile(String packPath, bool isOnline, String regionId) {
   // }
   String onlinePart =
       isOnline ? '<memory offset="0x800017C4" value="$regionId"/>' : '';
+
+  String customUi = createXmlStringForUi(packPath, customUI);
   contents = contents.replaceFirst(
       RegExp(r'<!--MY COMMONS-->.*<!--END MY TRACKS-->', dotAll: true),
-      '<!--MY COMMONS-->\n\t\t$commonBigString$onlinePart<!--END MY TRACKS-->\t\t');
+      '<!--MY COMMONS-->\n\t\t$commonBigString$onlinePart\n$customUi<!--END MY TRACKS-->\t\t');
   //print(contents);
   //print(commonBigString);
   //print(courseBigString);
@@ -138,9 +143,13 @@ void createFolders(String packPath) {
   if (!Directory(path.join(packPath, 'static')).existsSync()) {
     Directory(path.join(packPath, 'static')).createSync();
   }
-  if (!Directory(path.join(packPath, 'Scene')).existsSync()) {
-    Directory(path.join(packPath, 'Scene')).createSync();
+  // if (!Directory(path.join(packPath, 'Scene')).existsSync()) {
+  //   Directory(path.join(packPath, 'Scene')).createSync();
+  // }
+  if (Directory(path.join(packPath, 'Scene')).existsSync()) {
+    Directory(path.join(packPath, 'Scene')).deleteSync(recursive: true);
   }
+  Directory(path.join(packPath, 'Scene')).createSync();
   if (!Directory(path.join(packPath, 'Scene', 'UI')).existsSync()) {
     Directory(path.join(packPath, 'Scene', 'UI')).createSync();
   }
@@ -255,15 +264,10 @@ Future<String> createBMGList(String packPath) async {
 ///Wrapper function. This function calls multiple functions.
 ///
 ///At the end of the execution MenuSingle_U.szs will be patched with the new bmgs.
-Future<void> editMenuSingle(String workspace, String packPath) async {
+Future<void> editMenuSingle(
+    String workspace, String packPath, bool customUI) async {
   //copy MenuSingle_U.szs
-  final File origMenuFile = File(path.join(
-      path.dirname(Platform.resolvedExecutable),
-      "data",
-      "flutter_assets",
-      "assets",
-      "scene",
-      "MenuSingle_U.szs"));
+  File origMenuFile = getFileFromIndex(packPath, 13); //12 = MenuSingle_U,szs
   await origMenuFile
       .copy(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'));
   //create tracks.bmg.txt
@@ -386,9 +390,9 @@ void createSingleCommon(String packPath, String id, String srcFolderPath) {
 ///Patches MenuSingle.szs by modifying its icons.
 ///
 ///Note: Do not confuse MenuSingle.szs with MenuSingle_U.szs.
-Future<void> patchIcons(String workspace, String packPath) async {
-  final File origSingle = File(path.join(
-      workspace, 'ORIGINAL_DISC', 'files', 'Scene', 'UI', 'MenuSingle.szs'));
+Future<void> patchIcons(
+    String workspace, String packPath, bool customUI) async {
+  File origSingle = getFileFromIndex(packPath, 12); //12 = MenuSingle,szs
 
   origSingle.copySync(path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs'));
 
@@ -484,12 +488,9 @@ class _PatchWindowState extends State<PatchWindow> {
   void patch(String packPath) async {
     patchStatus = PatchingStatus.running;
     //create folders
-    //// try {
     createFolders(packPath);
-    // } on Exception catch (_) {
-    //   logString(LogType.ERROR, _.toString());
-    //   rethrow;
-    // }
+    List<bool> customUI = loadUIconfig(packPath);
+
     String workspace = path.dirname(path.dirname(packPath));
     //create gecko codes
     setState(() {
@@ -517,14 +518,12 @@ class _PatchWindowState extends State<PatchWindow> {
     });
     //await Future.delayed(Duration(seconds: 1));
     // patch MenuSingle.szs with icons.
-    //TODO FIX if myUI has MenuSingle.szs
-    await patchIcons(workspace, packPath);
+    await patchIcons(workspace, packPath, customUI[12]);
     setState(() {
       progressText = "patching singleplayer menu";
     });
     //patch MenuSingle_U.szs with the new bmgs.
-    //TODO FIX if myUI has MenuSingle_U.szs
-    await editMenuSingle(workspace, packPath);
+    await editMenuSingle(workspace, packPath, customUI[13]);
 
     //create Common/xxx folders
     await trackPathToCommon(workspace, packPath, trackList);
@@ -699,8 +698,22 @@ class _PatchWindowState extends State<PatchWindow> {
 
     setState(() {
       progressText = "editing xml file";
-      completeXmlFile(packPath, isOnline, regionId);
+      completeXmlFile(packPath, isOnline, regionId, customUI);
     });
+
+    setState(() {
+      progressText = "copying ui files";
+    });
+    for (int i = 0; i < customUI.length; i++) {
+      if (customUI[i] == false || i == 12 || i == 13) {
+        continue;
+      }
+      File f = File(path.join(
+          packPath, 'myUI', path.basename(getFileFromIndex(packPath, i).path)));
+
+      await f.copy(path.join(packPath, 'Scene', 'UI', path.basename(f.path)));
+    }
+
     setState(() {
       progressText = "deleting tmp files";
     });

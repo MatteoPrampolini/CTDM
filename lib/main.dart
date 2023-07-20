@@ -112,9 +112,20 @@ Future<void> _main() async {
 
   final prefs = await SharedPreferences.getInstance();
   try {
-    final _ = await Process.start('wlect', [], runInShell: false);
+    final p = await Process.run('wlect', ['--version'], runInShell: true);
+    double version = double.parse(p.stdout
+        .toString()
+        .split(RegExp(r'LE-CODE Tool v'))[1]
+        .substring(0, 4));
+    if (version < 2.33) {
+      //version could probably be lower, but who cares.
 
-    prefs.setBool('szs', true);
+      prefs.setBool('szs', false);
+      logString(
+          LogType.ERROR, "Wiimms' szs toolset version too old. Please update.");
+    } else {
+      prefs.setBool('szs', true);
+    }
   } on Exception catch (_) {
     //print("Wiimms' szs toolset not found");
     prefs.setBool('szs', false);
@@ -292,7 +303,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Column(
                     children: [
                       Text(
-                        "Wiimms SZS Toolset not installed.",
+                        "Wiimms SZS Toolset not installed or obsolete.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: Theme.of(context)

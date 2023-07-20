@@ -134,6 +134,32 @@ flutter:
       - assets/scene/Present_U.szs
       - assets/scene/Race_U.szs
       - assets/scene/Title_U.szs
+      
+      - assets/characters/images64/tt_baby_luigi_64x64.tpl-0.png
+      - assets\characters\images64\tt_baby_mario_64x64.tpl-0.png
+      - assets\characters\images64\tt_baby_peach_64x64.tpl-0.png
+      - assets\characters\images64\tt_catherine_64x64.tpl-0.png
+      - assets\characters\images64\tt_daisy_64x64.tpl-0.png
+      - assets\characters\images64\tt_didy_64x64.tpl-0.png
+      - assets\characters\images64\tt_donky_64x64.tpl-0.png
+      - assets\characters\images64\tt_funky_64x64.tpl-0.png
+      - assets\characters\images64\tt_hone_koopa_64x64.tpl-0.png
+      - assets\characters\images64\tt_karon_64x64.tpl-0.png
+      - assets\characters\images64\tt_kinopico_64x64.tpl-0.png
+      - assets\characters\images64\tt_kinopio_64x64.tpl-0.png
+      - assets\characters\images64\tt_koopa_64x64.tpl-0.png
+      - assets\characters\images64\tt_koopa_jr_64x64.tpl-0.png
+      - assets\characters\images64\tt_luigi_64x64.tpl-0.png
+      - assets\characters\images64\tt_mario_64x64.tpl-0.png
+      - assets\characters\images64\tt_noko_64x64.tpl-0.png
+      - assets\characters\images64\tt_peach_64x64.tpl-0.png
+      - assets\characters\images64\tt_roseta_64x64.tpl-0.png
+      - assets\characters\images64\tt_teresa_64x64.tpl-0.png
+      - assets\characters\images64\tt_waluigi_64x64.tpl-0.png
+      - assets\characters\images64\tt_wario_64x64.tpl-0.png
+      - assets\characters\images64\tt_yoshi_64x64.tpl-0.png
+      - assets\characters\images64\tt_baby_daisy_64x64.tpl-0.png
+      - assets\characters\images64\not_found.png
 
 
 

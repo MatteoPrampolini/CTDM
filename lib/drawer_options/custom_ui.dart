@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:ctdm/utils/character_utiles.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -17,6 +18,67 @@ enum Scene {
   title
 }
 
+void saveUIConfig(File uiFile, List<bool> values) {
+  uiFile.writeAsStringSync(jsonEncode(values));
+}
+
+List<bool> loadUIconfig(String packPath) {
+  List<bool> values =
+      List.generate(Scene.values.length * 2, (index) => false, growable: false);
+  File uiFile = File(path.join(packPath, 'ui.txt'));
+  if (!uiFile.existsSync()) {
+    uiFile.createSync();
+    saveUIConfig(uiFile, values);
+    return values;
+  }
+
+  List<String> a = uiFile
+      .readAsStringSync()
+      .replaceAll(RegExp(r'[\[\]]'), '')
+      .trim()
+      .split(',')
+      .toList();
+
+  return a.map((string) => string.toLowerCase() == "true").toList();
+}
+
+// String getNameFromIndex(index) {
+//   if (index % 2 == 0) {
+//     //from ORIGINAL_DISC
+//     return '${Scene.values.elementAt((index / 2).floor()).name.toCapitalized()}.szs';
+//   } else {
+//     //from assets
+//     return '${Scene.values.elementAt((index / 2).floor()).name.toCapitalized()}_U.szs';
+//   }
+// }
+
+File getFileFromIndex(String packPath, int index) {
+  String filePath = '';
+  if (index % 2 == 0) {
+    //from ORIGINAL_DISC
+    String basename =
+        '${Scene.values.elementAt((index / 2).floor()).name.toCapitalized()}.szs';
+    filePath = path.join(
+        path.dirname(
+          (path.dirname(packPath)),
+        ),
+        'ORIGINAL_DISC',
+        'files',
+        'Scene',
+        'UI',
+        basename);
+  } else {
+    //from assets
+    String basename =
+        '${Scene.values.elementAt((index / 2).floor()).name.toCapitalized()}_U.szs';
+
+    filePath = path.join(path.dirname(Platform.resolvedExecutable), "data",
+        "flutter_assets", "assets", "scene", basename);
+  }
+
+  return File(filePath);
+}
+
 class CustomUI extends StatefulWidget {
   final String packPath;
   const CustomUI(this.packPath, {super.key});
@@ -27,70 +89,27 @@ class CustomUI extends StatefulWidget {
 
 class _CustomUIState extends State<CustomUI> {
   late List<bool> values;
-  File getFileFromIndex(int index) {
-    String filePath = '';
-    if (index % 2 == 0) {
-      //from ORIGINAL_DISC
-      String basename =
-          '${Scene.values.elementAt((index / 2).floor()).name.toCapitalized()}.szs';
-      filePath = path.join(
-          path.dirname(
-            (path.dirname(widget.packPath)),
-          ),
-          'ORIGINAL_DISC',
-          'files',
-          'Scene',
-          'UI',
-          basename);
-    } else {
-      //from assets
-      String basename =
-          '${Scene.values.elementAt((index / 2).floor()).name.toCapitalized()}_U.szs';
-
-      filePath = path.join(path.dirname(Platform.resolvedExecutable), "data",
-          "flutter_assets", "assets", "scene", basename);
-    }
-
-    return File(filePath);
-  }
-
-  List<bool> loadUIconfig() {
-    List<bool> values = List.generate(Scene.values.length * 2, (index) => false,
-        growable: false);
-    File uiFile = File(path.join(widget.packPath, 'ui.txt'));
-    if (!uiFile.existsSync()) {
-      uiFile.createSync();
-      saveUIConfig(uiFile, values);
-      return values;
-    }
-
-    List<String> a = uiFile
-        .readAsStringSync()
-        .replaceAll(RegExp(r'[\[\]]'), '')
-        .trim()
-        .split(',')
-        .toList();
-
-    return a.map((string) => string.toLowerCase() == "true").toList();
-  }
-
-  void saveUIConfig(File uiFile, List<bool> values) {
-    uiFile.writeAsStringSync(jsonEncode(values));
-  }
 
   @override
   void initState() {
-    values = loadUIconfig();
+    values = loadUIconfig(widget.packPath);
 
     super.initState();
   }
 
   Future<void> createFiles() async {
+    if (!await Directory(path.join(widget.packPath, 'myUI')).exists()) {
+      await Directory(path.join(widget.packPath, 'myUI')).create();
+    }
     for (int i = 0; i < values.length; i++) {
       if (values[i] == false) continue;
-      File tmpFile = getFileFromIndex(i);
-      tmpFile.copy(
-          path.join(widget.packPath, 'myUI', path.basename(tmpFile.path)));
+      File tmpFile = getFileFromIndex(widget.packPath, i);
+      if (!await File(
+              path.join(widget.packPath, 'myUI', path.basename(tmpFile.path)))
+          .exists()) {
+        tmpFile.copy(
+            path.join(widget.packPath, 'myUI', path.basename(tmpFile.path)));
+      }
     }
   }
 
@@ -216,7 +235,15 @@ class _CustomUIState extends State<CustomUI> {
                                 //await
                               }
                           },
-                        )
+                        ),
+                        //TODO REMOVE
+                        ElevatedButton(
+                            child: const Text(
+                              "Debug",
+                              textAlign: TextAlign.center,
+                            ),
+                            onPressed: () async => createCharacterFolders(Directory(
+                                'C:/Users/matte/Documents/CT_test/custom characters/Characters'))),
                       ],
                     ),
                   ),
@@ -235,4 +262,37 @@ extension StringCasingExtension on String {
       .split(' ')
       .map((str) => str.toCapitalized())
       .join(' ');
+}
+
+String createXmlStringForUi(String packPath, List<bool> filesBool) {
+  String contents = "\t\t<!--CUSTOM UI-->\n";
+  for (int i = 0; i < filesBool.length; i++) {
+    if (filesBool[i] == false || i == 12 || i == 13) {
+      continue;
+    }
+    String basename = path.basename(getFileFromIndex(packPath, i).path);
+
+    if (i % 2 == 0) {
+      contents +=
+          '\t\t<file disc="/Scene/UI/$basename" external="/v9/Scene/UI/$basename"/>\n';
+    } else {
+      String basenameNoLetter = basename.replaceAll(RegExp(r'_.*'), '');
+      String packName = path.basename(packPath);
+      String s =
+          '''\t\t<file disc="/Scene/UI/${basenameNoLetter}_E.szs" external="/v9/Scene/UI/$basename" />
+\t\t<file disc="/Scene/UI/${basenameNoLetter}_F.szs" external="/$packName/Scene/UI/$basename" />
+\t\t<file disc="/Scene/UI/${basenameNoLetter}_G.szs" external="/$packName/Scene/UI/$basename" />
+\t\t<file disc="/Scene/UI/${basenameNoLetter}_I.szs" external="/$packName/Scene/UI/$basename" />
+\t\t<file disc="/Scene/UI/${basenameNoLetter}_S.szs" external="/$packName/Scene/UI/$basename" />
+\t\t<file disc="/Scene/UI/${basenameNoLetter}_M.szs" external="/$packName/Scene/UI/$basename" />
+\t\t<file disc="/Scene/UI/${basenameNoLetter}_Q.szs" external="/$packName/Scene/UI/$basename" />
+\t\t<file disc="/Scene/UI/${basenameNoLetter}_U.szs" external="/$packName/Scene/UI/$basename" />
+\t\t<file disc="/Scene/UI/${basenameNoLetter}_J.szs" external="/$packName/Scene/UI/$basename" />
+\t\t<file disc="/Scene/UI/${basenameNoLetter}_K.szs" external="/$packName/Scene/UI/$basename" />\n''';
+
+      contents += s;
+    }
+  }
+
+  return "$contents\t\t";
 }
