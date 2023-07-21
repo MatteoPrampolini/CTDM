@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:ctdm/utils/character_utiles.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -16,6 +15,29 @@ enum Scene {
   present,
   race,
   title
+}
+
+enum SceneComplete {
+  award,
+  award_,
+  channel,
+  channel_,
+  event,
+  event_,
+  globe,
+  globe_,
+  menuMulti,
+  menuMulti_,
+  menuOther,
+  menuOther_,
+  menuSingle,
+  menuSingle_,
+  present,
+  present_,
+  race,
+  race_,
+  title,
+  title_
 }
 
 void saveUIConfig(File uiFile, List<bool> values) {
@@ -236,14 +258,6 @@ class _CustomUIState extends State<CustomUI> {
                               }
                           },
                         ),
-                        //TODO REMOVE
-                        ElevatedButton(
-                            child: const Text(
-                              "Debug",
-                              textAlign: TextAlign.center,
-                            ),
-                            onPressed: () async => createCharacterFolders(Directory(
-                                'C:/Users/matte/Documents/CT_test/custom characters/Characters'))),
                       ],
                     ),
                   ),
