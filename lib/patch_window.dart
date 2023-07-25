@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/drawer_options/multiplayer.dart';
+import 'package:ctdm/utils/character_utiles.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:ctdm/utils/music_utils.dart';
@@ -23,8 +24,8 @@ class PatchWindow extends StatefulWidget {
 
 enum PatchingStatus { aborted, running, completed }
 
-void completeXmlFile(
-    String packPath, bool isOnline, String regionId, List<bool> customUI) {
+void completeXmlFile(String packPath, bool isOnline, String regionId,
+    List<bool> customUI, List<File> sceneFiles) {
   String packName = path.basename(packPath);
   File xmlFile = File(path.join(packPath, "$packName.xml"));
   String contents = xmlFile.readAsStringSync();
@@ -38,7 +39,7 @@ void completeXmlFile(
         '<folder external="/$packName/Race/Common/${path.basename(common.path)}" disc="/Race/Common/${path.basename(common.path)}/" create="true"/>\n\t\t';
   }
   //2 course dir
-  //Directory courseDir = Directory(path.join(packPath, 'Race', 'Course'));
+  // Directory courseDir = Directory(path.join(packPath, 'Race', 'Course'));
   // String courseBigString = "";
   // List<File> courseDirList = courseDir.listSync().whereType<File>().toList();
   // for (File course in courseDirList) {
@@ -62,7 +63,7 @@ void completeXmlFile(
   String onlinePart =
       isOnline ? '<memory offset="0x800017C4" value="$regionId"/>' : '';
 
-  String customUi = createXmlStringForUi(packPath, customUI);
+  String customUi = createXmlStringForUi(packPath, customUI, sceneFiles);
   contents = contents.replaceFirst(
       RegExp(r'<!--MY COMMONS-->.*<!--END MY TRACKS-->', dotAll: true),
       '<!--MY COMMONS-->\n\t\t$commonBigString$onlinePart\n$customUi<!--END MY TRACKS-->\t\t');
@@ -243,7 +244,7 @@ Future<String> createBMGList(String packPath) async {
         '--dest',
         path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt')
       ],
-      runInShell: false);
+      runInShell: true);
   return path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt');
   //return parseBMGList(packPath);
   // } on Exception catch (_) {
@@ -324,6 +325,7 @@ Future<void> editMenuSingle(
         path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
       ],
       runInShell: false);
+
   // } on Exception catch (_) {
   //   logString(LogType.ERROR, _.toString());
   //   rethrow;
@@ -390,9 +392,9 @@ void createSingleCommon(String packPath, String id, String srcFolderPath) {
 ///Patches MenuSingle.szs by modifying its icons.
 ///
 ///Note: Do not confuse MenuSingle.szs with MenuSingle_U.szs.
-Future<void> patchIcons(
-    String workspace, String packPath, bool customUI) async {
-  File origSingle = getFileFromIndex(packPath, 12); //12 = MenuSingle,szs
+Future<void> patchIcons(String workspace, String packPath, bool customUI,
+    List<String> charactersTxtContent) async {
+  File origSingle = getFileFromIndex(packPath, SceneComplete.menuSingle.index);
 
   origSingle.copySync(path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs'));
 
@@ -418,8 +420,23 @@ Future<void> patchIcons(
               '--dest',
               path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs'),
             ],
-            runInShell: false),
+            runInShell: true),
       });
+
+  await Process.run(
+      'wszst',
+      [
+        'extract',
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs'),
+        '-D',
+        path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs.d')
+      ],
+      runInShell: true);
+  await patchSzsWithImages(
+      packPath,
+      Directory(path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs.d')),
+      charactersTxtContent,
+      SceneComplete.menuSingle.index);
   // } on Exception catch (_) {
   //   logString(LogType.ERROR, _.toString());
   //   rethrow;
@@ -490,7 +507,12 @@ class _PatchWindowState extends State<PatchWindow> {
     //create folders
     createFolders(packPath);
     List<bool> customUI = loadUIconfig(packPath);
+    List<String> customTxtContent =
+        await File(path.join(packPath, 'characters.txt')).readAsLines();
 
+    bool enableCustomChar = getNumberOfCustomCharacters(
+            File(path.join(packPath, 'characters.txt'))) >
+        0;
     String workspace = path.dirname(path.dirname(packPath));
     //create gecko codes
     setState(() {
@@ -516,14 +538,18 @@ class _PatchWindowState extends State<PatchWindow> {
     setState(() {
       progressText = "patching icons";
     });
+
     //await Future.delayed(Duration(seconds: 1));
     // patch MenuSingle.szs with icons.
-    await patchIcons(workspace, packPath, customUI[12]);
+    await patchIcons(workspace, packPath,
+        customUI[SceneComplete.menuSingle.index], customTxtContent);
     setState(() {
       progressText = "patching singleplayer menu";
     });
+
     //patch MenuSingle_U.szs with the new bmgs.
-    await editMenuSingle(workspace, packPath, customUI[13]);
+    await editMenuSingle(
+        workspace, packPath, customUI[SceneComplete.menuSingle_.index]);
 
     //create Common/xxx folders
     await trackPathToCommon(workspace, packPath, trackList);
@@ -547,6 +573,17 @@ class _PatchWindowState extends State<PatchWindow> {
       for (File szs in szsFileList) {
         await szs.copy(path.join(
             packPath, 'Race', 'Course', 'tmp', path.basename(szs.path)));
+      }
+      List<String> preAwardsRaces = [
+        'winningrun_demo.szs',
+        'loser_demo.szs',
+        'draw_demo.szs',
+        'ending_demo.szs'
+      ];
+      for (String awardRace in preAwardsRaces) {
+        await File(path.join(path.dirname(path.dirname(packPath)),
+                'ORIGINAL_DISC', 'files', 'Race', 'Course', awardRace))
+            .copy(path.join(packPath, 'Race', 'Course', 'tmp', awardRace));
       }
       //copy lecode-XXX.bin from assets
       String isoVersion = gv.name;
@@ -683,7 +720,7 @@ class _PatchWindowState extends State<PatchWindow> {
 
     setState(() {
       progressText = widget.fastPatch != true
-          ? "creating music files (if any)"
+          ? "creating music files (it might take a while)"
           : "skipping music (FAST PATCHING)";
     });
     if (widget.fastPatch != true) {
@@ -697,15 +734,20 @@ class _PatchWindowState extends State<PatchWindow> {
     }
 
     setState(() {
-      progressText = "editing xml file";
-      completeXmlFile(packPath, isOnline, regionId, customUI);
-    });
-
-    setState(() {
       progressText = "copying ui files";
     });
+
+    List<SceneComplete> neededFiles = [SceneComplete.award, SceneComplete.race];
+    if (enableCustomChar) {
+      for (SceneComplete scene in neededFiles) {
+        File f = getFileFromIndex(packPath, scene.index);
+        await f.copy(path.join(packPath, 'Scene', 'UI', path.basename(f.path)));
+      }
+    }
     for (int i = 0; i < customUI.length; i++) {
-      if (customUI[i] == false || i == 12 || i == 13) {
+      if (customUI[i] == false ||
+          i == SceneComplete.menuSingle.index ||
+          i == SceneComplete.menuSingle_.index) {
         continue;
       }
       File f = File(path.join(
@@ -714,15 +756,63 @@ class _PatchWindowState extends State<PatchWindow> {
       await f.copy(path.join(packPath, 'Scene', 'UI', path.basename(f.path)));
     }
 
+    if (enableCustomChar) {
+      setState(() {
+        progressText = "patching ui files with custom characters";
+      });
+      for (SceneComplete scene in neededFiles) {
+        String baseName =
+            path.basename(getFileFromIndex(packPath, scene.index).path);
+        await Process.run(
+            'wszst',
+            [
+              'extract',
+              path.join(packPath, 'Scene', 'UI', baseName),
+              '--dest',
+              "${path.join(packPath, 'Scene', 'UI', baseName)}.d",
+            ],
+            runInShell: true);
+        await patchSzsWithImages(
+            packPath,
+            Directory(
+              "${path.join(packPath, 'Scene', 'UI', baseName)}.d",
+            ),
+            customTxtContent,
+            scene.index);
+      }
+    }
+
     setState(() {
       progressText = "deleting tmp files";
     });
     await Future.delayed(const Duration(seconds: 1));
-    File(path.join(packPath, 'Icons', 'merged.png')).delete();
-    Directory(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d'))
-        .deleteSync(recursive: true);
-    File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt')).delete();
-    File(path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt')).delete();
+    Directory(path.join(packPath, 'Scene', 'UI'))
+        .listSync()
+        .where((element) => !element.path.endsWith('.szs'))
+        .toList()
+        .forEach((element) async {
+      await element.delete(recursive: true);
+    });
+
+    setState(() {
+      progressText = "editing xml file";
+      completeXmlFile(
+          packPath,
+          isOnline,
+          regionId,
+          customUI,
+          Directory(path.join(packPath, 'Scene', 'UI'))
+              .listSync()
+              .whereType<File>()
+              .toList());
+    });
+
+    //     .deleteSync(recursive: true);
+    await File(path.join(packPath, 'Icons', 'merged.png')).delete();
+    // Directory(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d'))
+    //     .deleteSync(recursive: true);
+    // File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt')).delete();
+    // File(path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt')).delete();
     setState(() {
       patchStatus = PatchingStatus.completed;
       logString(LogType.INFO, "patch completed");

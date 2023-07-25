@@ -73,10 +73,10 @@ final Map<String, String> characters3D = {
 patchSzsWithImages(String packPath, Directory extractedSzs,
     List<String> charactersTxtLines, int index) async {
   //List<String> replacementsPaths = [];
-  List<Directory> dir64List = getDirsFromFileIndex(
-      packPath, SceneComplete.values[index], extractedSzs)[0];
-  List<Directory> dir32List = getDirsFromFileIndex(
-      packPath, SceneComplete.values[index], extractedSzs)[1];
+  List<Directory> dir64List = List<Directory>.from(getDirsFromFileIndex(
+      packPath, SceneComplete.values[index], extractedSzs)[0]);
+  List<Directory> dir32List = List<Directory>.from(getDirsFromFileIndex(
+      packPath, SceneComplete.values[index], extractedSzs)[1]);
   if (dir64List.isEmpty) return;
 
   int i = 0;
@@ -87,8 +87,8 @@ patchSzsWithImages(String packPath, Directory extractedSzs,
       continue;
     }
 
-    Directory absPathToCharFolder =
-        Directory(path.join(packPath, 'myCharacters', relFolder));
+    Directory absPathToCharFolder = Directory(path.join(
+        path.dirname(path.dirname(packPath)), 'myCharacters', relFolder));
 
     File icon64 =
         File(path.join(absPathToCharFolder.path, 'icons', 'icon64.png'));
@@ -97,31 +97,51 @@ patchSzsWithImages(String packPath, Directory extractedSzs,
 
     for (Directory dir64 in dir64List) {
       String filenameTpl = getOriginalFileNameForCharacter(i, false);
+
       await icon64.copy(path.join(dir64.path, "$filenameTpl.png"));
-      await Process.run('wimgt ', [
-        'encode',
-        "$filenameTpl.png",
-        '-o',
-        path.join(dir64.path, filenameTpl)
-      ]);
+
+      await Process.run(
+          'wimgt ',
+          [
+            'encode',
+            path.join(dir64.path, "$filenameTpl.png"),
+            '--dest',
+            path.join(dir64.path, filenameTpl),
+            '-o'
+          ],
+          runInShell: true);
     }
     for (Directory dir32 in dir32List) {
       String filenameTpl = getOriginalFileNameForCharacter(i, true);
       await icon32.copy(path.join(dir32.path, "$filenameTpl.png"));
-      await Process.run('wimgt ', [
-        'encode',
-        "$filenameTpl.png",
-        '-o',
-        path.join(dir32.path, filenameTpl)
-      ]);
+      await Process.run(
+          'wimgt',
+          [
+            'encode',
+            path.join(dir32.path, "$filenameTpl.png"),
+            '--dest',
+            path.join(dir32.path, filenameTpl),
+            '-o',
+          ],
+          runInShell: true);
     }
     i++;
   }
-
-  //TODO wszst CREATE per chiudere tutto
+  String fileBaseName = path.basename(getFileFromIndex(packPath, index).path);
+  await Process.run(
+      'wszst',
+      [
+        'CREATE',
+        extractedSzs.path,
+        '-o',
+        '--dest',
+        path.join(path.dirname(extractedSzs.path), fileBaseName)
+      ],
+      runInShell: true);
+  return;
 }
 
-getDirsFromFileIndex(
+List getDirsFromFileIndex(
     String packPath, SceneComplete index, Directory extractedDir) {
   switch (index) {
     case SceneComplete.award:
@@ -185,10 +205,17 @@ getOriginalFileNameForCharacter(int charIndex, bool is32) {
   if (charIndex == 22 && is32 == true) {
     return "st_fuky_32x32.tpl.png";
   }
-  String prefix = is32 ? "st_" : "tt";
+  String prefix = is32 ? "st_" : "tt_";
   String name = characters2D.values.elementAt(charIndex);
   String suffix = is32 ? "_32x32.tpl" : "_64x64.tpl";
   return "$prefix$name$suffix";
+}
+
+int getNumberOfCustomCharacters(File charTxt) {
+  return charTxt
+      .readAsLinesSync()
+      .where((element) => element.split(';')[1].isNotEmpty)
+      .length;
 }
 
 //TODO COPIARE 2 FILE (menusingle già estratto), estrarli, chiamare patchSzsWithImages, 

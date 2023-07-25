@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ctdm/custom_drawer.dart';
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/patch_window.dart';
+import 'package:ctdm/utils/character_utiles.dart';
 import 'package:ctdm/utils/excel.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
@@ -61,6 +62,7 @@ class _PackEditorState extends State<PackEditor> {
     'multiplayer'
   ];
   void checkEverything() async {
+    checks = [false, false, false, false, false, false, false];
     checks[0] = !widget.packPath.contains('tmp_pack_');
     checks[1] = File(path.join(widget.packPath, 'config.txt')).existsSync();
     checks[2] = File(path.join(widget.packPath, 'lpar.txt')).existsSync();
@@ -85,6 +87,12 @@ class _PackEditorState extends State<PackEditor> {
                   File(path.join(widget.packPath, 'gecko.txt')))
               .length >
           2;
+    }
+
+    if (getNumberOfCustomCharacters(
+            File(path.join(widget.packPath, 'characters.txt'))) >
+        0) {
+      checks[5] = true;
     }
     String regionContent = readRegionFile(widget.packPath);
     if (regionContent != "") {

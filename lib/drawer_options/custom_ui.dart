@@ -278,13 +278,18 @@ extension StringCasingExtension on String {
       .join(' ');
 }
 
-String createXmlStringForUi(String packPath, List<bool> filesBool) {
+String createXmlStringForUi(
+    String packPath, List<bool> filesBool, List<File> sceneFiles) {
   String contents = "\t\t<!--CUSTOM UI-->\n";
-  for (int i = 0; i < filesBool.length; i++) {
-    if (filesBool[i] == false || i == 12 || i == 13) {
+  for (int i = 0; i < SceneComplete.values.length; i++) {
+    if (i == SceneComplete.menuSingle.index ||
+        i == SceneComplete.menuSingle_.index) {
       continue;
     }
     String basename = path.basename(getFileFromIndex(packPath, i).path);
+    if (!sceneFiles.any((element) => path.basename(element.path) == basename)) {
+      continue;
+    }
 
     if (i % 2 == 0) {
       contents +=
