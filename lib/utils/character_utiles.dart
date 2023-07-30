@@ -25,8 +25,7 @@ final Map<String, String> characters2D = {
   'Bowser': 'koopa',
   'King Boo': 'teresa',
   'Rosalina': 'roseta',
-  'Funky Kong':
-      'funky', //per qualche strano motivo, la versione 32x32 si chiama fuky
+  'Funky Kong': 'funky',
   'Dry Bowser': 'hone_koopa',
 };
 
@@ -56,7 +55,60 @@ final Map<String, String> characters3D = {
   'Funky Kong': 'fk',
   'Dry Bowser': 'bk',
 };
-
+int nVehiclesPerSize = 16;
+final Map<String, String> vehicles = {
+  //large
+  "Flame Runner": "la_bike",
+  "Offroader": "la_kart",
+  "Wario Bike": "lb_bike",
+  "Flame Flyer": "lb_kart",
+  "Shooting Star": "lc_bike",
+  "Piranha Prowler": "lc_kart",
+  "Spear": "ld_bike",
+  "Jetsetter": "ld_kart",
+  "Standard Bike L": "ldf_bike",
+  "Standard Kart L": "ldf_kart",
+  "Standard Bike L (Battle Mode + Blue Team)": "ldf_bike_blue",
+  "Standard Bike L (Battle Mode + Red Team)": "ldf_bike_red",
+  "Standard Kart L (Battle Mode + Blue Team)": "ldf_kart_blue",
+  "Standard Kart L (Battle Mode + Red Team)": "ldf_kart_red",
+  "Phantom": "le_bike",
+  "Honeycoupe": "le_kart",
+  //medium
+  "Mach Bike": "ma_bike",
+  "Classic Dragster": "ma_kart",
+  "Sugarscoot": "mb_bike",
+  "Wild Wing": "mb_kart",
+  "Zip Zip": "mc_bike",
+  "Super Blooper": "mc_kart",
+  "Sneakster": "md_bike",
+  "Daytripper": "md_kart",
+  "Standard Bike M": "mdf_bike",
+  "Standard Kart M": "mdf_kart",
+  "Standard Bike M (Battle Mode + Blue Team)": "mdf_bike_blue",
+  "Standard Bike M (Battle Mode + Red Team)": "mdf_bike_red",
+  "Standard Kart M (Battle Mode + Blue Team)": "mdf_kart_blue",
+  "Standard Kart M (Battle Mode + Red Team)": "mdf_kart_red",
+  "Dolphin Dasher": "me_bike",
+  "Sprinter": "me_kart",
+  //small
+  "Bullet Bike": "sa_bike",
+  "Booster Seat": "sa_kart",
+  "Bit Bike": "sb_bike",
+  "Mini Beast": "sb_kart",
+  "Quacker": "sc_bike",
+  "Cheep Charger": "sc_kart",
+  "Magikruiser": "sd_bike",
+  "Tiny Titan": "sd_kart",
+  "Standard Bike S": "sdf_bike",
+  "Standard Kart S": "sdf_kart",
+  "Standard Bike S (Battle Mode + Blue Team)": "sdf_bike_blue",
+  "Standard Bike S (Battle Mode + Red Team)": "sdf_bike_red",
+  "Standard Kart S (Battle Mode + Blue Team)": "sdf_kart_blue",
+  "Standard Kart S (Battle Mode + Red Team)": "sdf_kart_red",
+  "Jet Bubble": "se_bike",
+  "Blue Falcon": "se_kart"
+};
 // createCharacterFolders(Directory dir) async {
 //   if (await dir.exists() == false) {
 //     await dir.create();
@@ -70,6 +122,7 @@ final Map<String, String> characters3D = {
 //     }
 //   });
 // }
+patchWithBrres(Directory extractedSzs, File brress, String subFolderpath) {}
 patchSzsWithImages(String packPath, Directory extractedSzs,
     List<String> charactersTxtLines, int index) async {
   //List<String> replacementsPaths = [];
@@ -99,9 +152,8 @@ patchSzsWithImages(String packPath, Directory extractedSzs,
       String filenameTpl = getOriginalFileNameForCharacter(i, false);
 
       await icon64.copy(path.join(dir64.path, "$filenameTpl.png"));
-
       await Process.run(
-          'wimgt ',
+          'wimgt',
           [
             'encode',
             path.join(dir64.path, "$filenameTpl.png"),
@@ -113,6 +165,7 @@ patchSzsWithImages(String packPath, Directory extractedSzs,
     }
     for (Directory dir32 in dir32List) {
       String filenameTpl = getOriginalFileNameForCharacter(i, true);
+      //print(path.join(dir32.path, "$filenameTpl.png"));
       await icon32.copy(path.join(dir32.path, "$filenameTpl.png"));
       await Process.run(
           'wimgt',
@@ -203,7 +256,7 @@ List getDirsFromFileIndex(
 
 getOriginalFileNameForCharacter(int charIndex, bool is32) {
   if (charIndex == 22 && is32 == true) {
-    return "st_fuky_32x32.tpl.png";
+    return "st_fuky_32x32.tpl";
   }
   String prefix = is32 ? "st_" : "tt_";
   String name = characters2D.values.elementAt(charIndex);
@@ -218,5 +271,126 @@ int getNumberOfCustomCharacters(File charTxt) {
       .length;
 }
 
-//TODO COPIARE 2 FILE (menusingle già estratto), estrarli, chiamare patchSzsWithImages, 
-//aggiungere al completeXml i 2 file
+///
+String xmlReplaceCharactersModelScenes(
+    String packPath, List<String> allKartsList) {
+  String bigString = '\n\t\t<!--CUSTOM CHARACTERS-->\n';
+  for (File f in Directory(path.join(packPath, 'Race', 'Kart'))
+      .listSync()
+      .whereType<File>()
+      .toList()) {
+    String basename = path.basename(f.path);
+    //create is not needed here, but it can avoid errors if the user places wrong files inside the custChar/kart/ folder
+    bigString +=
+        '\t\t<file disc="/Race/Kart/$basename" external="/${path.basename(packPath)}/Race/Kart/$basename" create="true"/>\n';
+  }
+  for (String allKartPath in allKartsList) {
+    bigString +=
+        '\t\t<file disc="/Scene/Model/Kart/$allKartPath" external="/${path.basename(packPath)}/Scene/Model/Kart/$allKartPath"/>\n';
+  }
+  bigString += "\t\t<!--END CUSTOM CHARACTERS-->\n\t\t";
+  return bigString;
+}
+
+String getPathOfCustomCharacter(String packPath, String dirBasename) {
+  return path.join(
+      path.dirname(path.dirname(packPath)), 'myCharacters', dirBasename);
+}
+
+List<Directory> getListOfCharactersDir(String packPath) {
+  return Directory(
+          path.join(path.dirname(path.dirname(packPath)), 'myCharacters'))
+      .listSync()
+      .whereType<Directory>()
+      .toList();
+}
+
+enum Size { large, medium, small }
+
+class CustomCharacter {
+  Directory dir;
+  late String name;
+  late File? icon64;
+  late File? icon32;
+  late Size size;
+  late Map<String, String> subVehicles;
+  late List<String> subVehiclesNames;
+  List<String> fileListPath = [];
+  late File configFile;
+  CustomCharacter(this.dir) {
+    configFile = File(path.join(dir.path, 'ctdm_settings.txt'));
+    name = path.basename(dir.path);
+    icon64 = File(path.join(dir.path, 'icons', 'icon64.png'));
+    icon32 = File(path.join(dir.path, 'icons', 'icon32.png'));
+
+    if (configFile.existsSync()) {
+      size =
+          Size.values[int.parse(configFile.readAsLinesSync()[0].split(';')[1])];
+
+      //print(name + size.name);
+    } else {
+      configFile.writeAsStringSync("size;2", mode: FileMode.writeOnly);
+      size = Size.small;
+    }
+
+    _createFilelist();
+  }
+  _createFilelist() {
+    fileListPath = [];
+
+    //fileListPath.add(RegExp(r'karts\/*.allkart\.szs'));
+    subVehiclesNames = vehicles.keys
+        .skip(nVehiclesPerSize * size.index)
+        .take(nVehiclesPerSize)
+        .toList();
+    subVehicles = Map.fromEntries(vehicles.entries
+        .skip(nVehiclesPerSize * size.index)
+        .take(nVehiclesPerSize));
+    for (String value in subVehicles.values) {
+      fileListPath.add(path.join('Race', 'Kart', value).replaceAll('.szs', ''));
+      //fileListPath.add(RegExp(r'karts\/.*' + RegExp.escape(value) + r'\.szs'));
+    }
+  }
+
+  void changeSize(int selectedSizeIndex) {
+    size = Size.values[selectedSizeIndex];
+    configFile.writeAsStringSync("size;$selectedSizeIndex",
+        mode: FileMode.writeOnly);
+    _createFilelist();
+  }
+}
+
+List<CustomCharacter> createListOfCharacter(String packPath) {
+  List<CustomCharacter> chars = [];
+  getListOfCharactersDir(packPath).forEach((dir) {
+    chars.add(CustomCharacter(dir));
+  });
+  return chars;
+}
+
+File findFilePath(Directory dir, String basename) {
+  File f = dir.listSync(recursive: true).whereType<File>().firstWhere(
+        (element) => element.path.contains(path.basename(basename)),
+        orElse: () => File("$basename;${dir.path};not found #######"),
+      );
+  return f;
+}
+
+List<String> findKeysByValue(Map<String, String> map, String targetValue) {
+  List<String> keys = [];
+  map.forEach((key, value) {
+    if (value == targetValue) {
+      keys.add(key);
+    }
+  });
+  return keys;
+}
+
+String findFirstKeyByValue(Map<String, String> map, String targetValue) {
+  for (var entry in map.entries) {
+    if (entry.value == targetValue) {
+      return entry.key;
+    }
+  }
+  return '';
+}

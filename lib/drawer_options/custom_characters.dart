@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:ctdm/drawer_options/character_editor.dart';
 import 'package:ctdm/utils/character_utiles.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -134,8 +135,17 @@ class _CustomCharactersState extends State<CustomCharacters> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 TextButton(
-                                    onPressed: () => {},
-                                    child: const Text("Create")),
+                                    onPressed: () => {
+                                          Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          CharEditor(
+                                                              widget.packPath)))
+                                              .then(
+                                                  (value) => setState(() => {}))
+                                        },
+                                    child: const Text("Character Editor")),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 15.0),
                                   child: TextButton(

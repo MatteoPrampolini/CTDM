@@ -25,7 +25,7 @@ class PatchWindow extends StatefulWidget {
 enum PatchingStatus { aborted, running, completed }
 
 void completeXmlFile(String packPath, bool isOnline, String regionId,
-    List<bool> customUI, List<File> sceneFiles) {
+    List<bool> customUI, List<File> sceneFiles, List<String> allKartsList) {
   String packName = path.basename(packPath);
   File xmlFile = File(path.join(packPath, "$packName.xml"));
   String contents = xmlFile.readAsStringSync();
@@ -64,9 +64,11 @@ void completeXmlFile(String packPath, bool isOnline, String regionId,
       isOnline ? '<memory offset="0x800017C4" value="$regionId"/>' : '';
 
   String customUi = createXmlStringForUi(packPath, customUI, sceneFiles);
+  String customChar = xmlReplaceCharactersModelScenes(packPath, allKartsList);
   contents = contents.replaceFirst(
       RegExp(r'<!--MY COMMONS-->.*<!--END MY TRACKS-->', dotAll: true),
-      '<!--MY COMMONS-->\n\t\t$commonBigString$onlinePart\n$customUi<!--END MY TRACKS-->\t\t');
+      '<!--MY COMMONS-->\n\t\t$commonBigString$onlinePart\n$customUi$customChar<!--END MY TRACKS-->\t\t');
+
   //print(contents);
   //print(commonBigString);
   //print(courseBigString);
@@ -132,11 +134,22 @@ void createFolders(String packPath) {
         "empty.thp"));
     emptyVideo.copy(path.join(packPath, 'thp', 'empty.thp'));
   }
+  if (Directory(path.join(packPath, 'Race')).existsSync()) {
+    Directory(path.join(packPath, 'Race')).deleteSync(recursive: true);
+  }
+  if (Directory(path.join(packPath, 'Demo')).existsSync()) {
+    Directory(path.join(packPath, 'Demo')).deleteSync(recursive: true);
+  }
+  Directory(path.join(packPath, 'Demo')).createSync();
+  Directory(path.join(packPath, 'Race')).createSync();
   if (!Directory(path.join(packPath, 'Race', 'Course')).existsSync()) {
     Directory(path.join(packPath, 'Race', 'Course')).createSync();
   }
   if (!Directory(path.join(packPath, 'Race', 'Common')).existsSync()) {
     Directory(path.join(packPath, 'Race', 'Common')).createSync();
+  }
+  if (!Directory(path.join(packPath, 'Race', 'Kart')).existsSync()) {
+    Directory(path.join(packPath, 'Race', 'Kart')).createSync();
   }
   if (!Directory(path.join(packPath, 'rel')).existsSync()) {
     Directory(path.join(packPath, 'rel')).createSync();
@@ -153,6 +166,10 @@ void createFolders(String packPath) {
   Directory(path.join(packPath, 'Scene')).createSync();
   if (!Directory(path.join(packPath, 'Scene', 'UI')).existsSync()) {
     Directory(path.join(packPath, 'Scene', 'UI')).createSync();
+  }
+  if (!Directory(path.join(packPath, 'Scene', 'Model')).existsSync()) {
+    Directory(path.join(packPath, 'Scene', 'Model')).createSync();
+    Directory(path.join(packPath, 'Scene', 'Model', 'Kart')).createSync();
   }
   if (!Directory(path.join(packPath, 'sys')).existsSync()) {
     Directory(path.join(packPath, 'sys')).createSync();
@@ -266,9 +283,15 @@ Future<String> createBMGList(String packPath) async {
 ///
 ///At the end of the execution MenuSingle_U.szs will be patched with the new bmgs.
 Future<void> editMenuSingle(
-    String workspace, String packPath, bool customUI) async {
+    String workspace, String packPath, List<bool> customUI) async {
   //copy MenuSingle_U.szs
-  File origMenuFile = getFileFromIndex(packPath, 13); //12 = MenuSingle_U,szs
+
+  File origMenuFile;
+  if (customUI[SceneComplete.menuSingle_.index] == true) {
+    origMenuFile = File(path.join(packPath, 'myUI', 'MenuSingle_U.szs'));
+  } else {
+    origMenuFile = getFileFromIndex(packPath, SceneComplete.menuSingle_.index);
+  }
   await origMenuFile
       .copy(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'));
   //create tracks.bmg.txt
@@ -549,7 +572,10 @@ class _PatchWindowState extends State<PatchWindow> {
 
     //patch MenuSingle_U.szs with the new bmgs.
     await editMenuSingle(
-        workspace, packPath, customUI[SceneComplete.menuSingle_.index]);
+      workspace,
+      packPath,
+      customUI,
+    );
 
     //create Common/xxx folders
     await trackPathToCommon(workspace, packPath, trackList);
@@ -736,7 +762,32 @@ class _PatchWindowState extends State<PatchWindow> {
     setState(() {
       progressText = "copying ui files";
     });
+    await File(path.join(path.dirname(path.dirname(packPath)), 'ORIGINAL_DISC',
+            'files', 'Demo', 'Award.szs'))
+        .copy(path.join(packPath, 'Demo', 'Award.szs'));
+    await File(path.join(path.dirname(path.dirname(packPath)), 'ORIGINAL_DISC',
+            'files', 'Scene', 'Model', 'Driver.szs'))
+        .copy(path.join(packPath, 'Scene', 'Model', 'Driver.szs'));
 
+    await Process.run(
+        'wszst',
+        [
+          'extract',
+          path.join(packPath, 'Demo', 'Award.szs'),
+          '--dest',
+          "${path.join(packPath, 'Demo', 'Award.szs')}.d",
+        ],
+        runInShell: true);
+
+    await Process.run(
+        'wszst',
+        [
+          'extract',
+          path.join(packPath, 'Scene', 'Model', 'Driver.szs'),
+          '--dest',
+          "${path.join(packPath, 'Scene', 'Model', 'Driver.szs')}.d",
+        ],
+        runInShell: true);
     List<SceneComplete> neededFiles = [SceneComplete.award, SceneComplete.race];
     if (enableCustomChar) {
       for (SceneComplete scene in neededFiles) {
@@ -781,11 +832,115 @@ class _PatchWindowState extends State<PatchWindow> {
             scene.index);
       }
     }
+    List<String> allKartsList = [];
+    List<String> driverBrresList = [];
+    List<String> awardBrresList = [];
+    List<String> customStrings = customTxtContent
+        .where((element) => element.split(';')[1].isNotEmpty)
+        .toList();
+    List<String> charNames = [];
+    if (enableCustomChar) {
+      setState(() {
+        progressText = "replacing vehicles files";
+      });
+
+      //extract /Scene/Model/Driver.szs
+      for (String string in customStrings) {
+        String name = string.split(';')[0];
+        charNames.add(name);
+        String customChar = string.split(';')[1];
+        String pathOfCustomDir = getPathOfCustomCharacter(packPath, customChar);
+        //sposta il file in Scene/Model/allkart.
+        List<FileSystemEntity> allKarts = await Directory(pathOfCustomDir)
+            .list()
+            .where((files) => files.path.contains('allkart.szs'))
+            .toList();
+        List<File> drivers = (await Directory(pathOfCustomDir)
+                .list()
+                .where((files) => files.path.contains('driver.brres'))
+                .toList())
+            .whereType<File>()
+            .toList();
+        List<File> awards = (await Directory(pathOfCustomDir)
+                .list()
+                .where((files) => files.path.contains('award.brres'))
+                .toList())
+            .whereType<File>()
+            .toList();
+        if (drivers.isNotEmpty) {
+          driverBrresList.add("${characters3D[name]}.brres");
+          await drivers[0].copy(path.join(packPath, 'Scene', 'Model',
+              'Driver.szs.d', "${characters3D[name]}.brres"));
+        } else {
+          logString(LogType.ERROR,
+              '$pathOfCustomDir does not contain driver.brres. skipping.');
+        }
+
+        if (awards.isNotEmpty) {
+          awardBrresList.add("${characters3D[name]}.brres");
+          await awards[0].copy(path.join(
+              packPath, 'Demo', 'Award.szs.d', "${characters3D[name]}.brres"));
+        } else {
+          logString(LogType.ERROR,
+              '$pathOfCustomDir does not contain award.brres. skipping.');
+        }
+
+        if (allKarts.isNotEmpty) {
+          await File(allKarts[0].path).copy(path.join(packPath, 'Scene',
+              'Model', 'Kart', "${characters3D[name]}-allkart.szs"));
+          allKartsList.add("${characters3D[name]}-allkart.szs");
+        } else {
+          logString(LogType.ERROR,
+              '$pathOfCustomDir does not contain allkart.szs. skipping.');
+        }
+
+        //spostare i vari kart in /Race/Kart
+        List<File> vehiclesFilesInKartsFolder =
+            (await Directory(path.join(pathOfCustomDir, 'karts'))
+                    .list()
+                    .toList())
+                .whereType<File>()
+                .toList();
+
+        for (File file in vehiclesFilesInKartsFolder) {
+          if (!file.path.endsWith(".szs")) continue;
+          String cleanFileName = path.basename(file.path);
+          for (String extraName in characters3D.values) {
+            cleanFileName = cleanFileName.replaceFirst("-$extraName.szs", '');
+          }
+
+          await file.copy(path.join(packPath, 'Race', 'Kart',
+              "$cleanFileName-${characters3D[name]}.szs"));
+        }
+
+        await Process.run(
+            'wszst',
+            [
+              'create',
+              path.join(packPath, 'Demo', 'Award.szs.d'),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'Demo', 'Award.szs'),
+            ],
+            runInShell: true);
+        await Process.run(
+            'wszst',
+            [
+              'create',
+              path.join(packPath, 'Scene', 'Model', 'Driver.szs.d'),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'Scene', 'Model', 'Driver.szs'),
+            ],
+            runInShell: true);
+      }
+    }
 
     setState(() {
       progressText = "deleting tmp files";
     });
     await Future.delayed(const Duration(seconds: 1));
+
     Directory(path.join(packPath, 'Scene', 'UI'))
         .listSync()
         .where((element) => !element.path.endsWith('.szs'))
@@ -793,6 +948,10 @@ class _PatchWindowState extends State<PatchWindow> {
         .forEach((element) async {
       await element.delete(recursive: true);
     });
+    await Directory(path.join(packPath, 'Demo', 'Award.szs.d'))
+        .delete(recursive: true);
+    await Directory(path.join(packPath, 'Scene', 'Model', 'Driver.szs.d'))
+        .delete(recursive: true);
 
     setState(() {
       progressText = "editing xml file";
@@ -804,7 +963,8 @@ class _PatchWindowState extends State<PatchWindow> {
           Directory(path.join(packPath, 'Scene', 'UI'))
               .listSync()
               .whereType<File>()
-              .toList());
+              .toList(),
+          allKartsList);
     });
 
     //     .deleteSync(recursive: true);

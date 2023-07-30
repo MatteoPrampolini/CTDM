@@ -147,22 +147,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         ),
         ListTile(
           enabled: widget.xmlExist,
-          title: const Text('Multiplayer'),
-          onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Multiplayer(widget.packPath))).then(
-                (value) => setState(() => DrawerOnExit().dispatch(context)));
-
-            //GeckoCodes(widget.packPath)));
-            // Update the state of the app.
-            // ...
-          },
-        ),
-        ListTile(
-          enabled: widget.xmlExist,
-          title: const Text('Custom UI'),
+          title: const Text('Custom Menus'),
           onTap: () {
             Navigator.push(
                 context,
@@ -175,6 +160,21 @@ class _CustomDrawerState extends State<CustomDrawer> {
             // ...
           },
         ),
+        ListTile(
+          enabled: widget.xmlExist,
+          title: const Text('Multiplayer'),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Multiplayer(widget.packPath))).then(
+                (value) => setState(() => DrawerOnExit().dispatch(context)));
+
+            //GeckoCodes(widget.packPath)));
+            // Update the state of the app.
+            // ...
+          },
+        )
       ],
     ));
   }

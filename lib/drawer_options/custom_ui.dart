@@ -140,7 +140,7 @@ class _CustomUIState extends State<CustomUI> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Custom UI",
+          "Custom Menus",
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.amber,
