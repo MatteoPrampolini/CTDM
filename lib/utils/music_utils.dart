@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ctdm/utils/log_utils.dart';
@@ -30,14 +31,17 @@ Future<void> fileToBrstm(
     logString(LogType.ERROR, "Cannot convert file. Use windows or linux.");
     return;
   }
+  File normalizeFile = await normalize(File(inputPath),
+      File(path.join(tmpFolder, "NORMALIZE_${path.basename(inputPath)}")));
   String tmpFilePath =
       "${path.join(tmpFolder, path.basenameWithoutExtension(inputPath))}.wav";
 
   String tmpFilePathFast =
       "${path.join(tmpFolder, path.basenameWithoutExtension(inputPath))}_f.wav";
-  double maxVolume = await getMaxVolumePeak(File(inputPath));
-  File normalFile =
-      await audioToWavAdpcm(inputPath, tmpFilePath, maxVolume); //create wav
+
+  double maxVolume = await getMaxVolumePeak(File(normalizeFile.path));
+  File normalFile = await audioToWavAdpcm(
+      normalizeFile.path, tmpFilePath, maxVolume); //create wav
 
   File fastFile =
       await createFastCopy(normalFile.path, tmpFilePathFast); //create fast wav
@@ -68,7 +72,7 @@ giveExecPermissionToBrstmConverter() async {
 
 Future<File> audioToWavAdpcm(
     String inputPath, String tmpFilePath, double maxVolume) async {
-  double targetDb = 1.7;
+  double targetDb = 2.5;
   double dbIncrease = (targetDb - maxVolume);
   //print(dbIncrease);
   await Process.run(
@@ -113,7 +117,7 @@ Future<void> callBrstmConverter(
   // print(filePath);
   String loopPoint = "0";
   // // print(loopPoint);
-  //TODO MORE TESTING
+
   //print(await getLoopPoint(File(filePath)));
   //String loopPoint = '40000';
   // print("fake loopoint: $loopPoint");
@@ -218,7 +222,6 @@ Future<String> getLoopPoint(File input) async {
   } else {
     throw Exception("cannot execute brstm_converter on this platform.");
   }
-  //TODO MORE TESTING
 
   int nSamples =
       int.parse(p.stdout.toString().split("Total samples:")[1].split("\n")[0]) -
@@ -247,4 +250,55 @@ Future<double> getMaxVolumePeak(File input) async {
       .replaceAll(" dB", ""));
   //print("${path.basename(input.path)} volume: $maxVolume");
   return maxVolume;
+}
+
+Future<File> _runCommandToNormalize(
+    File inputFile, File outputFile, String inputString) async {
+  Map<String, dynamic> data = json.decode(inputString);
+
+  String measuredI = data["input_i"];
+  String measuredTP = data["input_tp"];
+  String measuredLRA = data["input_lra"];
+  double targetOffset = 0.0; // Imposta l'offset su 0.0 come valore predefinito
+
+  // Calcola il valore della soglia di loudness
+  String measuredThreshold =
+      (double.parse(measuredI) - double.parse(measuredLRA)).toString();
+  String inputFilePath = inputFile.path;
+  String outputFilePath = outputFile.path;
+
+  List<String> ffmpegArgs = [
+    '-i',
+    inputFilePath,
+    '-af',
+    'loudnorm=I=-5.0:lra=1:tp=-0.0'
+        ':measured_I=$measuredI:measured_LRA=$measuredLRA:measured_TP=$measuredTP'
+        ':measured_thresh=$measuredThreshold:offset=${targetOffset.toStringAsFixed(2)}:linear=true',
+    outputFilePath,
+  ];
+
+  await Process.run('ffmpeg', ffmpegArgs, runInShell: true);
+
+  return outputFile;
+}
+
+Future<File> normalize(File inputFile, File output) async {
+  ProcessResult p = await Process.run(
+    'ffmpeg',
+    [
+      '-i',
+      inputFile.path,
+      '-af',
+      "loudnorm=print_format=json",
+      '-f',
+      'null',
+      '/dev/null',
+      '-hide_banner',
+    ],
+  );
+
+  String jsonString =
+      "{${p.stderr.toString().split('[Parsed_loudnorm')[1].split('{')[1]}";
+
+  return _runCommandToNormalize(inputFile, output, jsonString);
 }
