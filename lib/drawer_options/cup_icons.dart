@@ -195,7 +195,7 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
                                   },
                                 if (Platform.isLinux)
                                   {
-                                    pr = await Process.start('open',
+                                    pr = await Process.start('xdg-open',
                                         [path.join(widget.packPath, 'Icons')]),
                                     await pr.exitCode,
                                     //await
