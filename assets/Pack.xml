@@ -34,7 +34,17 @@
 		<file disc="/Scene/UI/MenuSingle_J.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
   		<file disc="/Scene/UI/MenuSingle_K.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
 		<file disc="/Scene/UI/MenuSingle.szs" external="/PACKNAME/Scene/UI/MenuSingle.szs" />
-
+		<file disc="/Scene/UI/MenuSingle_R.szs" external="/PACKNAME/Scene/UI/MenuSingle.szs" />
+		<file disc="/Scene/UI/Race_E.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_F.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_G.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_I.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_S.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_M.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_Q.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_U.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_J.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_K.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
 		<!--MY COMMONS-->
 		<!--END MY TRACKS-->
 		<!--CUSTOM CHARACTERS-->

@@ -112,6 +112,7 @@ class _CustomCharactersState extends State<CustomCharacters> {
                           Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: RichText(
+                                textAlign: TextAlign.center,
                                 text: TextSpan(
                                   text: 'Your workspace has ',
                                   style: const TextStyle(

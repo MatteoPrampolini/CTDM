@@ -265,6 +265,7 @@ getOriginalFileNameForCharacter(int charIndex, bool is32) {
 }
 
 int getNumberOfCustomCharacters(File charTxt) {
+  if (!charTxt.existsSync()) return 0;
   return charTxt
       .readAsLinesSync()
       .where((element) => element.split(';')[1].isNotEmpty)
@@ -309,6 +310,7 @@ enum Size { large, medium, small }
 
 class CustomCharacter {
   Directory dir;
+  late String dirBasename;
   late String name;
   late File? icon64;
   late File? icon32;
@@ -319,18 +321,18 @@ class CustomCharacter {
   late File configFile;
   CustomCharacter(this.dir) {
     configFile = File(path.join(dir.path, 'ctdm_settings.txt'));
-    name = path.basename(dir.path);
+    dirBasename = path.basename(dir.path);
     icon64 = File(path.join(dir.path, 'icons', 'icon64.png'));
     icon32 = File(path.join(dir.path, 'icons', 'icon32.png'));
 
     if (configFile.existsSync()) {
       size =
           Size.values[int.parse(configFile.readAsLinesSync()[0].split(';')[1])];
-
-      //print(name + size.name);
+      name = configFile.readAsLinesSync()[1].split(';')[1];
     } else {
-      configFile.writeAsStringSync("size;2", mode: FileMode.writeOnly);
+      configFile.writeAsStringSync("size;2\nname; ", mode: FileMode.writeOnly);
       size = Size.small;
+      name = " ";
     }
 
     _createFilelist();
@@ -352,9 +354,9 @@ class CustomCharacter {
     }
   }
 
-  void changeSize(int selectedSizeIndex) {
+  void rewriteFile(int selectedSizeIndex, String name) {
     size = Size.values[selectedSizeIndex];
-    configFile.writeAsStringSync("size;$selectedSizeIndex",
+    configFile.writeAsStringSync("size;$selectedSizeIndex\nname;$name",
         mode: FileMode.writeOnly);
     _createFilelist();
   }
@@ -393,4 +395,79 @@ String findFirstKeyByValue(Map<String, String> map, String targetValue) {
     }
   }
   return '';
+}
+
+final Map<String, String> bmgCharacterMap = {
+  'Baby Mario': '232e',
+  'Baby Luigi': '2334',
+  'Baby Peach': '2329',
+  'Baby Daisy': '232c',
+  'Toad': '2330',
+  'Toadette': '2335',
+  'Koopa Troopa': '2336',
+  'Dry Bones': '232d',
+  'Mario': '2328',
+  'Luigi': '232f',
+  'Peach': '2338',
+  'Daisy': '2337',
+  'Yoshi': '2332',
+  'Birdo': '2339',
+  'Diddy Kong': '233a',
+  'Bowser Jr': '233c',
+  'Wario': '2333',
+  'Waluigi': '232a',
+  'Donkey Kong': '2331',
+  'Bowser': '232b',
+  'King Boo': '233b',
+  'Rosalina': '233f',
+  'Funky Kong': '233e',
+  'Dry Bowser': '233d',
+};
+
+String replaceCharacterNameInCommonTxt(
+    String packPath, String commonTxtContents, String customTxtContent) {
+  List<String> characterUsed = customTxtContent
+      .split('\n')
+      .where((line) =>
+          line.isNotEmpty && line.replaceRange(0, line.indexOf(';'), '') != ";")
+      .toList();
+
+  List<CustomCharacter> chars = characterUsed
+      .map((dirName) => CustomCharacter(Directory(path.join(
+          path.dirname(path.dirname(packPath)),
+          'myCharacters',
+          dirName.split(';')[1]))))
+      .toList();
+
+  int i = 0;
+  for (CustomCharacter char in chars) {
+    String vanillaCharname = characterUsed[i].split(';')[0];
+    String? id = bmgCharacterMap[vanillaCharname];
+
+    if (id == null) {
+      return commonTxtContents;
+    }
+
+    commonTxtContents = modifyValueByKey(id, char.name, commonTxtContents);
+
+    i += 1;
+  }
+
+  return commonTxtContents;
+}
+
+String modifyValueByKey(String key, String newValue, String commonTxtContent) {
+  final RegExp regex = RegExp(r'^\s*' + key.trim() + r'\s*=\s*(.*?)(?:\n|\r|$)',
+      multiLine: true);
+  final match = regex.firstMatch(commonTxtContent);
+
+  if (match != null) {
+    // Update the content directly using replaceFirst method
+    String modifiedContent =
+        commonTxtContent.replaceFirst(regex, '${key.trim()} = $newValue\n');
+    return modifiedContent;
+  } else {
+    // The key specified doesn't exist, you can handle this case here if necessary.
+    return commonTxtContent;
+  }
 }

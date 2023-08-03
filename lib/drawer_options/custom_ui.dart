@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:ctdm/utils/filepath_utils.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -40,6 +41,25 @@ enum SceneComplete {
   title_
 }
 
+int getNofCustomUiSelected(String packPath) {
+  File uiFile = File(path.join(packPath, 'ui.txt'));
+  if (!uiFile.existsSync()) {
+    return 0;
+  }
+  List<String> a = uiFile
+      .readAsStringSync()
+      .replaceAll(RegExp(r'[\[\]]'), '')
+      .trim()
+      .split(',')
+      .toList();
+
+  return a
+      .map((string) => string.toLowerCase() == "true")
+      .toList()
+      .takeWhile((value) => value == true)
+      .length;
+}
+
 void saveUIConfig(File uiFile, List<bool> values) {
   uiFile.writeAsStringSync(jsonEncode(values));
 }
@@ -75,20 +95,13 @@ List<bool> loadUIconfig(String packPath) {
 // }
 
 File getFileFromIndex(String packPath, int index) {
+  String originalDiscPath = getOriginalDiscPath(packPath);
   String filePath = '';
   if (index % 2 == 0) {
     //from ORIGINAL_DISC
     String basename =
         '${Scene.values.elementAt((index / 2).floor()).name.toCapitalized()}.szs';
-    filePath = path.join(
-        path.dirname(
-          (path.dirname(packPath)),
-        ),
-        'ORIGINAL_DISC',
-        'files',
-        'Scene',
-        'UI',
-        basename);
+    filePath = path.join(originalDiscPath, 'files', 'Scene', 'UI', basename);
   } else {
     //from assets
     String basename =
@@ -286,6 +299,9 @@ String createXmlStringForUi(
         i == SceneComplete.menuSingle_.index) {
       continue;
     }
+    if (i == SceneComplete.race_.index || i == SceneComplete.race_.index) {
+      continue;
+    }
     String basename = path.basename(getFileFromIndex(packPath, i).path);
     if (!sceneFiles.any((element) => path.basename(element.path) == basename)) {
       continue;
@@ -294,6 +310,9 @@ String createXmlStringForUi(
     if (i % 2 == 0) {
       contents +=
           '\t\t<file disc="/Scene/UI/$basename" external="/v9/Scene/UI/$basename"/>\n';
+      //include korean weird naming convention
+      contents +=
+          '\t\t<file disc="/Scene/UI/${path.basenameWithoutExtension(basename)}_R.szs" external="/v9/Scene/UI/$basename"/>\n';
     } else {
       String basenameNoLetter = basename.replaceAll(RegExp(r'_.*'), '');
       String packName = path.basename(packPath);

@@ -198,6 +198,8 @@ class _CupTableRowState extends State<CupTableRow> {
                     },
                     child: Text(
                       widget.track.path,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.start,
                       style: const TextStyle(color: Colors.black87),
                     ),
@@ -324,6 +326,8 @@ class _CupTableRowState extends State<CupTableRow> {
                               },
                               child: Text(
                                 path.basename(musicFolder!),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(color: Colors.black87),
                               ),

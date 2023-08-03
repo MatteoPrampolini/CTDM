@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/drawer_options/multiplayer.dart';
 import 'package:ctdm/utils/character_utiles.dart';
+import 'package:ctdm/utils/filepath_utils.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:ctdm/utils/music_utils.dart';
@@ -282,8 +283,8 @@ Future<String> createBMGList(String packPath) async {
 ///Wrapper function. This function calls multiple functions.
 ///
 ///At the end of the execution MenuSingle_U.szs will be patched with the new bmgs.
-Future<void> editMenuSingle(
-    String workspace, String packPath, List<bool> customUI) async {
+Future<void> editMenuSingle(String workspace, String packPath,
+    List<bool> customUI, String customTxtContent) async {
   //copy MenuSingle_U.szs
 
   File origMenuFile;
@@ -306,8 +307,14 @@ Future<void> editMenuSingle(
         '--dest',
         path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'),
       ],
-      runInShell: false);
+      runInShell: true);
   //MenuSingle_U.szs (file) extract  -> MenuSingle_U.d (folder)
+  File menuSingleTxt =
+      File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'));
+
+  await menuSingleTxt.writeAsString(replaceCharacterNameInCommonTxt(
+      packPath, menuSingleTxt.readAsStringSync(), customTxtContent));
+
   await Process.run(
       'wszst',
       [
@@ -316,7 +323,7 @@ Future<void> editMenuSingle(
         '--dest',
         path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d'),
       ],
-      runInShell: false);
+      runInShell: true);
   //edit MenuSingle_U.txt with tracks.bmg.txt content
   String contents = await trackBmgTxt.readAsString();
   contents = contents.replaceAll(RegExp(r'#BMG'), '');
@@ -336,7 +343,7 @@ Future<void> editMenuSingle(
         path.join(
             packPath, 'Scene', 'UI', 'MenuSingle_U.d', 'message', 'Common.bmg'),
       ],
-      runInShell: false);
+      runInShell: true);
   //MenuSingle_U.szs (file) <- compact MenuSingle_U.d (folder)
   await Process.run(
       'wszst',
@@ -347,7 +354,7 @@ Future<void> editMenuSingle(
         '--dest',
         path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
       ],
-      runInShell: false);
+      runInShell: true);
 
   // } on Exception catch (_) {
   //   logString(LogType.ERROR, _.toString());
@@ -526,6 +533,7 @@ class _PatchWindowState extends State<PatchWindow> {
   }
 
   void patch(String packPath) async {
+    final String originalDiscPath = getOriginalDiscPath(packPath);
     patchStatus = PatchingStatus.running;
     //create folders
     createFolders(packPath);
@@ -571,11 +579,8 @@ class _PatchWindowState extends State<PatchWindow> {
     });
 
     //patch MenuSingle_U.szs with the new bmgs.
-    await editMenuSingle(
-      workspace,
-      packPath,
-      customUI,
-    );
+    await editMenuSingle(workspace, packPath, customUI,
+        await File(path.join(packPath, 'characters.txt')).readAsString());
 
     //create Common/xxx folders
     await trackPathToCommon(workspace, packPath, trackList);
@@ -607,8 +612,8 @@ class _PatchWindowState extends State<PatchWindow> {
         'ending_demo.szs'
       ];
       for (String awardRace in preAwardsRaces) {
-        await File(path.join(path.dirname(path.dirname(packPath)),
-                'ORIGINAL_DISC', 'files', 'Race', 'Course', awardRace))
+        await File(path.join(
+                originalDiscPath, 'files', 'Race', 'Course', awardRace))
             .copy(path.join(packPath, 'Race', 'Course', 'tmp', awardRace));
       }
       //copy lecode-XXX.bin from assets
@@ -762,11 +767,10 @@ class _PatchWindowState extends State<PatchWindow> {
     setState(() {
       progressText = "copying ui files";
     });
-    await File(path.join(path.dirname(path.dirname(packPath)), 'ORIGINAL_DISC',
-            'files', 'Demo', 'Award.szs'))
+    await File(path.join(originalDiscPath, 'files', 'Demo', 'Award.szs'))
         .copy(path.join(packPath, 'Demo', 'Award.szs'));
-    await File(path.join(path.dirname(path.dirname(packPath)), 'ORIGINAL_DISC',
-            'files', 'Scene', 'Model', 'Driver.szs'))
+    await File(path.join(
+            originalDiscPath, 'files', 'Scene', 'Model', 'Driver.szs'))
         .copy(path.join(packPath, 'Scene', 'Model', 'Driver.szs'));
 
     await Process.run(
@@ -788,6 +792,12 @@ class _PatchWindowState extends State<PatchWindow> {
           "${path.join(packPath, 'Scene', 'Model', 'Driver.szs')}.d",
         ],
         runInShell: true);
+
+    //it doesn't matter if raceU gets overwritten in the next for
+    File raceU = getFileFromIndex(packPath, SceneComplete.race_.index);
+    await raceU
+        .copy(path.join(packPath, 'Scene', 'UI', path.basename(raceU.path)));
+
     List<SceneComplete> neededFiles = [SceneComplete.award, SceneComplete.race];
     if (enableCustomChar) {
       for (SceneComplete scene in neededFiles) {
@@ -807,6 +817,69 @@ class _PatchWindowState extends State<PatchWindow> {
       await f.copy(path.join(packPath, 'Scene', 'UI', path.basename(f.path)));
     }
 
+    await Process.run(
+        'wszst',
+        [
+          'extract',
+          path.join(packPath, 'Scene', 'UI', 'Race_U.szs'),
+          '--dest',
+          "${path.join(packPath, 'Scene', 'UI', 'Race_U.szs')}.d",
+        ],
+        runInShell: true);
+    await Process.run(
+        'wbmgt',
+        [
+          'decode',
+          path.join(
+              packPath, 'Scene', 'UI', 'Race_U.szs.d', 'message', 'Common.bmg'),
+          '--dest',
+          path.join(
+              packPath, 'Scene', 'UI', 'Race_U.szs.d', 'message', 'Common.txt'),
+        ],
+        runInShell: true);
+
+    File raceUcommon = File(path.join(
+        packPath, 'Scene', 'UI', 'Race_U.szs.d', 'message', 'Common.txt'));
+    await raceUcommon.writeAsString(replaceCharacterNameInCommonTxt(
+        packPath,
+        raceUcommon.readAsStringSync(),
+        await File(path.join(packPath, 'characters.txt')).readAsString()));
+
+    File common = File(path.join(
+        packPath, 'Scene', 'UI', 'Race_U.szs.d', 'message', 'Common.txt'));
+    List<String> tracksBmgContents =
+        await File(path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt'))
+            .readAsLines();
+    tracksBmgContents.removeRange(0, 4);
+
+    String editedContent =
+        "${(await common.readAsString()).split('270f	= ?')[0]}270f	= ?\n${tracksBmgContents.join('\n')}";
+
+    await common.writeAsString(editedContent, mode: FileMode.write);
+
+    await Process.run(
+        'wbmgt',
+        [
+          'encode',
+          path.join(
+              packPath, 'Scene', 'UI', 'Race_U.szs.d', 'message', 'Common.txt'),
+          '--dest',
+          path.join(
+              packPath, 'Scene', 'UI', 'Race_U.szs.d', 'message', 'Common.bmg'),
+          '-o',
+        ],
+        runInShell: true);
+
+    await Process.run(
+        'wszst',
+        [
+          'create',
+          path.join(packPath, 'Scene', 'UI', 'Race_U.szs.d'),
+          '--overwrite',
+          '--dest',
+          path.join(packPath, 'Scene', 'UI', 'Race_U.szs'),
+        ],
+        runInShell: true);
     if (enableCustomChar) {
       setState(() {
         progressText = "patching ui files with custom characters";
@@ -823,6 +896,7 @@ class _PatchWindowState extends State<PatchWindow> {
               "${path.join(packPath, 'Scene', 'UI', baseName)}.d",
             ],
             runInShell: true);
+
         await patchSzsWithImages(
             packPath,
             Directory(
@@ -830,6 +904,59 @@ class _PatchWindowState extends State<PatchWindow> {
             ),
             customTxtContent,
             scene.index);
+      }
+
+      if (await File(path.join(packPath, 'Scene', 'UI', 'Award_U.szs'))
+          .exists()) {
+        await Process.run(
+            'wszst',
+            [
+              'extract',
+              path.join(packPath, 'Scene', 'UI', 'Award_U.szs'),
+              '--dest',
+              path.join(packPath, 'Scene', 'UI', 'Award_U.szs.d'),
+            ],
+            runInShell: true);
+        await Process.run(
+            'wbmgt',
+            [
+              'decode',
+              path.join(packPath, 'Scene', 'UI', 'Award_U.szs.d', 'message',
+                  'Common.bmg'),
+              '--dest',
+              path.join(packPath, 'Scene', 'UI', 'Award_U.szs.d', 'message',
+                  'Common.txt'),
+            ],
+            runInShell: true);
+
+        File awardCommonTxt = File(path.join(
+            packPath, 'Scene', 'UI', 'Award_U.szs.d', 'message', 'Common.txt'));
+        await awardCommonTxt.writeAsString(replaceCharacterNameInCommonTxt(
+            packPath,
+            awardCommonTxt.readAsStringSync(),
+            await File(path.join(packPath, 'characters.txt')).readAsString()));
+        await Process.run(
+            'wbmgt',
+            [
+              'encode',
+              path.join(packPath, 'Scene', 'UI', 'Award_U.szs.d', 'message',
+                  'Common.txt'),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'Scene', 'UI', 'Award_U.szs.d', 'message',
+                  'Common.bmg'),
+            ],
+            runInShell: true);
+        await Process.run(
+            'wszst',
+            [
+              'create',
+              path.join(packPath, 'Scene', 'UI', 'Award_U.szs.d'),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'Scene', 'UI', 'Award_U.szs'),
+            ],
+            runInShell: true);
       }
     }
     List<String> allKartsList = [];

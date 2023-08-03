@@ -16,6 +16,8 @@ class _CharEditorState extends State<CharEditor> {
   int selectedChar = 0;
   int selectedSizeIndex = 2;
   late List<CustomCharacter> charList;
+  final TextEditingController _textEditingController = TextEditingController();
+  String? _errorText;
   final Map<String, int> dropdownItems = {
     'Large': 0,
     'Medium': 1,
@@ -26,11 +28,13 @@ class _CharEditorState extends State<CharEditor> {
     super.initState();
     charList = createListOfCharacter(widget.packPath);
     selectedSizeIndex = charList[selectedChar].size.index;
+    _textEditingController.text = charList[selectedChar].name;
   }
 
   @override
   Widget build(BuildContext context) {
     selectedSizeIndex = charList[selectedChar].size.index;
+
     return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -46,13 +50,14 @@ class _CharEditorState extends State<CharEditor> {
             child: Container(
               decoration:
                   BoxDecoration(border: Border.all(color: Colors.amberAccent)),
-              height: MediaQuery.of(context).size.height - 30,
+              height: MediaQuery.of(context).size.height - 20,
               width: MediaQuery.of(context).size.width / 5,
               child: SingleChildScrollView(
                   child: Column(children: [
                 const Padding(
                   padding: EdgeInsets.only(top: 5.0),
                   child: Text("CHARACTERS",
+                      textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.amber, fontSize: 30)),
                 ),
                 const Divider(),
@@ -60,10 +65,18 @@ class _CharEditorState extends State<CharEditor> {
                   ListTile(
                     leading: const Icon(Icons.chevron_right),
                     selected: i == selectedChar,
-                    title: Text(charList[i].name),
+                    title: Text(
+                      charList[i].dirBasename,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     onTap: () => {
                       setState(
-                        () => selectedChar = i,
+                        () => {
+                          selectedChar = i,
+                          _textEditingController.text =
+                              charList[selectedChar].name
+                        },
                       )
                     },
                   ),
@@ -169,8 +182,9 @@ class _CharEditorState extends State<CharEditor> {
                                     onChanged: (int? newIndex) {
                                       setState(() {
                                         selectedSizeIndex = newIndex!;
-                                        charList[selectedChar]
-                                            .changeSize(selectedSizeIndex);
+                                        charList[selectedChar].rewriteFile(
+                                            selectedSizeIndex,
+                                            charList[selectedChar].name);
                                         FocusScope.of(context)
                                             .requestFocus(FocusNode());
                                       });
@@ -184,7 +198,36 @@ class _CharEditorState extends State<CharEditor> {
                                     }).toList(),
                                   ),
                                 ),
-                              )
+                              ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.topCenter,
+                                  child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width / 3.4,
+                                    child: TextFormField(
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                      controller: _textEditingController,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _errorText =
+                                              NoSpecialCharactersValidator
+                                                  .validate(value);
+                                        });
+                                      },
+                                      decoration: InputDecoration(
+                                        border: const OutlineInputBorder(),
+                                        hintText: 'Insert character name',
+                                        labelText: 'Character name',
+                                        errorText: _errorText,
+                                        errorStyle:
+                                            const TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ]),
                         const Divider(),
                         FileCheck(
@@ -227,7 +270,7 @@ class _CharEditorState extends State<CharEditor> {
                         ),
                         const Divider(),
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20.0),
+                          padding: const EdgeInsets.symmetric(vertical: 12.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -248,8 +291,38 @@ class _CharEditorState extends State<CharEditor> {
                                           }
                                       },
                                   child: const Text("open folder")),
+                              SizedBox(
+                                height: 28,
+                                width: 200,
+                                child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.amberAccent),
+                                    onPressed: () => setState(() {
+                                          charList[selectedChar].rewriteFile(
+                                              selectedSizeIndex,
+                                              _textEditingController.text);
+                                          charList = createListOfCharacter(
+                                              widget.packPath);
+                                          selectedSizeIndex =
+                                              charList[selectedChar].size.index;
+                                          _textEditingController.text =
+                                              charList[selectedChar].name;
+                                        }),
+                                    child: const Text(
+                                      "Save",
+                                      style: TextStyle(
+                                          color: Colors.black87, fontSize: 20),
+                                    )),
+                              ),
                               ElevatedButton(
-                                  onPressed: () => setState(() {}),
+                                  onPressed: () => setState(() {
+                                        charList = createListOfCharacter(
+                                            widget.packPath);
+                                        selectedSizeIndex =
+                                            charList[selectedChar].size.index;
+                                        _textEditingController.text =
+                                            charList[selectedChar].name;
+                                      }),
                                   child: const Text("refresh")),
                             ],
                           ),
@@ -305,5 +378,25 @@ class _FileCheckState extends State<FileCheck> {
               ),
             )
     ]);
+  }
+}
+
+class NoSpecialCharactersValidator {
+  static String? validate(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required.';
+    }
+    // Controlla la lunghezza del testo
+    if (value.length >= 25) {
+      return 'Text length must be less than 20 characters.';
+    }
+    // Definiamo l'espressione regolare per accettare solo lettere, numeri e spazi.
+    RegExp regex = RegExp(r'^[a-zA-Z0-9\s]+$');
+
+    if (!regex.hasMatch(value)) {
+      return 'Special characters are not allowed.';
+    }
+
+    return null; // Il valore è valido
   }
 }

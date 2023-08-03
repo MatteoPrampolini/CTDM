@@ -158,7 +158,7 @@ class _GeckoCodesState extends State<GeckoCodes> {
           backgroundColor: Colors.amber,
           iconTheme: IconThemeData(color: Colors.red.shade700),
         ),
-        body: Stack(children: [
+        body: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Padding(
             padding: const EdgeInsets.only(top: 10.0),
             child: Container(
@@ -178,7 +178,11 @@ class _GeckoCodesState extends State<GeckoCodes> {
                   ListTile(
                     leading: const Icon(Icons.chevron_right),
                     selected: i == selectedCode,
-                    title: Text(codes[i].name),
+                    title: Text(
+                      codes[i].name,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
                     onTap: () => {
                       setState(
                         () => selectedCode = i,
@@ -194,10 +198,12 @@ class _GeckoCodesState extends State<GeckoCodes> {
               ])),
             ),
           ),
-          Center(
+          Padding(
+            padding:
+                EdgeInsets.only(right: MediaQuery.of(context).size.width / 4),
             child: SizedBox(
               width: MediaQuery.of(context).size.width / 2,
-              height: 500,
+              height: 700,
               child: Column(
                 children: [
                   SizedBox(
@@ -236,8 +242,8 @@ class _GeckoCodesState extends State<GeckoCodes> {
                           )
                         ],
                       )),
-                  SizedBox(
-                    height: 200,
+                  Expanded(
+                    flex: 4,
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -253,6 +259,7 @@ class _GeckoCodesState extends State<GeckoCodes> {
                         ]),
                   ),
                   Expanded(
+                    flex: 1,
                     child: SizedBox(
                       height: 100,
                       child: Padding(

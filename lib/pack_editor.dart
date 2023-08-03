@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ctdm/custom_drawer.dart';
 import 'package:ctdm/drawer_options/cup_icons.dart';
+import 'package:ctdm/drawer_options/custom_ui.dart';
 import 'package:ctdm/patch_window.dart';
 import 'package:ctdm/utils/character_utiles.dart';
 import 'package:ctdm/utils/excel.dart';
@@ -50,7 +51,16 @@ class _PackEditorState extends State<PackEditor> {
   late bool xmlExist = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late bool canPatch = false;
-  late List<bool> checks = [false, false, false, false, false, false, false];
+  late List<bool> checks = [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ];
   final int optIndex = 4;
   final List<String> steps = [
     "valid pack name",
@@ -59,10 +69,11 @@ class _PackEditorState extends State<PackEditor> {
     'cup icons',
     'gecko codes',
     'custom characters',
+    'custom menus',
     'multiplayer'
   ];
   void checkEverything() async {
-    checks = [false, false, false, false, false, false, false];
+    checks = [false, false, false, false, false, false, false, false];
     checks[0] = !widget.packPath.contains('tmp_pack_');
     checks[1] = File(path.join(widget.packPath, 'config.txt')).existsSync();
     checks[2] = File(path.join(widget.packPath, 'lpar.txt')).existsSync();
@@ -94,9 +105,10 @@ class _PackEditorState extends State<PackEditor> {
         0) {
       checks[5] = true;
     }
+    checks[6] = getNofCustomUiSelected(widget.packPath) > 0;
     String regionContent = readRegionFile(widget.packPath);
     if (regionContent != "") {
-      checks[6] = regionContent.split(";").last == "true";
+      checks[7] = regionContent.split(";").last == "true";
     }
 
     canPatch = checks.take(optIndex).every((element) => element == true);
@@ -205,19 +217,22 @@ class _PackEditorState extends State<PackEditor> {
                               .textTheme
                               .headlineMedium
                               ?.fontSize)),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: GridView.count(
-                        crossAxisCount: 1,
-                        shrinkWrap: true,
-                        childAspectRatio: 1 / 0.086,
-                        children: <Widget>[
-                          for (var step in steps)
-                            ListTile(
+                  SizedBox(
+                    height: steps.length * 45 + 20,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: ListView.builder(
+                        itemCount: steps.length,
+                        itemBuilder: (context, index) {
+                          var step = steps[index];
+                          return SizedBox(
+                            height: 45,
+                            width: 300,
+                            child: ListTile(
                               onTap: null,
-                              enabled: checks[steps.indexOf(step)],
+                              enabled: checks[index],
                               title: Text(step),
-                              trailing: steps.indexOf(step) >= optIndex
+                              trailing: index >= optIndex
                                   ? const Text(
                                       "[opt]",
                                       style: TextStyle(color: Colors.red),
@@ -225,7 +240,7 @@ class _PackEditorState extends State<PackEditor> {
                                   : null,
                               leading: Checkbox(
                                 splashRadius: 0,
-                                value: checks[steps.indexOf(step)],
+                                value: checks[index],
                                 activeColor: Colors.amberAccent,
                                 fillColor: MaterialStateProperty.all(
                                     Colors.amberAccent),
@@ -233,8 +248,11 @@ class _PackEditorState extends State<PackEditor> {
                                     color: Colors.white38, width: 2),
                                 onChanged: null,
                               ),
-                            )
-                        ]),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

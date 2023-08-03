@@ -63,19 +63,27 @@ class NotifyErrorWidget extends StatelessWidget {
                           Theme.of(context).textTheme.headlineMedium?.fontSize),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    error,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.fontSize),
+                  padding:
+                      const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+                  child: SizedBox(
+                    height: 150,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        addNewLinesEveryNCharacters(error, 60),
+                        overflow: TextOverflow.fade,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: Theme.of(context)
+                                .textTheme
+                                .headlineMedium
+                                ?.fontSize),
+                      ),
+                    ),
                   ),
                 ),
                 Container(
-                  height: 300,
+                  height: 250,
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.redAccent)),
                   child: SingleChildScrollView(
@@ -118,7 +126,7 @@ Future<void> _main() async {
         .split(RegExp(r'LE-CODE Tool v'))[1]
         .substring(0, 4));
     if (version < 2.33) {
-      //version could probably be lower, but who cares.
+      //https://szs.wiimm.de/changelog.html
 
       prefs.setBool('szs', false);
       logString(
@@ -157,7 +165,7 @@ Future<void> _main() async {
   //   prefs.setString('isoVersion', 'PAL');
   // }
 
-  await DesktopWindow.setMinWindowSize(const Size(1100, 1100));
+  await DesktopWindow.setMinWindowSize(const Size(1300, 1000));
 
   runApp(const MyApp());
 }
@@ -427,4 +435,22 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         )));
   }
+}
+
+String addNewLinesEveryNCharacters(String input, int n) {
+  StringBuffer output = StringBuffer();
+  int length = input.length;
+
+  for (int i = 0; i < length; i += n) {
+    int end = i + n;
+    if (end > length) {
+      end = length;
+    }
+    output.write(input.substring(i, end));
+    if (end < length) {
+      output.writeln();
+    }
+  }
+
+  return output.toString();
 }
