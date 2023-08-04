@@ -43,6 +43,7 @@ class _CustomCharactersState extends State<CustomCharacters> {
     mediumCharacters =
         allCharacters.sublist(charactersPerPage, charactersPerPage * 2);
     heavyCharacters = allCharacters.sublist(charactersPerPage * 2);
+
     txt = File(path.join(widget.packPath, 'characters.txt'));
 
     if (!txt.existsSync()) {

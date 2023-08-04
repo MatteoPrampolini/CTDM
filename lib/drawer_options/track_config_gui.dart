@@ -64,42 +64,42 @@ Track parseTrackLine(String trackLine) {
 List<Cup> getNintendoCups() {
   List<Cup> nintendo = [];
   List<Track> trackList = [
-    Track('Luigi Circuit', 11, 11, '--', TrackType.base),
-    Track('Moo Moo Meadows', 12, 12, '--', TrackType.base),
-    Track('Mushroom Gorge', 13, 13, '--', TrackType.base),
-    Track("Toad's Factory", 14, 14, '--', TrackType.base),
+    Track('Luigi Circuit', 11, 11, 'original file', TrackType.base),
+    Track('Moo Moo Meadows', 12, 12, 'original file', TrackType.base),
+    Track('Mushroom Gorge', 13, 13, 'original file', TrackType.base),
+    Track("Toad's Factory", 14, 14, 'original file', TrackType.base),
 
-    Track('Mario Circuit', 21, 21, '--', TrackType.base),
-    Track('Coconut Mall', 22, 22, '--', TrackType.base),
-    Track('DK Summit', 23, 23, '--', TrackType.base),
-    Track("Wario's Gold Mine", 24, 24, '--', TrackType.base),
+    Track('Mario Circuit', 21, 21, 'original file', TrackType.base),
+    Track('Coconut Mall', 22, 22, 'original file', TrackType.base),
+    Track('DK Summit', 23, 23, 'original file', TrackType.base),
+    Track("Wario's Gold Mine", 24, 24, 'original file', TrackType.base),
     //CONTINUA TU
-    Track('Daisy Circuit', 31, 31, '--', TrackType.base),
-    Track('Koopa Cape', 32, 32, '--', TrackType.base),
-    Track('Maple Treeway', 33, 33, '--', TrackType.base),
-    Track('Grumble Volcano', 34, 34, '--', TrackType.base),
-    Track('Dry Dry Ruins', 41, 41, '--', TrackType.base),
-    Track('Moonview Highway', 42, 42, '--', TrackType.base),
-    Track("Bowser's Castle", 43, 43, '--', TrackType.base),
-    Track('Rainbow Road', 44, 44, '--', TrackType.base),
+    Track('Daisy Circuit', 31, 31, 'original file', TrackType.base),
+    Track('Koopa Cape', 32, 32, 'original file', TrackType.base),
+    Track('Maple Treeway', 33, 33, 'original file', TrackType.base),
+    Track('Grumble Volcano', 34, 34, 'original file', TrackType.base),
+    Track('Dry Dry Ruins', 41, 41, 'original file', TrackType.base),
+    Track('Moonview Highway', 42, 42, 'original file', TrackType.base),
+    Track("Bowser's Castle", 43, 43, 'original file', TrackType.base),
+    Track('Rainbow Road', 44, 44, 'original file', TrackType.base),
 
-    Track('GCN Peach Beach', 51, 51, '--', TrackType.base),
-    Track('DS Yoshi Falls', 52, 52, '--', TrackType.base),
-    Track('SNES Ghost Valley 2', 53, 53, '--', TrackType.base),
-    Track('N64 Mario Raceway', 54, 54, '--', TrackType.base),
-    Track('N64 Sherbert Land', 61, 61, '--', TrackType.base),
-    Track('GBA Shy Guy Beach', 62, 62, '--', TrackType.base),
-    Track('DS Delfino Square', 63, 63, '--', TrackType.base),
-    Track('GCN Waluigi Stadium', 64, 64, '--', TrackType.base),
+    Track('GCN Peach Beach', 51, 51, 'original file', TrackType.base),
+    Track('DS Yoshi Falls', 52, 52, 'original file', TrackType.base),
+    Track('SNES Ghost Valley 2', 53, 53, 'original file', TrackType.base),
+    Track('N64 Mario Raceway', 54, 54, 'original file', TrackType.base),
+    Track('N64 Sherbert Land', 61, 61, 'original file', TrackType.base),
+    Track('GBA Shy Guy Beach', 62, 62, 'original file', TrackType.base),
+    Track('DS Delfino Square', 63, 63, 'original file', TrackType.base),
+    Track('GCN Waluigi Stadium', 64, 64, 'original file', TrackType.base),
 
-    Track('DS Desert Hills', 71, 71, '--', TrackType.base),
-    Track('GBA Bowser Castle 3', 72, 72, '--', TrackType.base),
-    Track("N64 DK's Jungle Parkway", 73, 73, '--', TrackType.base),
-    Track('GCN Mario Circuit', 74, 74, '--', TrackType.base),
-    Track('SNES Mario Circuit 3', 81, 81, '--', TrackType.base),
-    Track('DS Peach Gardens', 82, 82, '--', TrackType.base),
-    Track('GCN DK Mountain', 83, 83, '--', TrackType.base),
-    Track("N64 Bowser's Castle", 84, 84, '--', TrackType.base),
+    Track('DS Desert Hills', 71, 71, 'original file', TrackType.base),
+    Track('GBA Bowser Castle 3', 72, 72, 'original file', TrackType.base),
+    Track("N64 DK's Jungle Parkway", 73, 73, 'original file', TrackType.base),
+    Track('GCN Mario Circuit', 74, 74, 'original file', TrackType.base),
+    Track('SNES Mario Circuit 3', 81, 81, 'original file', TrackType.base),
+    Track('DS Peach Gardens', 82, 82, 'original file', TrackType.base),
+    Track('GCN DK Mountain', 83, 83, 'original file', TrackType.base),
+    Track("N64 Bowser's Castle", 84, 84, 'original file', TrackType.base),
   ];
   nintendo.add(Cup('Mushroom Cup', trackList.getRange(0, 4).toList()));
   nintendo.add(Cup('Shell Cup', trackList.getRange(4 * 4, (4 * 5)).toList()));
@@ -507,7 +507,7 @@ N N$nintendoTracksString | """
                                           title: const Text("Wiimm's cup"),
                                           onChanged: (value) => {
                                             wiimsCup = value!,
-                                            keepNintendo = value,
+                                            if (wiimsCup) {keepNintendo = true},
                                             setState(() {})
                                           },
                                         ),
@@ -530,6 +530,41 @@ N N$nintendoTracksString | """
                                                 widget.packPath,
                                                 i + 1,
                                                 isDisabled: true),
+                                          wiimsCup
+                                              ? CupTable(
+                                                  9,
+                                                  'Wiimms Cup',
+                                                  [
+                                                    Track(
+                                                        'All Tracks',
+                                                        0,
+                                                        0,
+                                                        'Random',
+                                                        TrackType.base),
+                                                    Track(
+                                                        'Original Tracks',
+                                                        0,
+                                                        0,
+                                                        'Random',
+                                                        TrackType.base),
+                                                    Track(
+                                                        "Custom Tracks",
+                                                        0,
+                                                        0,
+                                                        'Random',
+                                                        TrackType.base),
+                                                    Track(
+                                                        'New Tracks',
+                                                        0,
+                                                        0,
+                                                        'Random',
+                                                        TrackType.base)
+                                                  ],
+                                                  widget.packPath,
+                                                  9,
+                                                  isDisabled: true,
+                                                )
+                                              : const Text(''),
                                         ],
                                       ),
                                     )

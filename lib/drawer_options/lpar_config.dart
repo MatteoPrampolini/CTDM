@@ -25,9 +25,9 @@ class _LparConfigState extends State<LparConfig> {
   void createLparFile(String packPath) async {
     if (!File(path.join(packPath, 'lpar.txt')).existsSync()) {
       try {
-        final _ = await Process.start('wlect',
+        final _ = await Process.run('wlect',
             ['create', 'lpar', '--dest', path.join(packPath, 'lpar.txt')],
-            runInShell: false);
+            runInShell: true);
       } on Exception catch (_) {
         logString(LogType.ERROR, _.toString());
       }
@@ -37,8 +37,8 @@ class _LparConfigState extends State<LparConfig> {
   void resetLparFile(String packPath) {
     if (File(path.join(packPath, 'lpar.txt')).existsSync()) {
       File(path.join(packPath, 'lpar.txt')).deleteSync();
+      createLparFile(packPath);
     }
-    createLparFile(packPath);
   }
 
   @override
