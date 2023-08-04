@@ -13,7 +13,10 @@ class CupTable extends StatefulWidget {
   late String packPath;
   late List<Track> cup;
   late String cupName;
-  CupTable(this.cupIndex, this.cupName, this.cup, this.packPath, {super.key});
+  late int iconIndex;
+  late bool? isDisabled;
+  CupTable(this.cupIndex, this.cupName, this.cup, this.packPath, this.iconIndex,
+      {this.isDisabled, super.key});
 
   @override
   State<CupTable> createState() => _CupTableState();
@@ -87,11 +90,26 @@ class _CupTableState extends State<CupTable> {
                       )),
                 ),
               ),
-              CupTableHeader(widget.cupIndex, widget.packPath),
+              widget.isDisabled == true
+                  ? ColorFiltered(
+                      colorFilter: const ColorFilter.mode(
+                          Colors.white70, BlendMode.color),
+                      child: CupTableHeader(
+                          widget.cupIndex, widget.packPath, widget.iconIndex),
+                    )
+                  : CupTableHeader(
+                      widget.cupIndex, widget.packPath, widget.iconIndex),
               for (var track in widget.cup)
                 track.type == TrackType.base
-                    ? CupTableRow(track, widget.cupIndex, i = i + 1,
-                        widget.packPath, canDelete)
+                    ? widget.isDisabled == true
+                        ? ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white24, BlendMode.color),
+                            child: CupTableRow(track, widget.cupIndex,
+                                i = i + 1, widget.packPath, canDelete),
+                          )
+                        : CupTableRow(track, widget.cupIndex, i = i + 1,
+                            widget.packPath, canDelete)
                     : track.type == TrackType.menu
                         ? CupTableSubMenu(
                             [track]

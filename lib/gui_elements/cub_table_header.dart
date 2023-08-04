@@ -7,8 +7,10 @@ import 'package:path/path.dart' as path;
 class CupTableHeader extends StatefulWidget {
   final int cupIndex;
   final String packPath;
+  final int iconIndex;
 
-  const CupTableHeader(this.cupIndex, this.packPath, {super.key});
+  const CupTableHeader(this.cupIndex, this.packPath, this.iconIndex,
+      {super.key});
 
   @override
   State<CupTableHeader> createState() => _CupTableHeaderState();
@@ -16,6 +18,7 @@ class CupTableHeader extends StatefulWidget {
 
 class _CupTableHeaderState extends State<CupTableHeader> {
   late bool canDelete = false;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -119,11 +122,11 @@ class _CupTableHeaderState extends State<CupTableHeader> {
               flex: 1,
               child: Center(
                   child: File(path.join(widget.packPath, 'Icons',
-                              '${widget.cupIndex}.png'))
+                              '${widget.iconIndex}.png'))
                           .existsSync()
                       ? Image.file(File(path.join(
-                          widget.packPath, 'Icons', '${widget.cupIndex}.png')))
-                      : Text("${widget.cupIndex}.png"))),
+                          widget.packPath, 'Icons', '${widget.iconIndex}.png')))
+                      : Text("${widget.iconIndex}.png"))),
         ],
       ),
     );

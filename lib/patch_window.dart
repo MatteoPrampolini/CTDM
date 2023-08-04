@@ -538,6 +538,9 @@ class _PatchWindowState extends State<PatchWindow> {
     //create folders
     createFolders(packPath);
     List<bool> customUI = loadUIconfig(packPath);
+    if (!await File(path.join(packPath, 'characters.txt')).exists()) {
+      await File(path.join(packPath, 'characters.txt')).create();
+    }
     List<String> customTxtContent =
         await File(path.join(packPath, 'characters.txt')).readAsLines();
 
@@ -605,17 +608,27 @@ class _PatchWindowState extends State<PatchWindow> {
         await szs.copy(path.join(
             packPath, 'Race', 'Course', 'tmp', path.basename(szs.path)));
       }
-      List<String> preAwardsRaces = [
-        'winningrun_demo.szs',
-        'loser_demo.szs',
-        'draw_demo.szs',
-        'ending_demo.szs'
-      ];
-      for (String awardRace in preAwardsRaces) {
-        await File(path.join(
-                originalDiscPath, 'files', 'Race', 'Course', awardRace))
-            .copy(path.join(packPath, 'Race', 'Course', 'tmp', awardRace));
+      // List<String> preAwardsRaces = [
+      //   'winningrun_demo.szs',
+      //   'loser_demo.szs',
+      //   'draw_demo.szs',
+      //   'ending_demo.szs'
+      // ];
+      // for (String awardRace in preAwardsRaces) {
+      //   await File(path.join(
+      //           originalDiscPath, 'files', 'Race', 'Course', awardRace))
+      //       .copy(path.join(packPath, 'Race', 'Course', 'tmp', awardRace));
+      // }
+      final ogRaceDir = Directory(
+          path.join(getOriginalDiscPath(packPath), 'files', 'Race', 'Course'));
+      final originalTracksSzs =
+          await ogRaceDir.list().where((event) => event is File).toList();
+
+      for (var originalRaceFile in originalTracksSzs) {
+        await File(originalRaceFile.path).copy(path.join(packPath, 'Race',
+            'Course', 'tmp', path.basename(originalRaceFile.path)));
       }
+
       //copy lecode-XXX.bin from assets
       String isoVersion = gv.name;
       String lecodePath = path.join(
