@@ -4,6 +4,7 @@ import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/drawer_options/multiplayer.dart';
 import 'package:ctdm/drawer_options/track_config_gui.dart';
 import 'package:ctdm/gui_elements/types.dart';
+import 'package:ctdm/utils/bmg_utils.dart';
 import 'package:ctdm/utils/character_utiles.dart';
 import 'package:ctdm/utils/filepath_utils.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
@@ -203,20 +204,40 @@ void createFolders(String packPath) {
   Directory(path.join(packPath, 'static', 'K')).createSync();
 }
 
-//TODO
 String replaceCommonBmgTextWithVanillaNames(
     String contents, bool keepNintendo) {
   //contents = contents.split(RegExp(r'6800.= '))[1];
   //List<String> lines = contents.split('\n');
   //print(tracksDirty);
-  List<Cup> nintendoCups = getNintendoCups();
-  int id = 6800;
-  for (int i = 0; i < 8; i++) {
-    int currentId = id + i;
-    RegExp reg = RegExp('^[\\s\\t]*$currentId\\s*=.*\$', multiLine: true);
+  if (keepNintendo) {
+    List<Cup> nintendoCups = getNintendoCups();
+    int id = 6800;
+    for (int i = 0; i < 8; i++) {
+      int currentId = id + i;
+      RegExp reg = RegExp('^[\\s\\t]*$currentId\\s*=.*\$', multiLine: true);
 
-    contents = contents.replaceFirst(
-        reg, '\n $currentId = ${nintendoCups[i].cupName}');
+      contents = contents.replaceFirst(
+          reg, '\n $currentId = ${nintendoCups[i].cupName}');
+    }
+    for (String key in vsMap.keys) {
+      RegExp lastOccReg = RegExp(r'(?<!' + key + r'.*)' + key);
+      if (contents.split('7043').length > 1) {
+        contents =
+            '${contents.split('7043')[0].replaceFirst(lastOccReg, vsMap[key]!)}7043${contents.split('7043')[1]}';
+      } else {
+        contents = contents.replaceFirst(lastOccReg, vsMap[key]!);
+      }
+    }
+  }
+  for (String key in battleMap.keys) {
+    RegExp lastOccReg = RegExp(r'(?<!' + key + r'.*)' + key);
+
+    if (contents.split('7043').length > 1) {
+      contents =
+          '${contents.split('7043')[0].replaceFirst(lastOccReg, battleMap[key]!)}7043${contents.split('7043')[1]}';
+    } else {
+      contents = contents.replaceFirst(lastOccReg, battleMap[key]!);
+    }
   }
   List<String> wiimmId = ['703e', '703f', '7040', '7041'];
   List<String> wiimmStrings = [
@@ -231,6 +252,7 @@ String replaceCommonBmgTextWithVanillaNames(
     contents =
         contents.replaceFirst(reg, '\n ${wiimmId[i]} = ${wiimmStrings[i]}');
   }
+
   return contents;
 }
 
@@ -316,91 +338,6 @@ Future<String> createBMGList(String packPath) async {
 ///Wrapper function. This function calls multiple functions.
 ///
 ///At the end of the execution MenuSingle_U.szs will be patched with the new bmgs.
-Future<void> editMenuSingle(String workspace, String packPath,
-    List<bool> customUI, String customTxtContent) async {
-  //copy MenuSingle_U.szs
-
-  File origMenuFile;
-  if (customUI[SceneComplete.menuSingle_.index] == true) {
-    origMenuFile = File(path.join(packPath, 'myUI', 'MenuSingle_U.szs'));
-  } else {
-    origMenuFile = getFileFromIndex(packPath, SceneComplete.menuSingle_.index);
-  }
-  await origMenuFile
-      .copy(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'));
-  //create tracks.bmg.txt
-  final File trackBmgTxt = File(await createBMGList(packPath));
-
-  //print(newContents);
-
-  // try {
-  //  wbmgt decode MenuSingle_U.szs --dest MenuSingle_U.txt
-  await Process.run(
-      'wbmgt',
-      [
-        'decode',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
-        '--dest',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'),
-      ],
-      runInShell: true);
-  //MenuSingle_U.szs (file) extract  -> MenuSingle_U.d (folder)
-  File menuSingleTxt =
-      File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'));
-
-  await menuSingleTxt.writeAsString(replaceCharacterNameInCommonTxt(
-      packPath, menuSingleTxt.readAsStringSync(), customTxtContent));
-
-  await Process.run(
-      'wszst',
-      [
-        'extract',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
-        '--dest',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d'),
-      ],
-      runInShell: true);
-  //edit MenuSingle_U.txt with tracks.bmg.txt content
-  String contents = await trackBmgTxt.readAsString();
-  //TODO
-  contents = replaceCommonBmgTextWithVanillaNames(
-      contents, contents.contains(r'%WIIMM-CUP = 1'));
-  contents = contents.replaceAll(RegExp(r'#BMG'), '');
-
-  File editedMenuFile =
-      File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'));
-  await editedMenuFile.writeAsString(contents, mode: FileMode.append);
-  //MenuSingle_U.txt -> Common.bmg (MenuSingle_U.d/Common.bmg)
-  //  wbmgt encode MenuSingle_U.txt
-
-  await Process.run(
-      'wbmgt',
-      [
-        'encode',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'),
-        '--overwrite',
-        '--dest',
-        path.join(
-            packPath, 'Scene', 'UI', 'MenuSingle_U.d', 'message', 'Common.bmg'),
-      ],
-      runInShell: true);
-  //MenuSingle_U.szs (file) <- compact MenuSingle_U.d (folder)
-  await Process.run(
-      'wszst',
-      [
-        'create',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d'),
-        '--overwrite',
-        '--dest',
-        path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
-      ],
-      runInShell: true);
-
-  // } on Exception catch (_) {
-  //   logString(LogType.ERROR, _.toString());
-  //   rethrow;
-  // }
-}
 
 ///Returns the display name for a given filename from the config.txt
 String getBmgFromFileName(File configFile, String filePath) {
@@ -561,15 +498,110 @@ class _PatchWindowState extends State<PatchWindow> {
   late List<String> missingTracks = [];
   PatchingStatus patchStatus = PatchingStatus.running;
   String progressText = 'creating folder';
+  bool keepNintendo = false;
+  bool hasWiimmCup = false;
   @override
   void initState() {
     // try {
+    if (File(path.join(widget.packPath, 'config.txt')).existsSync()) {
+      String contents =
+          File(path.join(widget.packPath, 'config.txt')).readAsStringSync();
+      keepNintendo = contents.contains(r'N$SWAP');
+      hasWiimmCup = contents.contains(r'%WIIMM-CUP = 1');
+    }
     patch(widget.packPath);
     // } on Exception catch (_) {
     //   logString(LogType.ERROR, _.toString());
     //   rethrow;
     // }
     super.initState();
+  }
+
+  Future<void> editMenuSingle(String workspace, String packPath,
+      List<bool> customUI, String customTxtContent) async {
+    //copy MenuSingle_U.szs
+
+    File origMenuFile;
+    if (customUI[SceneComplete.menuSingle_.index] == true) {
+      origMenuFile = File(path.join(packPath, 'myUI', 'MenuSingle_U.szs'));
+    } else {
+      origMenuFile =
+          getFileFromIndex(packPath, SceneComplete.menuSingle_.index);
+    }
+    await origMenuFile
+        .copy(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'));
+    //create tracks.bmg.txt
+    final File trackBmgTxt = File(await createBMGList(packPath));
+
+    //print(newContents);
+
+    // try {
+    //  wbmgt decode MenuSingle_U.szs --dest MenuSingle_U.txt
+    await Process.run(
+        'wbmgt',
+        [
+          'decode',
+          path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
+          '--dest',
+          path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'),
+        ],
+        runInShell: true);
+    //MenuSingle_U.szs (file) extract  -> MenuSingle_U.d (folder)
+    File menuSingleTxt =
+        File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'));
+
+    await menuSingleTxt.writeAsString(replaceCharacterNameInCommonTxt(
+        packPath, menuSingleTxt.readAsStringSync(), customTxtContent));
+
+    await Process.run(
+        'wszst',
+        [
+          'extract',
+          path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
+          '--dest',
+          path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d'),
+        ],
+        runInShell: true);
+    //edit MenuSingle_U.txt with tracks.bmg.txt content
+    String contents = await trackBmgTxt.readAsString();
+
+    contents = replaceCommonBmgTextWithVanillaNames(contents, keepNintendo);
+
+    contents = contents.replaceAll(RegExp(r'#BMG'), '');
+
+    File editedMenuFile =
+        File(path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'));
+    await editedMenuFile.writeAsString(contents, mode: FileMode.append);
+    //MenuSingle_U.txt -> Common.bmg (MenuSingle_U.d/Common.bmg)
+    //  wbmgt encode MenuSingle_U.txt
+
+    await Process.run(
+        'wbmgt',
+        [
+          'encode',
+          path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.txt'),
+          '--overwrite',
+          '--dest',
+          path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d', 'message',
+              'Common.bmg'),
+        ],
+        runInShell: true);
+    //MenuSingle_U.szs (file) <- compact MenuSingle_U.d (folder)
+    await Process.run(
+        'wszst',
+        [
+          'create',
+          path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.d'),
+          '--overwrite',
+          '--dest',
+          path.join(packPath, 'Scene', 'UI', 'MenuSingle_U.szs'),
+        ],
+        runInShell: true);
+
+    // } on Exception catch (_) {
+    //   logString(LogType.ERROR, _.toString());
+    //   rethrow;
+    // }
   }
 
   void patch(String packPath) async {
@@ -896,25 +928,32 @@ class _PatchWindowState extends State<PatchWindow> {
         ],
         runInShell: true);
 
-    //TODO ADD STUFF HERE
     File raceUcommon = File(path.join(
         packPath, 'Scene', 'UI', 'Race_U.szs.d', 'message', 'Common.txt'));
+    String raceUcontentsTxt = await raceUcommon.readAsString();
+    raceUcontentsTxt =
+        replaceCommonBmgTextWithVanillaNames(raceUcontentsTxt, keepNintendo);
+
     await raceUcommon.writeAsString(replaceCharacterNameInCommonTxt(
         packPath,
-        raceUcommon.readAsStringSync(),
+        raceUcontentsTxt,
         await File(path.join(packPath, 'characters.txt')).readAsString()));
 
-    File common = File(path.join(
-        packPath, 'Scene', 'UI', 'Race_U.szs.d', 'message', 'Common.txt'));
-    List<String> tracksBmgContents =
+    // // List<String> tracksBmgContents =
+    //     await File(path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt'))
+    //         .readAsLines();
+    // tracksBmgContents.removeRange(0, 4);
+    String tracksBmgContents =
         await File(path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt'))
-            .readAsLines();
-    tracksBmgContents.removeRange(0, 4);
+            .readAsString();
 
+    // String editedContent =
+
+    //     "${raceUcontentsTxt.split('270f	= ?')[0]}270f	= ?\n${tracksBmgContents.join('\n')}";
     String editedContent =
-        "${(await common.readAsString()).split('270f	= ?')[0]}270f	= ?\n${tracksBmgContents.join('\n')}";
+        "${raceUcontentsTxt.split('270f	= ?')[0]}270f	= ?\n${replaceCharacterNameInCommonTxt(packPath, replaceCommonBmgTextWithVanillaNames(tracksBmgContents, keepNintendo), await File(path.join(packPath, 'characters.txt')).readAsString())}";
 
-    await common.writeAsString(editedContent, mode: FileMode.write);
+    await raceUcommon.writeAsString(editedContent, mode: FileMode.write);
 
     await Process.run(
         'wbmgt',
@@ -990,9 +1029,12 @@ class _PatchWindowState extends State<PatchWindow> {
 
         File awardCommonTxt = File(path.join(
             packPath, 'Scene', 'UI', 'Award_U.szs.d', 'message', 'Common.txt'));
+
+        String awardContentsCommonTxt = await awardCommonTxt.readAsString();
+
         await awardCommonTxt.writeAsString(replaceCharacterNameInCommonTxt(
             packPath,
-            awardCommonTxt.readAsStringSync(),
+            awardContentsCommonTxt,
             await File(path.join(packPath, 'characters.txt')).readAsString()));
         await Process.run(
             'wbmgt',
