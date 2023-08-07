@@ -361,27 +361,27 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     //createConfigFile(widget.packPath);
 
     updateConfigContent(cups, configTxt, keepNintendo, wiimsCup);
-    updateMusicConfig(configTxt, musicTxt);
+    updateMusicConfig(configTxt, musicTxt, keepNintendo);
   }
 
-  void updateMusicConfig(File configTxt, File musicTxt) {
+  void updateMusicConfig(File configTxt, File musicTxt, bool keepNintendo) {
     if (!musicTxt.existsSync()) {
       musicTxt.createSync();
     }
     String content = "";
-    int i = 0;
+    int i = keepNintendo ? 32 : 0;
     for (var cup in cups) {
       for (Track track in cup.tracks) {
-        if (track.musicFolder != null && track.type != TrackType.menu) {
-          content +=
-              "${i.toRadixString(16).padLeft(3, '0')};${track.musicFolder!}\n";
-        }
-        i++;
         if (i == 32) {
           //if in bmg.txt index>32, we are in battle slot. which is not good.
           // skip to custom tracks slots at 044 and beyond.
           i = 68;
         }
+        if (track.musicFolder != null && track.type != TrackType.menu) {
+          content +=
+              "${i.toRadixString(16).padLeft(3, '0')};${track.musicFolder!}\n";
+        }
+        i++;
       }
     }
     musicTxt.writeAsStringSync(content, mode: FileMode.write);

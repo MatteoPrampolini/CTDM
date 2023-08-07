@@ -161,6 +161,10 @@ Future<void> _main() async {
   if (!prefs.containsKey('workspace')) {
     prefs.setString('workspace', '');
   }
+  if (!Directory(prefs.getString('workspace')!).existsSync()) {
+    prefs.setString('workspace', '');
+  }
+
   // if (!prefs.containsKey('isoVersion')) {
   //   prefs.setString('isoVersion', 'PAL');
   // }

@@ -18,8 +18,30 @@ Future<int> extractIso(String source, String dest) async {
     return 1;
   }
   final process =
-      await Process.start('wit', ['EXTRACT', source, dest], runInShell: false);
+      await Process.start('wit', ['EXTRACT', source, dest], runInShell: true);
   final exitCode = await process.exitCode;
+  ProcessResult checkKoreanIso = await Process.run(
+      'wit', ['dump', source, '--show', 'D-ID'],
+      runInShell: true);
+
+  if (checkKoreanIso.stdout.toString().contains('RMCK01')) {
+    String originalDiscPath = dest;
+    if (await Directory(path.join(originalDiscPath, 'DATA')).exists()) {
+      originalDiscPath = path.join(originalDiscPath, 'DATA');
+    }
+    Directory sceneDir =
+        Directory(path.join(originalDiscPath, 'files', 'Scene', 'UI'));
+
+    await sceneDir
+        .list()
+        .where((systemEntity) =>
+            path.basename(systemEntity.path).contains('_R.szs'))
+        .forEach((file) async {
+      File tmp = file as File;
+      await tmp.copy(tmp.path.replaceAll('_R', ''));
+      await tmp.delete();
+    });
+  }
   return exitCode;
 }
 

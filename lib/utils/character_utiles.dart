@@ -152,6 +152,7 @@ patchSzsWithImages(String packPath, Directory extractedSzs,
       String filenameTpl = getOriginalFileNameForCharacter(i, false);
 
       await icon64.copy(path.join(dir64.path, "$filenameTpl.png"));
+
       await Process.run(
           'wimgt',
           [
@@ -163,10 +164,12 @@ patchSzsWithImages(String packPath, Directory extractedSzs,
           ],
           runInShell: true);
     }
+
     for (Directory dir32 in dir32List) {
       String filenameTpl = getOriginalFileNameForCharacter(i, true);
       //print(path.join(dir32.path, "$filenameTpl.png"));
       await icon32.copy(path.join(dir32.path, "$filenameTpl.png"));
+
       await Process.run(
           'wimgt',
           [
@@ -178,6 +181,7 @@ patchSzsWithImages(String packPath, Directory extractedSzs,
           ],
           runInShell: true);
     }
+
     i++;
   }
   String fileBaseName = path.basename(getFileFromIndex(packPath, index).path);

@@ -294,6 +294,7 @@ extension StringCasingExtension on String {
 String createXmlStringForUi(
     String packPath, List<bool> filesBool, List<File> sceneFiles) {
   String contents = "\t\t<!--CUSTOM UI-->\n";
+  String packName = path.basename(packPath);
   for (int i = 0; i < SceneComplete.values.length; i++) {
     if (i == SceneComplete.menuSingle.index ||
         i == SceneComplete.menuSingle_.index) {
@@ -309,13 +310,13 @@ String createXmlStringForUi(
 
     if (i % 2 == 0) {
       contents +=
-          '\t\t<file disc="/Scene/UI/$basename" external="/v9/Scene/UI/$basename"/>\n';
+          '\t\t<file disc="/Scene/UI/$basename" external="/$packName/Scene/UI/$basename"/>\n';
       //include korean weird naming convention
       contents +=
-          '\t\t<file disc="/Scene/UI/${path.basenameWithoutExtension(basename)}_R.szs" external="/v9/Scene/UI/$basename"/>\n';
+          '\t\t<file disc="/Scene/UI/${path.basenameWithoutExtension(basename)}_R.szs" external="/$packName/Scene/UI/$basename"/>\n';
     } else {
       String basenameNoLetter = basename.replaceAll(RegExp(r'_.*'), '');
-      String packName = path.basename(packPath);
+
       String s =
           '''\t\t<file disc="/Scene/UI/${basenameNoLetter}_E.szs" external="/v9/Scene/UI/$basename" />
 \t\t<file disc="/Scene/UI/${basenameNoLetter}_F.szs" external="/$packName/Scene/UI/$basename" />

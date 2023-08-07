@@ -1123,24 +1123,28 @@ class _PatchWindowState extends State<PatchWindow> {
         }
 
         //spostare i vari kart in /Race/Kart
-        List<File> vehiclesFilesInKartsFolder =
-            (await Directory(path.join(pathOfCustomDir, 'karts'))
-                    .list()
-                    .toList())
-                .whereType<File>()
-                .toList();
+        if (await Directory(path.join(pathOfCustomDir, 'karts')).exists()) {
+          List<File> vehiclesFilesInKartsFolder =
+              (await Directory(path.join(pathOfCustomDir, 'karts'))
+                      .list()
+                      .toList())
+                  .whereType<File>()
+                  .toList();
 
-        for (File file in vehiclesFilesInKartsFolder) {
-          if (!file.path.endsWith(".szs")) continue;
-          String cleanFileName = path.basename(file.path);
-          for (String extraName in characters3D.values) {
-            cleanFileName = cleanFileName.replaceFirst("-$extraName.szs", '');
+          for (File file in vehiclesFilesInKartsFolder) {
+            if (!file.path.endsWith(".szs")) continue;
+            String cleanFileName = path.basename(file.path);
+            for (String extraName in characters3D.values) {
+              cleanFileName = cleanFileName.replaceFirst("-$extraName.szs", '');
+            }
+
+            await file.copy(path.join(packPath, 'Race', 'Kart',
+                "$cleanFileName-${characters3D[name]}.szs"));
           }
-
-          await file.copy(path.join(packPath, 'Race', 'Kart',
-              "$cleanFileName-${characters3D[name]}.szs"));
+        } else {
+          logString(LogType.ERROR,
+              '$pathOfCustomDir does not contain karts folder. skipping.');
         }
-
         await Process.run(
             'wszst',
             [
