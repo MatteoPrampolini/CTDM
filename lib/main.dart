@@ -127,6 +127,7 @@ Future<void> _main() async {
         .substring(0, 4));
     if (version < 2.33) {
       //https://szs.wiimm.de/changelog.html
+      //2.36 for --9-laps patch, but installer seems broken.
 
       prefs.setBool('szs', false);
       logString(
@@ -331,7 +332,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           launchUrl(uri);
                         },
                         child: Text(
-                          "download",
+                          "download latest",
                           style: TextStyle(
                             color: Colors.red.shade700,
                             decoration: TextDecoration.underline,
@@ -378,7 +379,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             launchUrl(uri);
                           },
                           child: Text(
-                            "download",
+                            "download latest",
                             style: TextStyle(
                               color: Colors.red.shade700,
                               decoration: TextDecoration.underline,

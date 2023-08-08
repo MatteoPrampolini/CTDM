@@ -413,22 +413,7 @@ Future<void> patchIcons(String workspace, String packPath, bool customUI,
   }
   //wszst patch MenuSingle.szs --le-menu --cup-icons ./icons.tpl --links
   // try {
-  await createBigImage(iconDir, nCups).then((value) => {
-        Process.runSync(
-            'wszst',
-            [
-              'patch',
-              '--le-menu',
-              '--cup-icons',
-              path.join(packPath, 'Icons', 'merged.png'),
-              '--links',
-              path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs'),
-              '--overwrite',
-              '--dest',
-              path.join(packPath, 'Scene', 'UI', 'MenuSingle.szs'),
-            ],
-            runInShell: true),
-      });
+  await createBigImage(iconDir, nCups);
 
   await Process.run(
       'wszst',
@@ -1059,6 +1044,37 @@ class _PatchWindowState extends State<PatchWindow> {
             ],
             runInShell: true);
       }
+    }
+    for (SceneComplete scene in SceneComplete.values) {
+      if (scene.index % 2 == 0) {
+        File ogFile = getFileFromIndex(packPath, scene.index);
+        if (!await File(
+                path.join(packPath, 'Scene', 'UI', path.basename(ogFile.path)))
+            .exists()) {
+          await ogFile.copy(
+              path.join(packPath, 'Scene', 'UI', path.basename(ogFile.path)));
+        }
+      }
+    }
+    for (FileSystemEntity file in await Directory(path.join(
+            packPath, 'Scene', 'UI', path.join(packPath, 'Scene', 'UI')))
+        .list()
+        .toList()) {
+      await Process.run(
+          'wszst',
+          [
+            'patch',
+            '--le-menu',
+            //'--9laps',
+            '--cup-icons',
+            path.join(packPath, 'Icons', 'merged.png'),
+            '--links',
+            file.path,
+            '--overwrite',
+            '--dest',
+            file.path
+          ],
+          runInShell: true);
     }
     List<String> allKartsList = [];
     List<String> driverBrresList = [];
