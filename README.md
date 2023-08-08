@@ -21,8 +21,8 @@ A modding tool for Mario Kart Wii. Multi-ISO modpack maker for [Riivolution](htt
 
 ## Documentation
 * [CTDM's Discord](https://discord.gg/DFTnFMreAT)
-* [Tockdom Wiki](https://wiki.tockdom.com/wiki/Custom_Track_Distribution_Maker)
-* Wiki Tutorial Page WIP
+* [CTDM Tockdom Wiki](https://wiki.tockdom.com/wiki/Custom_Track_Distribution_Maker)
+* [CTDM Tutorial Tockdom Wiki](https://wiki.tockdom.com/wiki/CTDM_Tutorial)
 * [Video Guide](https://youtu.be/LMqPX21z4cE)
 
 
