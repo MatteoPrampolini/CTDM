@@ -318,7 +318,7 @@ String createXmlStringForUi(
       String basenameNoLetter = basename.replaceAll(RegExp(r'_.*'), '');
 
       String s =
-          '''\t\t<file disc="/Scene/UI/${basenameNoLetter}_E.szs" external="/v9/Scene/UI/$basename" />
+          '''\t\t<file disc="/Scene/UI/${basenameNoLetter}_E.szs" external="/$packName/Scene/UI/$basename" />
 \t\t<file disc="/Scene/UI/${basenameNoLetter}_F.szs" external="/$packName/Scene/UI/$basename" />
 \t\t<file disc="/Scene/UI/${basenameNoLetter}_G.szs" external="/$packName/Scene/UI/$basename" />
 \t\t<file disc="/Scene/UI/${basenameNoLetter}_I.szs" external="/$packName/Scene/UI/$basename" />
