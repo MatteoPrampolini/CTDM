@@ -15,6 +15,7 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   late SharedPreferences prefs;
   late String workspace = "";
+  late String version = "";
   //late int isoVersionNumber = 1;
   // ignore: non_constant_identifier_names
   //final List<String> VERSIONS = ["PAL", "USA", "JAP", "KOR"];
@@ -27,8 +28,11 @@ class _SettingsState extends State<Settings> {
 
   Future<void> loadSettings() async {
     prefs = await SharedPreferences.getInstance();
+    version = prefs.getString("version")!;
+
     setState(() {
       workspace = prefs.getString('workspace')!;
+
       // String? tmp = prefs.getString('isoVersion');
       // if (tmp != null) {
       //isoVersionNumber = VERSIONS.indexOf(tmp);
@@ -66,11 +70,11 @@ class _SettingsState extends State<Settings> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Align(
+              Align(
                 alignment: Alignment.topRight,
                 child: Text(
-                  "CTDM v0.9",
-                  style: TextStyle(color: Colors.white54, fontSize: 20),
+                  "CTDM $version",
+                  style: const TextStyle(color: Colors.white54, fontSize: 20),
                 ),
               ),
               SizedBox(

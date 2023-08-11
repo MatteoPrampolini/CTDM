@@ -6,7 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
 
-void saveAndRenamePack(String packPath, String chosenName, String chosenId) {
+void saveAndRenamePack(
+    String packPath, String chosenName, String chosenId, String version) {
   //1: se non esiste xml-> copia Pack.xml
   //2 crivo contenuto xml
   //3: rinomina xml
@@ -28,7 +29,7 @@ void saveAndRenamePack(String packPath, String chosenName, String chosenId) {
       .whereType<File>()
       .where((element) => element.path.endsWith('.xml'));
   File xmlFile = xmlList.first;
-  replaceParamsInXml(xmlFile, chosenName, chosenId);
+  replaceParamsInXml(xmlFile, chosenName, chosenId, version);
   //3
   xmlFile.renameSync(path.join(packPath, "$chosenName.xml"));
   //4
@@ -49,10 +50,11 @@ void createXmlFile(String xmlPath) {
   //xmlFile.copySync(xmlPath);
 }
 
-void replaceParamsInXml(File xmlFile, String chosenName, String chosenId) {
+void replaceParamsInXml(
+    File xmlFile, String chosenName, String chosenId, String version) {
   String contents = xmlFile.readAsStringSync();
   // final versionRegex = RegExp(r'-[A-Z]+.bin');
-
+  contents = contents.replaceFirst('CTDM_VERSION', version);
   // contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
   String oldName = contents.split(RegExp(r'<section name='))[1];
   oldName =
@@ -93,6 +95,7 @@ class _RenamePackState extends State<RenamePack> {
   late TextEditingController _chosenNameController;
   late TextEditingController _chosenIdController;
   late SharedPreferences prefs;
+  late String version = "";
   //late String isoVersion = 'PAL';
 
   // // void getIsoVersion() async {
@@ -102,7 +105,9 @@ class _RenamePackState extends State<RenamePack> {
 
   @override
   void initState() {
+    setVersion();
     super.initState();
+
     if (widget.packPath.contains('tmp_pack_')) {
       packNameChosen = 'MyPackName';
       packIdChosen = 'mypack_uniquename';
@@ -110,10 +115,10 @@ class _RenamePackState extends State<RenamePack> {
       packNameChosen = path.basename(widget.packPath);
       final String xmlPath = path.join(widget.packPath, '$packNameChosen.xml');
       File xmlFile = File(xmlPath);
-      if (xmlFile.existsSync()) {
-      } else {
+      if (!xmlFile.existsSync()) {
         createXmlFile(xmlPath);
       }
+
       String contents = xmlFile.readAsStringSync();
       packIdChosen = contents.split(RegExp(r'patch id='))[1];
 
@@ -145,6 +150,11 @@ class _RenamePackState extends State<RenamePack> {
     _chosenNameController.dispose();
     _chosenIdController.dispose();
     super.dispose();
+  }
+
+  setVersion() async {
+    prefs = await SharedPreferences.getInstance();
+    version = prefs.getString('version')!;
   }
 
   @override
@@ -266,7 +276,7 @@ class _RenamePackState extends State<RenamePack> {
                         onPressed: enableSaveBtn
                             ? () => {
                                   saveAndRenamePack(widget.packPath,
-                                      packNameChosen, packIdChosen),
+                                      packNameChosen, packIdChosen, version),
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(

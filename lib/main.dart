@@ -119,6 +119,7 @@ Future<void> _main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('version', 'v0.9.1');
   try {
     final p = await Process.run('wlect', ['--version'], runInShell: true);
     double version = double.parse(p.stdout
@@ -127,7 +128,7 @@ Future<void> _main() async {
         .substring(0, 4));
     if (version < 2.33) {
       //https://szs.wiimm.de/changelog.html
-      //2.36 for --9-laps patch, but installer seems broken.
+      //2.36 when --9-laps will be implemented.
 
       prefs.setBool('szs', false);
       logString(

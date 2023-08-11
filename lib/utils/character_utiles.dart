@@ -221,7 +221,10 @@ List getDirsFromFileIndex(
     case SceneComplete.globe_:
       return [[], []];
     case SceneComplete.menuMulti:
-      return [[], []];
+      return [
+        [Directory(path.join(extractedDir.path, 'button', 'timg'))],
+        []
+      ];
     case SceneComplete.menuMulti_:
       return [[], []];
     case SceneComplete.menuOther:
