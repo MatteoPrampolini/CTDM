@@ -121,26 +121,36 @@ Future<void> _main() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('version', 'v0.9.1');
   try {
-    final p = await Process.run('wlect', ['--version'], runInShell: true);
-    double version = double.parse(p.stdout
-        .toString()
-        .split(RegExp(r'LE-CODE Tool v'))[1]
-        .substring(0, 4));
-    if (version < 2.33) {
-      //https://szs.wiimm.de/changelog.html
-      //2.36 when --9-laps will be implemented.
-
+    ProcessResult p =
+        await Process.run('wlect', ['--version'], runInShell: true);
+    if (p.exitCode == 1) {
+      //error in executing wlect --version
       prefs.setBool('szs', false);
-      logString(
-          LogType.ERROR, "Wiimms' szs toolset version too old. Please update.");
+      logString(LogType.ERROR, "Wiimms' szs toolset not found.");
     } else {
-      prefs.setBool('szs', true);
+      double version = double.parse(p.stdout
+          .toString()
+          .split(RegExp(r'LE-CODE Tool v'))[1]
+          .substring(0, 4));
+      if (version < 2.33) {
+        //https://szs.wiimm.de/changelog.html
+        //2.36 when --9-laps will be implemented.
+
+        prefs.setBool('szs', false);
+        logString(LogType.ERROR,
+            "Wiimms' szs toolset version too old. Please update.");
+      } else {
+        prefs.setBool('szs', true);
+      }
     }
   } on Exception catch (_) {
+    //(there is no whay this expection will be thrown)
+
     //print("Wiimms' szs toolset not found");
     prefs.setBool('szs', false);
-    logString(LogType.ERROR, "Wiimms' szs toolset not found");
+    logString(LogType.ERROR, "Wiimms' szs toolset not found?");
   }
+
   try {
     final _ = await Process.start('wit', [], runInShell: false);
 
@@ -160,16 +170,11 @@ Future<void> _main() async {
     prefs.setBool('ffmpeg', false);
   }
 
-  if (!prefs.containsKey('workspace')) {
-    prefs.setString('workspace', '');
-  }
-  if (!Directory(prefs.getString('workspace')!).existsSync()) {
-    prefs.setString('workspace', '');
-  }
-
-  // if (!prefs.containsKey('isoVersion')) {
-  //   prefs.setString('isoVersion', 'PAL');
-  // }
+  defaultSettingsValues.forEach((key, value) async {
+    if (!prefs.containsKey(key)) {
+      await prefs.setString(key, value);
+    }
+  });
 
   await DesktopWindow.setMinWindowSize(const Size(1300, 1000));
 
