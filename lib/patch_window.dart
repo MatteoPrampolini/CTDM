@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/drawer_options/multiplayer.dart';
@@ -323,8 +324,9 @@ class _PatchWindowState extends State<PatchWindow> {
   bool keepNintendo = false;
   bool hasWiimmCup = false;
   String dolphin = "";
-  //String game = "";
+  String game = "";
   late SharedPreferences prefs;
+  bool pleaseWait = false;
   @override
   void initState() {
     // try {
@@ -344,7 +346,7 @@ class _PatchWindowState extends State<PatchWindow> {
     prefs = await SharedPreferences.getInstance();
     dolphin = prefs.getString('dolphin')!;
     setState(() {});
-    //game = prefs.getString('game')!;
+    game = prefs.getString('game')!;
   }
 
   void patch(String packPath) async {
@@ -688,8 +690,8 @@ class _PatchWindowState extends State<PatchWindow> {
       await encodeAndClose(commonTxtFile, sceneSzs);
     }
     List<String> allKartsList = [];
-    List<String> driverBrresList = [];
-    List<String> awardBrresList = [];
+    // List<String> driverBrresList = [];
+    // List<String> awardBrresList = [];
     if (enableCustomChar) {
       setState(() {
         progressText = "swapping character models";
@@ -733,6 +735,8 @@ class _PatchWindowState extends State<PatchWindow> {
         //extract /Scene/Model/Driver.szs
         for (String string in customStrings) {
           String name = string.split(';')[0];
+          bool characterIsExtraPain =
+              ['Daisy', 'Peach', 'Rosalina'].contains(name);
           charNames.add(name);
           String customChar = string.split(';')[1];
           String pathOfCustomDir =
@@ -750,26 +754,39 @@ class _PatchWindowState extends State<PatchWindow> {
               .toList();
           List<File> awards = (await Directory(pathOfCustomDir)
                   .list()
-                  .where((files) => files.path.contains('award.brres'))
+                  .where((files) =>
+                      files.path.contains(RegExp(r'award[1-3]*\.brres')))
                   .toList())
               .whereType<File>()
               .toList();
+
           if (drivers.isNotEmpty) {
-            driverBrresList.add("${characters3D[name]}.brres");
-            await drivers[0].copy(path.join(packPath, 'Scene', 'Model',
-                'Driver.szs.d', "${characters3D[name]}.brres"));
+            String suffix = "";
+            if (characterIsExtraPain) {
+              suffix = "_menu";
+            }
+            String driverFileName = "${characters3D[name]}$suffix.brres";
+            //driverBrresList.add("${characters3D[name]}.brres");
+            await drivers[0].copy(path.join(
+                packPath, 'Scene', 'Model', 'Driver.szs.d', driverFileName));
           } else {
             logString(LogType.ERROR,
                 '$pathOfCustomDir does not contain driver.brres. skipping.');
           }
 
           if (awards.isNotEmpty) {
-            awardBrresList.add("${characters3D[name]}.brres");
+            //awardBrresList.add("${characters3D[name]}.brres");
             await awards[0].copy(path.join(packPath, 'Demo', 'Award.szs.d',
                 "${characters3D[name]}.brres"));
           } else {
             logString(LogType.ERROR,
                 '$pathOfCustomDir does not contain award.brres. skipping.');
+          }
+          if (characterIsExtraPain) {
+            if (awards.length == 2) {
+              await awards[1].copy(path.join(packPath, 'Demo', 'Award.szs.d',
+                  "${characters3D[name]}3.brres"));
+            }
           }
 
           if (allKarts.isNotEmpty) {
@@ -933,6 +950,12 @@ class _PatchWindowState extends State<PatchWindow> {
     await tmpDir.delete(recursive: true);
   }
 
+  void setWait(bool value) {
+    setState(() {
+      pleaseWait = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1010,24 +1033,51 @@ class _PatchWindowState extends State<PatchWindow> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 AfterPatchOptions(
-                                    Icons.folder_zip,
-                                    "Create a\n zip file",
-                                    'Zip file created',
-                                    zipPack,
-                                    [widget.packPath]),
+                                  Icons.folder_zip,
+                                  "Create a\n zip file",
+                                  'Zip file created',
+                                  zipPack,
+                                  [widget.packPath],
+                                  updateWaiting: setWait,
+                                ),
                                 AfterPatchOptions(
                                     Icons.play_circle_outline,
                                     "Run on \nDolphin",
-                                    'Dolphin stopped',
+                                    'Execution stopped',
                                     runOnDolphin, [
                                   dolphin,
                                   path.join(widget.packPath,
-                                      "${path.basename(widget.packPath)}.json")
+                                      "${path.basename(widget.packPath)}.json"),
+                                  widget.packPath,
+                                  game
                                 ]),
                               ],
                             ),
                           ),
                         ))),
+                    Visibility(
+                      visible: pleaseWait,
+                      child: const Padding(
+                          padding: EdgeInsets.only(top: 100.0),
+                          child: Column(
+                            children: [
+                              Text(
+                                "Please wait.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 24, color: Colors.white54),
+                              ),
+                              Text(
+                                "Do not exit this page.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 24,
+                                    color: Colors.white70,
+                                    fontStyle: FontStyle.italic),
+                              ),
+                            ],
+                          )),
+                    ),
                   ],
                 )
               else
@@ -1174,9 +1224,10 @@ class AfterPatchOptions extends StatelessWidget {
   List<String> parameters;
   String modalTitle;
   String tmpString = "";
+  Function? updateWaiting;
   AfterPatchOptions(this.icon, this.text, this.modalTitle, this.customFunction,
       this.parameters,
-      {super.key});
+      {this.updateWaiting, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -1190,9 +1241,13 @@ class AfterPatchOptions extends StatelessWidget {
             iconSize: 80,
             color: Colors.amberAccent,
             onPressed: () async => {
+              if (updateWaiting != null) {updateWaiting!(true)},
               tmpString = await customFunction(parameters),
               if (tmpString.isNotEmpty)
-                {_showResultModal(context, await customFunction(parameters))}
+                {
+                  if (updateWaiting != null) {updateWaiting!(false)},
+                  _showResultModal(context, tmpString)
+                }
             },
             icon: Icon(
               icon,
@@ -1207,7 +1262,7 @@ class AfterPatchOptions extends StatelessWidget {
             style: const TextStyle(
               fontStyle: FontStyle.italic,
             ),
-          )
+          ),
         ],
       ),
     );

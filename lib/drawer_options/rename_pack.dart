@@ -116,6 +116,20 @@ void createXmlFile(String xmlPath) {
   //xmlFile.copySync(xmlPath);
 }
 
+(String, String) getPackNameAndId(String packPath) {
+  File xmlFile = File(path.join(packPath, '${path.basename(packPath)}.xml'));
+  String contents = xmlFile.readAsStringSync();
+  String packName = contents.split(RegExp(r'<section name='))[1];
+  packName = packName
+      .replaceRange(packName.indexOf('>'), null, '')
+      .replaceAll('"', '');
+  String packId = contents.split(RegExp(r'patch id='))[1];
+
+  packId =
+      packId.replaceRange(packId.indexOf(r'/'), null, '').replaceAll('"', '');
+  return (packName, packId);
+}
+
 void replaceParamsInXml(
     File xmlFile, String chosenName, String chosenId, String version) {
   String contents = xmlFile.readAsStringSync();

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:ctdm/drawer_options/rename_pack.dart';
+import 'package:ctdm/utils/log_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:archive/archive.dart';
 
@@ -61,6 +63,33 @@ Future<List<File>> _getFileListInDirectory(Directory directory) async {
 Future<String> runOnDolphin(List<String> parameters) async {
   String dolphinPath = parameters[0];
   String presetPath = parameters[1];
+  String packPath = parameters[2];
+  String game = parameters[3];
+  bool errorFound = false;
+  //dolphin checks
+  if (!File(dolphinPath).existsSync()) {
+    logString(
+        LogType.ERROR, 'Dolphin executable not found. Go to CTDM settings.');
+    errorFound = true;
+  } else {
+    FileStat fileStat = await File(dolphinPath).stat();
+    bool isExecutable = (fileStat.mode & 0x1) > 0;
+    if (!isExecutable) {
+      logString(LogType.ERROR, 'Dolphin executable cannot be run.');
+      errorFound = true;
+    }
+  }
+  //game checks
+  if (!File(game).existsSync()) {
+    logString(LogType.ERROR, 'Game iso was not found. Go to CTDM settings.');
+    errorFound = true;
+  }
+  if (errorFound) {
+    return "An error occurred. Check your CTDM settings.";
+  }
+  var (packName, packId) = getPackNameAndId(packPath);
+  replaceParamsInJson(File(path.join(packPath, "$packName.json")), packName,
+      packId, game, dolphinPath);
   Process.run(dolphinPath, ['-e', presetPath, '-b'], runInShell: false);
   // print(p.stderr);
   // print(p.stdout);

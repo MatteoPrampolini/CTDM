@@ -109,7 +109,7 @@ class _SettingsState extends State<Settings> {
               Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: SizedBox(
-                    width: 350,
+                    width: 320,
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () => {
@@ -120,11 +120,15 @@ class _SettingsState extends State<Settings> {
                       },
                       child: const Text(
                         "reset settings",
-                        style: TextStyle(fontSize: 30),
+                        style: TextStyle(fontSize: 24),
                       ),
                     )),
               ),
-              const FractionallySizedBox(widthFactor: 0.65, child: Divider()),
+              const Padding(
+                padding: EdgeInsets.only(top: 16.0),
+                child:
+                    FractionallySizedBox(widthFactor: 0.65, child: Divider()),
+              ),
               Card(
                 child: FractionallySizedBox(
                   widthFactor: 0.65,
@@ -336,7 +340,7 @@ Map<String, String> defaultSettingsValues = {
   'workspace': '',
   'Riivolution': getDeafultRiivoFolder(),
   'dolphin':
-      '', //TODO chiamare dolphin.exe sul cmd e vedere se esiste nel path.
+      '', //TODO chiamare dolphin.exe sul cmd e vedere se esiste nel path. ha senso visto che di default non viene aggiunto?
   'game': '',
 };
 
