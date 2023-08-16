@@ -119,6 +119,7 @@ Future<void> _main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
+
   await prefs.setString('version', 'v0.9.1');
   try {
     ProcessResult p =

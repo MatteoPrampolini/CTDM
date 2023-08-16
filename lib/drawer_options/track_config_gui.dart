@@ -449,7 +449,7 @@ N N$nintendoTracksString | """
 
         break;
     }
-    return '$typeLetter ${track.musicId}; $typeLetter${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
+    return '$typeLetter ${track.musicId}; T${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
   }
 
   @override

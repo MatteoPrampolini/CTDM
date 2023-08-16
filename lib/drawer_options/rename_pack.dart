@@ -88,7 +88,7 @@ void replaceParamsInJson(
   Map<String, dynamic> replacements = {
     "base-file": game,
     "display-name": chosenName,
-    "section-name": chosenId,
+    "section-name": chosenName,
     "root": "$workspace/Packs/",
     "xml": "$packPath/$chosenName.xml",
   };
