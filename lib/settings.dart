@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:ctdm/main.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,8 @@ class _SettingsState extends State<Settings> {
   String workspace = "";
   late String version = "";
   String riivolution = "";
+  String dolphin = "";
+  String game = "";
   //late int isoVersionNumber = 1;
   // ignore: non_constant_identifier_names
   //final List<String> VERSIONS = ["PAL", "USA", "JAP", "KOR"];
@@ -37,6 +40,8 @@ class _SettingsState extends State<Settings> {
     setState(() {
       workspace = prefs.getString('workspace')!;
       riivolution = prefs.getString('Riivolution')!;
+      dolphin = prefs.getString('dolphin')!;
+      game = prefs.getString('game')!;
     });
   }
 
@@ -78,10 +83,29 @@ class _SettingsState extends State<Settings> {
                   style: const TextStyle(color: Colors.white54, fontSize: 20),
                 ),
               ),
-              SettingOptionFolder('Workspace:', Directory(workspace),
-                  'workspace', loadSettings),
-              SettingOptionFolder('Riivolution:', Directory(riivolution),
-                  'Riivolution', loadSettings),
+              SettingOptionFolder(
+                'Workspace:',
+                Directory(workspace),
+                false,
+                'workspace',
+                loadSettings,
+              ),
+              // SettingOptionFolder('Riivolution:', Directory(riivolution),
+              //     'Riivolution', loadSettings),
+              Platform.isWindows
+                  ? SettingOptionFolder(
+                      'Dolphin executable:',
+                      Directory(dolphin),
+                      true,
+                      'dolphin',
+                      loadSettings,
+                      extensions: const ['exe'],
+                    )
+                  : SettingOptionFolder('Dolphin executable:',
+                      Directory(dolphin), true, 'dolphin', loadSettings),
+              SettingOptionFolder(
+                  'Game ISO:', Directory(game), true, 'game', loadSettings,
+                  extensions: const ['iso', 'wbfs']),
               Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: SizedBox(
@@ -181,12 +205,21 @@ Future<void> _launchUrl(Uri url) async {
 // ignore: must_be_immutable
 class SettingOptionFolder extends StatefulWidget {
   String text;
-  Directory dir;
+  FileSystemEntity fileSystemEntity;
   String settingKey;
   Function reloadParent;
+  bool isFile;
+  List<String>? extensions;
 
-  SettingOptionFolder(this.text, this.dir, this.settingKey, this.reloadParent,
-      {super.key});
+  SettingOptionFolder(
+    this.text,
+    this.fileSystemEntity,
+    this.isFile,
+    this.settingKey,
+    this.reloadParent, {
+    this.extensions,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<SettingOptionFolder> createState() => _SettingOptionFolderState();
@@ -197,12 +230,20 @@ class _SettingOptionFolderState extends State<SettingOptionFolder> {
   @override
   Widget build(BuildContext context) {
     String? selectedDir;
+    FilePickerResult? tmp;
     return Padding(
       padding: EdgeInsets.symmetric(
           horizontal: MediaQuery.of(context).size.width / 6),
       child: IntrinsicHeight(
         child: Row(mainAxisSize: MainAxisSize.max, children: [
-          Expanded(flex: 4, child: FittedBox(child: Text(widget.text))),
+          Expanded(
+              flex: 4,
+              child: Text(
+                widget.text,
+                textAlign: TextAlign.left,
+                style: const TextStyle(fontSize: 16),
+                maxLines: 2,
+              )),
           Expanded(
             flex: 16,
             child: Padding(
@@ -210,7 +251,9 @@ class _SettingOptionFolderState extends State<SettingOptionFolder> {
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                    widget.dir.path.isNotEmpty ? widget.dir.path : '---',
+                    widget.fileSystemEntity.path.isNotEmpty
+                        ? widget.fileSystemEntity.path
+                        : '---',
                     style:
                         const TextStyle(color: Colors.white54, fontSize: 16)),
               ),
@@ -222,8 +265,28 @@ class _SettingOptionFolderState extends State<SettingOptionFolder> {
                   style: TextButton.styleFrom(
                       fixedSize: const Size.fromHeight(36)),
                   onPressed: () async => {
-                        selectedDir =
-                            await FilePicker.platform.getDirectoryPath(),
+                        if (widget.isFile)
+                          {
+                            if (widget.extensions == null)
+                              {
+                                tmp = (await FilePicker.platform.pickFiles(
+                                    type: FileType.any, lockParentWindow: true))
+                              }
+                            else
+                              {
+                                tmp = (await FilePicker.platform.pickFiles(
+                                    type: FileType.custom,
+                                    allowedExtensions: widget.extensions,
+                                    lockParentWindow: true))
+                              },
+                            selectedDir =
+                                tmp == null ? "" : tmp!.files.first.path
+                          }
+                        else
+                          {
+                            selectedDir =
+                                await FilePicker.platform.getDirectoryPath()
+                          },
                         if (selectedDir != null)
                           {
                             await (await SharedPreferences.getInstance())
@@ -271,7 +334,10 @@ class _SettingOptionFolderState extends State<SettingOptionFolder> {
 
 Map<String, String> defaultSettingsValues = {
   'workspace': '',
-  'Riivolution': getDeafultRiivoFolder()
+  'Riivolution': getDeafultRiivoFolder(),
+  'dolphin':
+      '', //TODO chiamare dolphin.exe sul cmd e vedere se esiste nel path.
+  'game': '',
 };
 
 String getDeafultRiivoFolder() {

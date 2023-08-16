@@ -1,0 +1,22 @@
+{
+    "base-file": "ISOFILEPATH",
+    "display-name": "PACKNAME",
+    "riivolution": {
+      "patches": [
+        {
+          "options": [
+            {
+              "choice": 1,
+              "option-name": "Enable",
+              "section-name": "PACKID"
+            }
+          ],
+          "root": "WORKSPACE/Packs/",
+          "xml": "PACKPATH/PACKNAME.xml"
+        }
+      ]
+    },
+    "type": "dolphin-game-mod-descriptor",
+    "version": 1
+  }
+  

@@ -170,6 +170,7 @@ Future<void> _main() async {
     prefs.setBool('ffmpeg', false);
   }
 
+  // defaultSettingsValues.remove('dolphin');
   defaultSettingsValues.forEach((key, value) async {
     if (!prefs.containsKey(key)) {
       await prefs.setString(key, value);

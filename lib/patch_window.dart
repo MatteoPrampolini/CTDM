@@ -10,10 +10,12 @@ import 'package:ctdm/utils/filepath_utils.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:ctdm/utils/music_utils.dart';
+import 'package:ctdm/utils/output_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:merge_images/merge_images.dart';
 import 'package:path/path.dart' as path;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'drawer_options/custom_ui.dart';
 
@@ -320,9 +322,13 @@ class _PatchWindowState extends State<PatchWindow> {
   String progressText = 'creating folder';
   bool keepNintendo = false;
   bool hasWiimmCup = false;
+  String dolphin = "";
+  //String game = "";
+  late SharedPreferences prefs;
   @override
   void initState() {
     // try {
+    loadSettings();
     if (File(path.join(widget.packPath, 'config.txt')).existsSync()) {
       String contents =
           File(path.join(widget.packPath, 'config.txt')).readAsStringSync();
@@ -334,11 +340,24 @@ class _PatchWindowState extends State<PatchWindow> {
     super.initState();
   }
 
+  void loadSettings() async {
+    prefs = await SharedPreferences.getInstance();
+    dolphin = prefs.getString('dolphin')!;
+    setState(() {});
+    //game = prefs.getString('game')!;
+  }
+
   void patch(String packPath) async {
     patchStatus = PatchingStatus.running;
+
     final String originalDiscPath = getOriginalDiscPath(packPath);
     final String workspace = path.dirname(path.dirname(packPath));
 
+    //DEBUG ONLY
+    // patchStatus = PatchingStatus.completed;
+    // setState(() {});
+    // return;
+    //END DEBUG ONLY
     //if some track files from config.txt are missing-> abort.
     List<String> trackList =
         getTracksFilenamesFromConfig(packPath).toSet().toList();
@@ -350,6 +369,7 @@ class _PatchWindowState extends State<PatchWindow> {
     await Future.delayed(const Duration(seconds: 1));
     if (missingTracks.isNotEmpty) {
       patchStatus = PatchingStatus.aborted;
+      setState(() {});
       return;
     }
 
@@ -916,141 +936,190 @@ class _PatchWindowState extends State<PatchWindow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "Patch window",
-            style: TextStyle(color: Colors.black),
-          ),
-          backgroundColor: Colors.amber,
-          iconTheme: IconThemeData(color: Colors.red.shade700),
+      appBar: AppBar(
+        title: const Text(
+          "Patch window",
+          style: TextStyle(color: Colors.black),
         ),
-        body: Center(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-              Center(
-                  child: Column(children: [
-                patchStatus == PatchingStatus.running
-                    ? Text("Patching...",
-                        style: TextStyle(
-                            fontSize: Theme.of(context)
-                                .textTheme
-                                .headlineLarge
-                                ?.fontSize))
-                    : patchStatus == PatchingStatus.completed
-                        ? Text("Patch is completed",
-                            style: TextStyle(
-                                fontSize: Theme.of(context)
-                                    .textTheme
-                                    .headlineLarge
-                                    ?.fontSize))
-                        : const Text(''),
-                if (patchStatus == PatchingStatus.running)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Column(
-                      children: [
-                        LoadingAnimationWidget.fourRotatingDots(
-                            color: Colors.amberAccent, size: 50),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 20.0),
-                          child: Text(
-                            progressText,
-                            style: TextStyle(
-                                color: Colors.white54,
-                                fontSize: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall
-                                    ?.fontSize),
-                          ),
-                        )
-                      ],
+        backgroundColor: Colors.amber,
+        iconTheme: IconThemeData(color: Colors.red.shade700),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: patchStatus == PatchingStatus.running
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              //STATE RUNNING
+              if (patchStatus == PatchingStatus.running)
+                Column(
+                  children: [
+                    Text(
+                      "Patching...",
+                      style: TextStyle(
+                        fontSize:
+                            Theme.of(context).textTheme.headlineLarge?.fontSize,
+                      ),
                     ),
-                  )
-              ])),
-              Visibility(
-                visible: missingTracks.isNotEmpty,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 20.0),
-                  child: Wrap(
-                    children: [
-                      Center(
-                        child: Text(
-                          "ERROR: TRACK FILES NOT FOUND",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              backgroundColor: Colors.red,
-                              fontSize: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.fontSize),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: LoadingAnimationWidget.fourRotatingDots(
+                        color: Colors.amberAccent,
+                        size: 50,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Text(
+                        progressText,
+                        style: TextStyle(
+                          color: Colors.white54,
+                          fontSize: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.fontSize,
                         ),
                       ),
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            "the following tracks were not found in myTracks folder:",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.fontSize),
-                          ),
+                    ),
+                  ],
+                )
+              else if (patchStatus == PatchingStatus.completed)
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Text(
+                        "Patch is completed",
+                        style: TextStyle(
+                          fontSize: Theme.of(context)
+                              .textTheme
+                              .headlineLarge
+                              ?.fontSize,
                         ),
                       ),
-                      Padding(
+                    ),
+                    Padding(
                         padding: const EdgeInsets.only(top: 20.0),
                         child: Center(
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width / 3,
-                            height: 300,
-                            child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: missingTracks.length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    decoration: BoxDecoration(
-                                        color: Colors.amber.shade300,
-                                        border: Border.all(
-                                          color: Colors.black,
-                                        )),
-                                    child: SelectableText(
-                                      "${missingTracks[index]}.szs",
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                          color: Colors.black87),
-                                    ),
-                                  );
-                                }),
+                            child: FractionallySizedBox(
+                          widthFactor: 0.65,
+                          child: Card(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                AfterPatchOptions(
+                                    Icons.folder_zip,
+                                    "Create a\n zip file",
+                                    'Zip file created',
+                                    zipPack,
+                                    [widget.packPath]),
+                                AfterPatchOptions(
+                                    Icons.play_circle_outline,
+                                    "Run on \nDolphin",
+                                    'Dolphin stopped',
+                                    runOnDolphin, [
+                                  dolphin,
+                                  path.join(widget.packPath,
+                                      "${path.basename(widget.packPath)}.json")
+                                ]),
+                              ],
+                            ),
+                          ),
+                        ))),
+                  ],
+                )
+              else
+                Visibility(
+                  visible: missingTracks.isNotEmpty,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: Wrap(
+                      children: [
+                        Center(
+                          child: Text(
+                            "ERROR: TRACK FILES NOT FOUND",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                backgroundColor: Colors.red,
+                                fontSize: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.fontSize),
                           ),
                         ),
-                      ),
-                      Visibility(
-                          visible: patchStatus == PatchingStatus.aborted,
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 30.0),
-                              child: Text(
-                                "the patching process has been stopped.",
-                                style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.fontSize),
-                              ),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              "the following tracks were not found in myTracks folder:",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.fontSize),
                             ),
-                          ))
-                    ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20.0),
+                          child: Center(
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width / 3,
+                              height: 300,
+                              child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: missingTracks.length,
+                                  itemBuilder: (context, index) {
+                                    return Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      decoration: BoxDecoration(
+                                          color: Colors.amber.shade300,
+                                          border: Border.all(
+                                            color: Colors.black,
+                                          )),
+                                      child: SelectableText(
+                                        "${missingTracks[index]}.szs",
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                            color: Colors.black87),
+                                      ),
+                                    );
+                                  }),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                            visible: patchStatus == PatchingStatus.aborted,
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 30.0),
+                                child: Text(
+                                  "the patching process has been stopped.",
+                                  style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.fontSize),
+                                ),
+                              ),
+                            ))
+                      ],
+                    ),
                   ),
-                ),
-              )
-            ])));
+                )
+              // Resto del codice...
+            ],
+          ),
+
+          // Resto del codice...
+        ],
+      ),
+    );
   }
 }
 
@@ -1095,4 +1164,76 @@ Future<void> encodeAndClose(File commonTxt, File f) async {
         f.path,
       ],
       runInShell: true);
+}
+
+// ignore: must_be_immutable
+class AfterPatchOptions extends StatelessWidget {
+  IconData icon;
+  String text;
+  Function customFunction;
+  List<String> parameters;
+  String modalTitle;
+  String tmpString = "";
+  AfterPatchOptions(this.icon, this.text, this.modalTitle, this.customFunction,
+      this.parameters,
+      {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 100,
+      height: 140,
+      child: Column(
+        children: [
+          IconButton(
+            splashRadius: 50,
+            iconSize: 80,
+            color: Colors.amberAccent,
+            onPressed: () async => {
+              tmpString = await customFunction(parameters),
+              if (tmpString.isNotEmpty)
+                {_showResultModal(context, await customFunction(parameters))}
+            },
+            icon: Icon(
+              icon,
+              //size: 80,
+              //color: Colors.amberAccent,
+            ),
+          ),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            style: const TextStyle(
+              fontStyle: FontStyle.italic,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showResultModal(BuildContext context, String result) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            modalTitle,
+            style: const TextStyle(color: Colors.amberAccent),
+          ),
+          content:
+              FittedBox(fit: BoxFit.fitWidth, child: Text(result, maxLines: 2)),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

@@ -46,6 +46,7 @@ dependencies:
   image: ^4.0.15
   merge_images: ^2.0.0-nullsafety
   excel: ^2.1.0
+  archive: ^3.3.7
 
 dev_dependencies:
   flutter_lints: ^2.0.1
@@ -87,6 +88,7 @@ flutter:
   assets:
       - assets/config.txt
       - assets/Pack.xml
+      - assets/Pack.json
       - assets/images/icon.png
       - assets/images/default_pack_icons/
       - assets/images/default_pack_icons/1.png

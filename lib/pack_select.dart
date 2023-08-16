@@ -132,6 +132,7 @@ class _PackSelectState extends State<PackSelect> {
                       if (result != null && result!.files.first.path != null)
                         {
                           setState(() => isLoading = true),
+                          prefs.setString('game', result!.files.first.path!),
                           if (await extractIso(result!.files.first.path!,
                                   path.join(workspace, 'ORIGINAL_DISC')) ==
                               0)

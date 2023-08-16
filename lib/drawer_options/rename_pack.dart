@@ -5,14 +5,28 @@ import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
+import 'dart:convert';
 
-void saveAndRenamePack(
-    String packPath, String chosenName, String chosenId, String version) {
-  //1: se non esiste xml-> copia Pack.xml
-  //2 crivo contenuto xml
-  //3: rinomina xml
-  //4: rinomino folder
+void replaceJsonValues(
+    Map<dynamic, dynamic> jsonMap, Map<String, dynamic> replacements) {
+  jsonMap.forEach((key, value) {
+    if (replacements.containsKey(key)) {
+      jsonMap[key] = replacements[key];
+    }
+    if (value is Map) {
+      replaceJsonValues(value, replacements);
+    } else if (value is List) {
+      for (var element in value) {
+        if (element is Map) {
+          replaceJsonValues(element, replacements);
+        }
+      }
+    }
+  });
+}
 
+void saveAndRenamePack(String packPath, String chosenName, String chosenId,
+    String version, String game, String dolphin) {
   Directory dir = Directory(packPath);
   List<FileSystemEntity> entities = dir.listSync().toList();
   Iterable<File> xmlList = entities
@@ -22,7 +36,7 @@ void saveAndRenamePack(
   if (xmlList.isEmpty) {
     createXmlFile(path.join(packPath, 'Pack.xml'));
   }
-  //2
+
   dir = Directory(packPath);
   entities = dir.listSync().toList();
   xmlList = entities
@@ -30,10 +44,62 @@ void saveAndRenamePack(
       .where((element) => element.path.endsWith('.xml'));
   File xmlFile = xmlList.first;
   replaceParamsInXml(xmlFile, chosenName, chosenId, version);
-  //3
+
   xmlFile.renameSync(path.join(packPath, "$chosenName.xml"));
-  //4
+
   dir.renameSync(path.join(path.dirname(packPath), chosenName));
+  Iterable<File> jsonList = entities
+      .whereType<File>()
+      .where((element) => element.path.endsWith('.json'));
+
+  if (jsonList.isEmpty) {
+    String jsonOgPath = path.join(path.dirname(Platform.resolvedExecutable),
+        "data", "flutter_assets", "assets", "Pack.json");
+    File(jsonOgPath)
+        .copySync(path.join(path.dirname(packPath), chosenName, 'Pack.json'));
+    //createXmlFile(path.join(packPath, 'Pack.json'));
+  }
+  dir = Directory(path.join(path.dirname(packPath), chosenName));
+  entities = dir.listSync().toList();
+  jsonList = entities
+      .whereType<File>()
+      .where((element) => element.path.endsWith('.json'));
+  File jsonFile = jsonList.first;
+  replaceParamsInJson(jsonFile, chosenName, chosenId, game, dolphin);
+  //3
+  jsonFile.renameSync(
+      path.join(path.dirname(packPath), chosenName, "$chosenName.json"));
+}
+
+void replaceParamsInJson(
+  File jsonFile,
+  String chosenName,
+  String chosenId,
+  String game,
+  String dolphin,
+) {
+  String packPath = path.dirname(jsonFile.path);
+  String workspace = path.dirname(path.dirname(packPath));
+
+  String contents = jsonFile.readAsStringSync();
+
+  Map<String, dynamic> jsonData = json.decode(contents);
+
+  Map<String, dynamic> replacements = {
+    "base-file": game,
+    "display-name": chosenName,
+    "section-name": chosenId,
+    "root": "$workspace/Packs/",
+    "xml": "$packPath/$chosenName.xml",
+  };
+
+  replaceJsonValues(jsonData, replacements);
+
+  String modifiedJsonString = json.encode(jsonData);
+  String prettifiedJsonString = const JsonEncoder.withIndent('  ')
+      .convert(json.decode(modifiedJsonString));
+
+  jsonFile.writeAsStringSync(prettifiedJsonString);
 }
 
 void createXmlFile(String xmlPath) {
@@ -96,6 +162,8 @@ class _RenamePackState extends State<RenamePack> {
   late TextEditingController _chosenIdController;
   late SharedPreferences prefs;
   late String version = "";
+  late String dolphin = "";
+  late String game = "";
   //late String isoVersion = 'PAL';
 
   // // void getIsoVersion() async {
@@ -105,7 +173,7 @@ class _RenamePackState extends State<RenamePack> {
 
   @override
   void initState() {
-    setVersion();
+    loadSettings();
     super.initState();
 
     if (widget.packPath.contains('tmp_pack_')) {
@@ -152,9 +220,11 @@ class _RenamePackState extends State<RenamePack> {
     super.dispose();
   }
 
-  setVersion() async {
+  loadSettings() async {
     prefs = await SharedPreferences.getInstance();
     version = prefs.getString('version')!;
+    dolphin = prefs.getString('dolphin')!;
+    game = prefs.getString('game')!;
   }
 
   @override
@@ -167,6 +237,14 @@ class _RenamePackState extends State<RenamePack> {
           ),
           backgroundColor: Colors.amber,
           iconTheme: IconThemeData(color: Colors.red.shade700),
+          leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MyHomePage()));
+              }),
         ),
         body: Align(
           alignment: Alignment.topCenter,
@@ -275,14 +353,24 @@ class _RenamePackState extends State<RenamePack> {
                                 MaterialStateProperty.all(const Size(150, 50))),
                         onPressed: enableSaveBtn
                             ? () => {
-                                  saveAndRenamePack(widget.packPath,
-                                      packNameChosen, packIdChosen, version),
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const MyApp(),
-                                    ),
-                                  )
+                                  saveAndRenamePack(
+                                      widget.packPath,
+                                      packNameChosen,
+                                      packIdChosen,
+                                      version,
+                                      game,
+                                      dolphin),
+                                  // Navigator.pushReplacement(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) => const MyApp(),
+                                  //   ),
+                                  // )
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const MyHomePage()))
                                 }
                             : null,
                         child: const Text("SAVE")),
