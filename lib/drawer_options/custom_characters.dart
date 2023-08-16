@@ -70,11 +70,13 @@ class _CustomCharactersState extends State<CustomCharacters> {
   bool charIsUpdated(CharacterUpdated n) {
     if (n.path == "invalidPath#################") {
       characterPaths[n.index] = "";
+    }
+    if (!File(path.join(n.path, 'icons', 'icon64.png')).existsSync()) {
+      characterPaths[n.index] = "";
     } else {
       characterPaths[n.index] = path.basename(n.path);
     }
 
-    //print("ho salvato il path");
     String contents = "";
     for (var element in allCharacters) {
       contents +=

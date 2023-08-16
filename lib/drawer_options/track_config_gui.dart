@@ -368,7 +368,6 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     if (!musicTxt.existsSync()) {
       musicTxt.createSync();
     }
-    print(keepNintendo);
 
     String content = "";
     int i = keepNintendo ? 32 : 0;

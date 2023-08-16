@@ -485,7 +485,7 @@ class _PatchWindowState extends State<PatchWindow> {
       //patch lecode with the new tracks
 
       //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-      ProcessResult p = await Process.run(
+      await Process.run(
           'wlect',
           [
             'patch',
@@ -503,9 +503,6 @@ class _PatchWindowState extends State<PatchWindow> {
             path.join(packPath, 'lpar.txt'), //added
           ],
           runInShell: true);
-      print(p.exitCode);
-      print(p.stdout);
-      print(p.stderr);
     }
 
     //move main.dol and patch it with gecko codes
@@ -863,10 +860,15 @@ class _PatchWindowState extends State<PatchWindow> {
         .forEach((element) async {
       await element.delete(recursive: true);
     });
-    await Directory(path.join(packPath, 'Demo', 'Award.szs.d'))
-        .delete(recursive: true);
-    await Directory(path.join(packPath, 'Scene', 'Model', 'Driver.szs.d'))
-        .delete(recursive: true);
+    if (Directory(path.join(packPath, 'Demo', 'Award.szs.d')).existsSync()) {
+      await Directory(path.join(packPath, 'Demo', 'Award.szs.d'))
+          .delete(recursive: true);
+    }
+    if (Directory(path.join(packPath, 'Scene', 'Model', 'Driver.szs.d'))
+        .existsSync()) {
+      await Directory(path.join(packPath, 'Scene', 'Model', 'Driver.szs.d'))
+          .delete(recursive: true);
+    }
     await Directory(path.join(packPath, 'Race', 'Course', 'tmp'))
         .delete(recursive: true);
     setState(() {
