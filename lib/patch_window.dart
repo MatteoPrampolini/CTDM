@@ -451,6 +451,7 @@ class _PatchWindowState extends State<PatchWindow> {
       await File(originalRaceFile.path).copy(path.join(packPath, 'Race',
           'Course', 'tmp', path.basename(originalRaceFile.path)));
     }
+
     //copy custom tracks in tmp
     List<File> szsFileList = Directory(path.join(workspace, 'myTracks'))
         .listSync(recursive: true)
@@ -463,6 +464,7 @@ class _PatchWindowState extends State<PatchWindow> {
       await szs.copy(path.join(
           packPath, 'Race', 'Course', 'tmp', path.basename(szs.path)));
     }
+
     setState(() {
       progressText = "patching lecode binaries";
     });
@@ -483,7 +485,7 @@ class _PatchWindowState extends State<PatchWindow> {
       //patch lecode with the new tracks
 
       //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-      await Process.run(
+      ProcessResult p = await Process.run(
           'wlect',
           [
             'patch',
@@ -500,7 +502,10 @@ class _PatchWindowState extends State<PatchWindow> {
             '--lpar', //added
             path.join(packPath, 'lpar.txt'), //added
           ],
-          runInShell: false);
+          runInShell: true);
+      print(p.exitCode);
+      print(p.stdout);
+      print(p.stderr);
     }
 
     //move main.dol and patch it with gecko codes
@@ -925,18 +930,14 @@ class _PatchWindowState extends State<PatchWindow> {
                 !isFastBrstm(element.path) &&
                 element.path.contains(path
                     .basename(filepath)
-                    .replaceFirst(RegExp(r'_?[a-zA-Z]?\.brstm$'), '')));
+                    .replaceFirst(RegExp(r'_+[a-zA-Z]?\.brstm$'), '')));
         await normalFile.copy(path.join(musicDir.path, '$id.brstm'));
 
         File fastFile = Directory(path
                 .join(path.join(workspace, 'myMusic', path.dirname(filepath))))
             .listSync()
             .whereType<File>()
-            .firstWhere((element) =>
-                isFastBrstm(element.path) &&
-                element.path.contains(path
-                    .basename(filepath)
-                    .replaceFirst(RegExp(r'_?[a-zA-Z]?\.brstm$'), '')));
+            .firstWhere((element) => isFastBrstm(element.path));
 
         await fastFile.copy(path.join(musicDir.path, '${id}_f.brstm'));
       } else {

@@ -150,19 +150,19 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
     for (String line in musicTxt.readAsLinesSync()) {
       String hex = line.substring(0, 3);
-      int i = 0;
+      int i = keepNintendo ? 32 : 0;
       for (Cup cup in cups) {
+        if (i == 32) {
+          //if in bmg.txt index>32, we are in battle slot. which is not good.
+          // skip to custom tracks slots at 044 and beyond.
+          i = 68;
+        }
         for (Track track in cup.tracks) {
           if (int.parse(hex, radix: 16) == i) {
             track.musicFolder = line.substring(4);
           }
 
           i++;
-          if (i == 32) {
-            //if in bmg.txt index>32, we are in battle slot. which is not good.
-            // skip to custom tracks slots at 044 and beyond.
-            i = 68;
-          }
         }
       }
     }
@@ -368,8 +368,11 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     if (!musicTxt.existsSync()) {
       musicTxt.createSync();
     }
+    print(keepNintendo);
+
     String content = "";
     int i = keepNintendo ? 32 : 0;
+
     for (var cup in cups) {
       for (Track track in cup.tracks) {
         if (i == 32) {
@@ -377,10 +380,12 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
           // skip to custom tracks slots at 044 and beyond.
           i = 68;
         }
+
         if (track.musicFolder != null && track.type != TrackType.menu) {
           content +=
               "${i.toRadixString(16).padLeft(3, '0')};${track.musicFolder!}\n";
         }
+
         i++;
       }
     }
@@ -445,7 +450,7 @@ N N$nintendoTracksString | """
 
         break;
     }
-    return '$typeLetter T${track.musicId}; T${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
+    return '$typeLetter ${track.musicId}; $typeLetter${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
   }
 
   @override
