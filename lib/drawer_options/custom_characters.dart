@@ -180,7 +180,7 @@ class _CustomCharactersState extends State<CustomCharacters> {
                                               }
                                             else if (Platform.isLinux)
                                               {
-                                                await Process.start('open', [
+                                                await Process.start('xdg-open', [
                                                   path.join(path.join(
                                                       path.dirname(path.dirname(
                                                           widget.packPath)),

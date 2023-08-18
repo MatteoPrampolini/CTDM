@@ -303,7 +303,7 @@ class _CharEditorState extends State<CharEditor> {
                                           },
                                         if (Platform.isLinux)
                                           {
-                                            await Process.start('open', [
+                                            await Process.start('xdg-open', [
                                               charList[selectedChar].dir.path
                                             ]),
 

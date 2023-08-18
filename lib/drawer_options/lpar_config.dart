@@ -80,7 +80,7 @@ class _LparConfigState extends State<LparConfig> {
                               if (Platform.isLinux)
                                 {
                                   pr = await Process.start(
-                                      'open', [widget.packPath]),
+                                      'xdg-open', [widget.packPath]),
                                   await pr.exitCode,
                                   //await
                                 }

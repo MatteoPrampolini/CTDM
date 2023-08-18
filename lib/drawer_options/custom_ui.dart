@@ -264,7 +264,7 @@ class _CustomUIState extends State<CustomUI> {
                               }
                             else if (Platform.isLinux)
                               {
-                                await Process.start('open',
+                                await Process.start('xdg-open',
                                     [path.join(widget.packPath, 'myUI')]),
 
                                 //await
