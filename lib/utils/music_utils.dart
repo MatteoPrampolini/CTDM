@@ -5,8 +5,7 @@ import 'package:ctdm/utils/log_utils.dart';
 import 'package:path/path.dart' as path;
 
 bool isFastBrstm(String path) {
-  final fastRegex = RegExp(r'.*_[f,F].+$');
-  return fastRegex.hasMatch(path);
+  return path.endsWith('_f.brstm') || path.endsWith('_F.brstm');
 }
 
 bool isFfmpegInstalled() {

@@ -231,26 +231,43 @@ class _CharEditorState extends State<CharEditor> {
                             ]),
                         const Divider(),
                         FileCheck(
-                            findFilePath(charList[selectedChar].dir,
-                                path.basename('allkart')),
-                            "Vehicles menu selection",
-                            '/allkart.szs'),
+                          findFilePath(charList[selectedChar].dir,
+                              path.basename('allkart.szs')),
+                          "Vehicles menu selection",
+                        ),
+                        FileCheck(
+                          findFilePath(charList[selectedChar].dir,
+                              path.basename('BT-allkart.szs')),
+                          "Battle Mode vehicles menu selection",
+                        ),
                         const Divider(),
                         FileCheck(
-                            findFilePath(charList[selectedChar].dir,
-                                path.basename('driver.brres')),
-                            "Driver",
-                            '/driver.brres'),
+                          findFilePath(charList[selectedChar].dir,
+                              path.basename('driver.brres')),
+                          "Driver",
+                        ),
                         FileCheck(
-                            findFilePath(charList[selectedChar].dir,
-                                path.basename('award.brres')),
-                            "Award",
-                            '/award.brres'),
+                          findFilePath(charList[selectedChar].dir,
+                              path.basename('award.brres')),
+                          "Award",
+                        ),
+                        Visibility(
+                          visible: charList[selectedChar].size == Size.medium,
+                          child: Tooltip(
+                            textAlign: TextAlign.left,
+                            message: "for Peach, Daisy and Rosalina only.",
+                            child: FileCheck(
+                              findFilePath(charList[selectedChar].dir,
+                                  path.basename('award3.brres')),
+                              "Award 3 ",
+                            ),
+                          ),
+                        ),
                         const Divider(),
                         SingleChildScrollView(
                           physics: const BouncingScrollPhysics(),
                           child: SizedBox(
-                            height: MediaQuery.of(context).size.height / 2.15,
+                            height: MediaQuery.of(context).size.height / 2.5,
                             child: ListView.builder(
                               shrinkWrap: true,
                               itemCount:
@@ -259,7 +276,10 @@ class _CharEditorState extends State<CharEditor> {
                                 String file =
                                     charList[selectedChar].fileListPath[index];
                                 return FileCheck(
-                                  findFilePath(charList[selectedChar].dir,
+                                  findFilePath(
+                                      Directory(path.join(
+                                          charList[selectedChar].dir.path,
+                                          'karts')),
                                       path.basename(file)),
                                   findFirstKeyByValue(
                                       vehicles, path.basename(file)),
@@ -338,9 +358,9 @@ class _CharEditorState extends State<CharEditor> {
 class FileCheck extends StatefulWidget {
   String desc;
   File file;
-  String? customPath;
+  //String? customPath;
   // ignore: use_key_in_widget_constructors
-  FileCheck(this.file, this.desc, [this.customPath]);
+  FileCheck(this.file, this.desc);
 
   @override
   State<FileCheck> createState() => _FileCheckState();
@@ -349,10 +369,8 @@ class FileCheck extends StatefulWidget {
 class _FileCheckState extends State<FileCheck> {
   @override
   Widget build(BuildContext context) {
-    String message = widget.file.path
-        .split('myCharacters')[1]
-        .replaceRange(0, 1, '')
-        .split(';')[0];
+    String message =
+        widget.file.path.split('myCharacters')[1].replaceAll(r'\', r'/');
 
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Text(path.basename(widget.desc)),
@@ -368,7 +386,7 @@ class _FileCheckState extends State<FileCheck> {
                     color: Colors.amber,
                   )))
           : Tooltip(
-              message: "$message${widget.customPath} not found",
+              message: "$message not found",
               child: const Padding(
                 padding: EdgeInsets.only(right: 20.0),
                 child: Icon(

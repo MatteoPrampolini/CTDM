@@ -204,7 +204,7 @@ class _PackEditorState extends State<PackEditor> {
         ),
       ),
       body: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(14.0),
           child: Center(
             child: SizedBox(
               width: MediaQuery.of(context).size.width / 2,

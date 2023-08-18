@@ -226,6 +226,9 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       szsFound = prefs.getBool('szs')!;
       workspace = prefs.getString('workspace')!;
+      if (workspace != '' && !Directory(workspace).existsSync()) {
+        workspace = '';
+      }
       witFound = prefs.getBool('wit')!;
       ffmpegFound = prefs.getBool('ffmpeg')!;
     });

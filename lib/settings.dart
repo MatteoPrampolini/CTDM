@@ -339,8 +339,7 @@ class _SettingOptionFolderState extends State<SettingOptionFolder> {
 Map<String, String> defaultSettingsValues = {
   'workspace': '',
   'Riivolution': getDeafultRiivoFolder(),
-  'dolphin':
-      '', //TODO chiamare dolphin.exe sul cmd e vedere se esiste nel path. ha senso visto che di default non viene aggiunto?
+  'dolphin': '',
   'game': '',
 };
 

@@ -213,11 +213,17 @@ List getDirsFromFileIndex(
     case SceneComplete.channel_:
       return [[], []];
     case SceneComplete.event:
-      return [[], []];
+      return [
+        [Directory(path.join(extractedDir.path, 'button', 'timg'))],
+        []
+      ];
     case SceneComplete.event_:
       return [[], []];
     case SceneComplete.globe:
-      return [[], []];
+      return [
+        [Directory(path.join(extractedDir.path, 'button', 'timg'))],
+        []
+      ];
     case SceneComplete.globe_:
       return [[], []];
     case SceneComplete.menuMulti:
@@ -380,7 +386,7 @@ List<CustomCharacter> createListOfCharacter(String packPath) {
 File findFilePath(Directory dir, String basename) {
   File f = dir.listSync(recursive: true).whereType<File>().firstWhere(
         (element) => element.path.contains(path.basename(basename)),
-        orElse: () => File("$basename;${dir.path};not found #######"),
+        orElse: () => File(path.join(dir.path, basename)),
       );
   return f;
 }
