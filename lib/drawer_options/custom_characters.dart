@@ -180,7 +180,8 @@ class _CustomCharactersState extends State<CustomCharacters> {
                                               }
                                             else if (Platform.isLinux)
                                               {
-                                                await Process.start('xdg-open', [
+                                                await Process.start(
+                                                    'xdg-open', [
                                                   path.join(path.join(
                                                       path.dirname(path.dirname(
                                                           widget.packPath)),
@@ -285,20 +286,25 @@ class _CharacterRowState extends State<CharacterRow> {
                       )),
           ),
           Expanded(
-            child: IconButton(
-                iconSize: 64,
-                padding: const EdgeInsets.only(left: 15),
-                onPressed: () async => {
-                      widget.replace = await searchForDir(widget.packPath),
-                      CharacterUpdated(widget.index, widget.replace.path)
-                          .dispatch(context),
-                      setState(() {})
-                    },
-                icon: const Icon(
-                  Icons.folder,
-                  size: 64,
-                  color: Colors.amberAccent,
-                )),
+            child: Tooltip(
+              message: widget.name == "Toadette"
+                  ? "Wrong Toadette replacement will crash the game.\nUse Toadette-specific custom characters."
+                  : "",
+              child: IconButton(
+                  iconSize: 64,
+                  // padding: const EdgeInsets.only(left: 15),
+                  onPressed: () async => {
+                        widget.replace = await searchForDir(widget.packPath),
+                        CharacterUpdated(widget.index, widget.replace.path)
+                            .dispatch(context),
+                        setState(() {})
+                      },
+                  icon: const Icon(
+                    Icons.folder,
+                    size: 64,
+                    color: Colors.amberAccent,
+                  )),
+            ),
           ),
 
           Visibility(
@@ -353,6 +359,7 @@ Widget _buildGridView(List<MapEntry<String, String>> characters,
             ? "invalidPath#################"
             : path.join(path.join(path.dirname(path.dirname(packPath)),
                 'myCharacters', charPathList.elementAt(index + 8 * mult)));
+
         return CharacterRow(characters[index].key, icon, Directory(charPath),
             packPath, index + 8 * mult);
       },
@@ -362,7 +369,7 @@ Widget _buildGridView(List<MapEntry<String, String>> characters,
               MediaQueryData.fromView(WidgetsBinding.instance.window)
                           .size
                           .width >
-                      910
+                      930
                   ? 2
                   : 1,
           mainAxisExtent: 100,

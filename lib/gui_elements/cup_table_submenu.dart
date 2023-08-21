@@ -30,7 +30,6 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
   @override
   void initState() {
     widget.color = Colors.limeAccent;
-
     super.initState();
     trackNameTextField = TextEditingController();
     trackNameTextField.text = widget.tracks[0].name;
@@ -166,10 +165,12 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
                           widget.packPath, widget.canDeleteTracks),
                     ElevatedButton(
                       child: const Text("Add hidden"),
-                      onPressed: () => AddTrackRequest(TrackType.hidden,
-                              widget.cupIndex, widget.rowIndex)
-                          .dispatch(
-                              context), //aggiungere parametro che indica last index delle hidden track, credo sia semplicemente i?
+                      onPressed: () => AddTrackRequest(
+                        TrackType.hidden,
+                        widget.cupIndex,
+                        widget.rowIndex + widget.tracks.length - 1,
+                      ).dispatch(
+                          context), //aggiungere parametro che indica last index delle hidden track, credo sia semplicemente i?
                     ),
                   ],
                 ),

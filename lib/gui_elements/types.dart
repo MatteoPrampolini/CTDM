@@ -19,9 +19,9 @@ class Track {
   String toString() {
     //return "Track($name)";
     if (musicFolder == null) {
-      return "Track($name,$path,$slotId,$musicId,$type)";
+      return "Track($name,$type)";
     }
-    return "Track($name,$path,$slotId,$musicId,$type,$musicFolder)";
+    return "Track($name,$type)";
   }
 }
 

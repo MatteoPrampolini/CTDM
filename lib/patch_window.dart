@@ -748,6 +748,10 @@ class _PatchWindowState extends State<PatchWindow> {
               .list()
               .where((files) => files.path.contains('allkart.szs'))
               .toList();
+          List<FileSystemEntity> allKartsBT = await Directory(pathOfCustomDir)
+              .list()
+              .where((files) => files.path.contains('allkart_BT.szs'))
+              .toList();
           List<File> drivers = (await Directory(pathOfCustomDir)
                   .list()
                   .where((files) => files.path.contains('driver.brres'))
@@ -798,6 +802,15 @@ class _PatchWindowState extends State<PatchWindow> {
           } else {
             logString(LogType.ERROR,
                 '$pathOfCustomDir does not contain allkart.szs. skipping.');
+          }
+
+          if (allKartsBT.isNotEmpty) {
+            await File(allKartsBT[0].path).copy(path.join(packPath, 'Scene',
+                'Model', 'Kart', "${characters3D[name]}-allkart_BT.szs"));
+            allKartsList.add("${characters3D[name]}-allkart_BT.szs");
+          } else {
+            logString(LogType.ERROR,
+                '$pathOfCustomDir does not contain allkart_BT.szs. skipping.');
           }
 
           //spostare i vari kart in /Race/Kart

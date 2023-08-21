@@ -8,9 +8,11 @@ import 'package:ctdm/utils/character_utiles.dart';
 import 'package:ctdm/utils/excel.dart';
 import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
+import 'package:ctdm/utils/output_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'package:path/path.dart' as path;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'drawer_options/multiplayer.dart';
 
@@ -47,20 +49,14 @@ void wipeOldFiles(String packPath) {
 }
 
 class _PackEditorState extends State<PackEditor> {
-  late bool checkResultVisibility = false;
-  late bool xmlExist = false;
+  bool pleaseWait = false;
+  bool checkResultVisibility = false;
+  bool xmlExist = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late bool canPatch = false;
-  late List<bool> checks = [
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false
-  ];
+  bool canPatch = false;
+  bool canRunOnDolphin = false;
+  late SharedPreferences prefs;
+  List<bool> checks = [false, false, false, false, false, false, false, false];
   final int optIndex = 4;
   final List<String> steps = [
     "valid pack name",
@@ -112,17 +108,20 @@ class _PackEditorState extends State<PackEditor> {
     }
 
     canPatch = checks.take(optIndex).every((element) => element == true);
-    if (!checkResultVisibility && !canPatch) {
-      checkResultVisibility = true;
-      Future.delayed(const Duration(seconds: 5), () {
-        //asynchronous delay
-        if (mounted) {
-          //checks if widget is still active and not disposed
-          //tells the widget builder to rebuild again because ui has updated
-          setState(() => checkResultVisibility = false);
-        }
-      });
-    }
+    // if (!checkResultVisibility && !canPatch) {
+    //   checkResultVisibility = true;
+    //   Future.delayed(const Duration(seconds: 5), () {
+    //     //asynchronous delay
+    //     if (mounted) {
+    //       //checks if widget is still active and not disposed
+    //       //tells the widget builder to rebuild again because ui has updated
+    //       setState(() => checkResultVisibility = false);
+    //     }
+    //   });
+    // }
+    canRunOnDolphin = await File(path.join(
+            widget.packPath, "${path.basename(widget.packPath)}.json"))
+        .exists();
     setState(() {});
   }
 
@@ -135,6 +134,9 @@ class _PackEditorState extends State<PackEditor> {
 
     xmlExist = tmp.isNotEmpty;
     super.initState();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      checkEverything();
+    });
   }
 
   void loadSettings() async {
@@ -174,6 +176,7 @@ class _PackEditorState extends State<PackEditor> {
         .exists()) {
       Directory(path.join(widget.packPath, 'Race', 'Common')).create();
     }
+    prefs = await SharedPreferences.getInstance();
   }
 
   @override
@@ -208,159 +211,254 @@ class _PackEditorState extends State<PackEditor> {
           child: Center(
             child: SizedBox(
               width: MediaQuery.of(context).size.width / 2,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text("Automatic Check List",
-                      style: TextStyle(
-                          fontSize: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.fontSize)),
-                  SizedBox(
-                    height: steps.length * 45 + 20,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: ListView.builder(
-                        itemCount: steps.length,
-                        itemBuilder: (context, index) {
-                          var step = steps[index];
-                          return SizedBox(
-                            height: 45,
-                            width: 300,
-                            child: ListTile(
-                              onTap: null,
-                              enabled: checks[index],
-                              title: Text(step),
-                              trailing: index >= optIndex
-                                  ? const Text(
-                                      "[opt]",
-                                      style: TextStyle(color: Colors.red),
-                                    )
-                                  : null,
-                              leading: Checkbox(
-                                splashRadius: 0,
-                                value: checks[index],
-                                activeColor: Colors.amberAccent,
-                                fillColor: MaterialStateProperty.all(
-                                    Colors.amberAccent),
-                                side: const BorderSide(
-                                    color: Colors.white38, width: 2),
-                                onChanged: null,
+              child: pleaseWait == false
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text("Automatic Check List",
+                            style: TextStyle(
+                                fontSize: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.fontSize)),
+                        SizedBox(
+                          height: steps.length * 45 + 20,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 20.0),
+                            child: ListView.builder(
+                              itemCount: steps.length,
+                              itemBuilder: (context, index) {
+                                var step = steps[index];
+                                return SizedBox(
+                                  height: 45,
+                                  width: 300,
+                                  child: ListTile(
+                                    onTap: null,
+                                    enabled: checks[index],
+                                    title: Text(step),
+                                    trailing: index >= optIndex
+                                        ? const Text(
+                                            "[opt]",
+                                            style: TextStyle(color: Colors.red),
+                                          )
+                                        : null,
+                                    leading: Checkbox(
+                                      splashRadius: 0,
+                                      value: checks[index],
+                                      activeColor: Colors.amberAccent,
+                                      fillColor: MaterialStateProperty.all(
+                                          Colors.amberAccent),
+                                      side: const BorderSide(
+                                          color: Colors.white38, width: 2),
+                                      onChanged: null,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ElevatedButton(
+                                    onPressed: () => {
+                                          checkResultVisibility = true,
+                                          //_scaffoldKey.currentState?.openDrawer(),
+                                          checkEverything(),
+
+                                          if (!canPatch)
+                                            {
+                                              Future.delayed(
+                                                  const Duration(seconds: 2),
+                                                  () {
+                                                checkResultVisibility = false;
+                                                //asynchronous delay
+                                                if (mounted) {
+                                                  //checks if widget is still active and not disposed
+                                                  //tells the widget builder to rebuild again because ui has updated
+                                                  _scaffoldKey.currentState
+                                                      ?.openDrawer();
+                                                }
+                                              })
+                                            }
+                                        },
+                                    child: const Text("CHECK")),
                               ),
                             ),
-                          );
-                        },
+                            Expanded(
+                              child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.amberAccent),
+                                    onPressed: canPatch
+                                        ? () => {
+                                              wipeOldFiles(widget.packPath),
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          PatchWindow(
+                                                              widget.packPath)))
+                                            }
+                                        : null,
+                                    child: Text("PATCH!",
+                                        style: TextStyle(
+                                            color: canPatch
+                                                ? Colors.black
+                                                : Colors.white)),
+                                  )),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green),
+                                    onPressed: () =>
+                                        {exportToExcel(widget.packPath)},
+                                    child: const Text("EXPORT XLSX")),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.amberAccent),
+                                    onPressed: canPatch
+                                        ? () => {
+                                              wipeOldFiles(widget.packPath),
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          PatchWindow(
+                                                            widget.packPath,
+                                                            fastPatch: true,
+                                                          )))
+                                            }
+                                        : null,
+                                    child: Text("NO MUSIC PATCH!",
+                                        style: TextStyle(
+                                            color: canPatch
+                                                ? Colors.black
+                                                : Colors.white)),
+                                  )),
+                            ),
+                          ],
+                        ),
+                        Visibility(
+                          visible: canRunOnDolphin,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 8, left: 8, right: 8),
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green),
+                                      onPressed: canRunOnDolphin
+                                          ? () async => {
+                                                setState(
+                                                    () => pleaseWait = true),
+                                                await zipPack(
+                                                    [widget.packPath]),
+                                                setState(
+                                                    () => pleaseWait = false),
+                                              }
+                                          : null,
+                                      child: const Text("EXPORT ZIP",
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                    )),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 4.5, left: 8, right: 8),
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              Colors.lightBlueAccent),
+                                      onPressed: canRunOnDolphin
+                                          ? () => {
+                                                runOnDolphin([
+                                                  prefs.getString('dolphin')!,
+                                                  path.join(widget.packPath,
+                                                      "${path.basename(widget.packPath)}.json"),
+                                                  widget.packPath,
+                                                  prefs.getString('game')!
+                                                ])
+                                              }
+                                          : null,
+                                      child: Text("RUN ON DOLPHIN",
+                                          style: TextStyle(
+                                              color: canPatch
+                                                  ? Colors.black
+                                                  : Colors.white)),
+                                    )),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20.0),
+                          child: Visibility(
+                              visible: checkResultVisibility,
+                              child: Text(
+                                canPatch
+                                    ? "You can patch."
+                                    : "Missing mandatory steps.",
+                                style: const TextStyle(color: Colors.white60),
+                              )),
+                        )
+                      ],
+                    )
+                  : const Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              "Compressing your CT Distribution...",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 24,
+                                  color: Colors.amber,
+                                  fontStyle: FontStyle.italic),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              "Do not exit this page.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 24,
+                                  color: Colors.white54,
+                                  fontStyle: FontStyle.italic),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(
-                              onPressed: () => {
-                                    //_scaffoldKey.currentState?.openDrawer(),
-                                    checkEverything(),
-                                    if (!canPatch)
-                                      {
-                                        Future.delayed(
-                                            const Duration(seconds: 2), () {
-                                          //asynchronous delay
-                                          if (mounted) {
-                                            //checks if widget is still active and not disposed
-                                            //tells the widget builder to rebuild again because ui has updated
-                                            _scaffoldKey.currentState
-                                                ?.openDrawer();
-                                          }
-                                        })
-                                      }
-                                  },
-                              child: const Text("CHECK")),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.amberAccent),
-                              onPressed: canPatch
-                                  ? () => {
-                                        wipeOldFiles(widget.packPath),
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    PatchWindow(
-                                                        widget.packPath)))
-                                      }
-                                  : null,
-                              child: Text("PATCH!",
-                                  style: TextStyle(
-                                      color: canPatch
-                                          ? Colors.black
-                                          : Colors.white)),
-                            )),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green),
-                              onPressed: () => {exportToExcel(widget.packPath)},
-                              child: const Text("EXPORT XLSX")),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.amberAccent),
-                              onPressed: canPatch
-                                  ? () => {
-                                        wipeOldFiles(widget.packPath),
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    PatchWindow(
-                                                      widget.packPath,
-                                                      fastPatch: true,
-                                                    )))
-                                      }
-                                  : null,
-                              child: Text("NO MUSIC PATCH!",
-                                  style: TextStyle(
-                                      color: canPatch
-                                          ? Colors.black
-                                          : Colors.white)),
-                            )),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Visibility(
-                        visible: checkResultVisibility,
-                        child: const Text(
-                          "Failed: complete mandatory steps first.",
-                          style: TextStyle(color: Colors.white60),
-                        )),
-                  )
-                ],
-              ),
             ),
           )),
     );

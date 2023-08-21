@@ -120,7 +120,7 @@ Future<void> _main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  await prefs.setString('version', 'v0.9.1');
+  await prefs.setString('version', 'v0.9.2');
   try {
     ProcessResult p =
         await Process.run('wlect', ['--version'], runInShell: true);
@@ -178,7 +178,7 @@ Future<void> _main() async {
     }
   });
 
-  await DesktopWindow.setMinWindowSize(const Size(1300, 1000));
+  await DesktopWindow.setMinWindowSize(const Size(1300, 1050));
 
   runApp(const MyApp());
 }

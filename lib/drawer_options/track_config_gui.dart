@@ -2,13 +2,8 @@ import 'dart:io';
 
 import 'package:ctdm/gui_elements/cup_table.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import '../gui_elements/types.dart';
-
-Future<String> loadAsset(String assetPath) async {
-  return await rootBundle.loadString(assetPath);
-}
 
 List<Track> splitCupListsFromText(String str) {
   List<Track> trackList = [];
@@ -126,13 +121,16 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   //late List<List<Track>> cups = [];
   late List<Cup> cups = [];
   bool keepNintendo = false;
+  bool isEditMode = false;
   bool wiimsCup = false;
   late List<Cup> nintendoCups;
 
   @override
   void initState() {
     super.initState();
+
     createConfigFile(widget.packPath);
+
     loadMusic(widget.packPath);
 
     nintendoCups = getNintendoCups();
@@ -168,7 +166,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     }
   }
 
-  void createConfigFile(String packPath) async {
+  void createConfigFile(String packPath) {
     File configTxt = File(path.join(packPath, 'config.txt'));
     if (!configTxt.existsSync()) {
       String assetConfigPath = path.join(
@@ -182,13 +180,11 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
       parseConfig(configTxt.path);
       return;
-      // //print(await loadAsset("assets/config.txt"));
-      // //loadAsset("assets/config.txt").then((value) => print("ciao"));
     }
     parseConfig(configTxt.path);
   }
 
-  void parseConfig(String configPath) {
+  void parseConfig(String configPath) async {
     //List<List<Track>> cups = [];
     List<Cup> cups = [];
     File configFile = File(configPath);
@@ -272,7 +268,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       } else {
         //print("lastHidden:${n.lastHiddenIndex}");
         int rightPlace = n.submenuIndex!;
-
+        //print(n.submenuIndex);
         cups[n.cupIndex - 1].tracks.insert(
             rightPlace, Track('', 11, 11, "-----ADD TRACK-----", n.type));
       }
@@ -452,9 +448,97 @@ N N$nintendoTracksString | """
     return '$typeLetter ${track.musicId}; T${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
   }
 
+  void setCupsFromAllTracks(List<Track> allTracks) {
+    for (Cup cup in cups) {
+      cup.tracks.clear();
+    }
+    int currentTrackIndex = 0;
+    for (Cup cup in cups) {
+      for (int i = 0; i < 4; i++) {
+        if (currentTrackIndex == allTracks.length) {
+          break;
+        }
+        cup.tracks.add(allTracks[currentTrackIndex]);
+        if (allTracks[currentTrackIndex].type == TrackType.menu && i == 3) {
+          i--;
+        }
+        if (allTracks[currentTrackIndex].type == TrackType.hidden) {
+          i--;
+        }
+        currentTrackIndex++;
+      }
+    }
+
+    cups.removeWhere((element) => element.tracks.isEmpty);
+  }
+
+  List<Track> sortTracks(List<Track> allTracks) {
+    List<Track> sortedTracks = [];
+
+    for (Track track in allTracks) {
+      if (track.type == TrackType.hidden) {
+        continue;
+      }
+
+      if (track.type == TrackType.menu) {
+        int insertIndex = sortedTracks.indexWhere((sortedTrack) =>
+            sortedTrack.type != TrackType.hidden &&
+            track.name.toLowerCase().compareTo(sortedTrack.name.toLowerCase()) <
+                0);
+        if (insertIndex == -1) {
+          sortedTracks.add(track);
+        } else {
+          sortedTracks.insert(insertIndex, track);
+        }
+
+        List<Track> hiddenTracksToAdd = [];
+        for (int i = allTracks.indexOf(track) + 1; i < allTracks.length; i++) {
+          Track nextTrack = allTracks[i];
+          if (nextTrack.type == TrackType.hidden) {
+            hiddenTracksToAdd.add(nextTrack);
+          } else {
+            break;
+          }
+        }
+        sortedTracks.insertAll(
+            sortedTracks.indexOf(track) + 1, hiddenTracksToAdd);
+      } else {
+        int insertIndex = sortedTracks.indexWhere((sortedTrack) =>
+            sortedTrack.type != TrackType.hidden &&
+            track.name.toLowerCase().compareTo(sortedTrack.name.toLowerCase()) <
+                0);
+        if (insertIndex == -1) {
+          sortedTracks.add(track);
+        } else {
+          sortedTracks.insert(insertIndex, track);
+        }
+      }
+    }
+
+    return sortedTracks;
+  }
+
+  sortCups() {
+    List<Track> allTracks = List.empty(growable: true);
+    for (var cup in cups) {
+      allTracks.addAll(cup.tracks);
+    }
+    //print(allTracks);
+    //allTracks.sort(customSort);
+    // cups.forEach((element) {
+    //   print(element.tracks);
+    // });
+    setCupsFromAllTracks(sortTracks(allTracks));
+    // cups.forEach((element) {
+    //   print(element.tracks);
+    // });
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     rebuildAllChildren(context);
+
     return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -488,6 +572,25 @@ N N$nintendoTracksString | """
                                 child: Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
+                                      // SizedBox(
+                                      //   height: 50,
+                                      //   width: 200,
+                                      //   child: CheckboxListTile(
+                                      //     value: isEditMode,
+                                      //     activeColor: Colors.red,
+                                      //     title: const Text("Edit Mode"),
+                                      //     onChanged: (value) => {
+                                      //       keepNintendo = value!,
+                                      //       setState(() {})
+                                      //     },
+                                      //   ),
+                                      // ),
+                                      SizedBox(
+                                          height: 50,
+                                          width: 200,
+                                          child: ElevatedButton(
+                                              onPressed: () => sortCups(),
+                                              child: const Text("sort"))),
                                       SizedBox(
                                         height: 50,
                                         width: 280,

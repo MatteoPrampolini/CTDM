@@ -237,7 +237,7 @@ class _CharEditorState extends State<CharEditor> {
                         ),
                         FileCheck(
                           findFilePath(charList[selectedChar].dir,
-                              path.basename('BT-allkart.szs')),
+                              path.basename('allkart_BT.szs')),
                           "Battle Mode vehicles menu selection",
                         ),
                         const Divider(),
