@@ -392,26 +392,25 @@ class _PackEditorState extends State<PackEditor> {
                                     padding: const EdgeInsets.only(
                                         top: 4.5, left: 8, right: 8),
                                     child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              Colors.lightBlueAccent),
-                                      onPressed: canRunOnDolphin
-                                          ? () => {
-                                                runOnDolphin([
-                                                  prefs.getString('dolphin')!,
-                                                  path.join(widget.packPath,
-                                                      "${path.basename(widget.packPath)}.json"),
-                                                  widget.packPath,
-                                                  prefs.getString('game')!
-                                                ])
-                                              }
-                                          : null,
-                                      child: Text("RUN ON DOLPHIN",
-                                          style: TextStyle(
-                                              color: canPatch
-                                                  ? Colors.black
-                                                  : Colors.white)),
-                                    )),
+                                        style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                Colors.lightBlueAccent),
+                                        onPressed: canRunOnDolphin
+                                            ? () => {
+                                                  runOnDolphin([
+                                                    prefs.getString('dolphin')!,
+                                                    path.join(widget.packPath,
+                                                        "${path.basename(widget.packPath)}.json"),
+                                                    widget.packPath,
+                                                    prefs.getString('game')!
+                                                  ])
+                                                }
+                                            : null,
+                                        child: const Text(
+                                          "RUN ON DOLPHIN",
+                                          style:
+                                              TextStyle(color: Colors.black87),
+                                        ))),
                               ),
                             ],
                           ),

@@ -26,21 +26,26 @@ class CupTableRow extends StatefulWidget {
 class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController trackNameTextField;
   late TextEditingController trackslotTextField;
-  late String? musicFolder = widget.track.musicFolder ?? "select music";
+  late String? musicFolder;
   late TextEditingController musicslotTextField;
 
-  late final List<bool> _selectedMusicOption =
-      musicFolder == "select music" ? <bool>[false, true] : <bool>[true, false];
+  // ignore: prefer_final_fields
+  //late List<bool> _selectedMusicOption;
   @override
   void initState() {
+    //print(widget.track);
     setColor();
     super.initState();
     trackNameTextField = TextEditingController();
-    trackNameTextField.text = widget.track.name;
+
     trackslotTextField = TextEditingController();
     musicslotTextField = TextEditingController();
-    musicslotTextField.text = widget.track.musicId.toString();
-    trackslotTextField.text = widget.track.slotId.toString();
+    musicFolder = widget.track.musicFolder ?? "select music";
+
+    // _selectedMusicOption = musicFolder != "select music"
+    //     ? <bool>[true, false]
+    //     : <bool>[false, true];
+    // setState(() => {});
   }
 
   void setColor() {
@@ -73,13 +78,28 @@ class _CupTableRowState extends State<CupTableRow> {
   @override
   Widget build(BuildContext context) {
     trackNameTextField.text = widget.track.name;
-    widget.track.musicFolder != null
-        ? musicFolder = widget.track.musicFolder
-        : null;
-    //trackslotTextField.text = widget.track.slotId.toString();
+    musicslotTextField.text = widget.track.musicId.toString();
+    trackslotTextField.text = widget.track.slotId.toString();
+    //musicFolder = widget.track.musicFolder; // ?? "select music";
+    musicFolder = widget.track.musicFolder;
+    if (widget.track.musicFolder == null) musicFolder = "select music";
+    //_selectedMusicOption = <bool>[true, false];
+
+    trackNameTextField.text = widget.track.name;
+
     setColor();
     FilePickerResult? result;
     FilePickerResult? musicRes;
+
+    if (widget.track.musicFolder == "." ||
+        widget.track.musicFolder == ".." ||
+        widget.track.musicFolder == "myMusic") {
+      musicFolder = "select music";
+    }
+    if (musicFolder == null) {
+      musicFolder == "..TMP..";
+    }
+
     return Container(
       decoration: BoxDecoration(
           border: Border.all(color: Colors.black), color: widget.color),
@@ -227,32 +247,48 @@ class _CupTableRowState extends State<CupTableRow> {
                               borderRadius: BorderRadius.circular(3),
                               border: Border.all(color: Colors.red)),
                           child: ToggleButtons(
+                            fillColor: Colors.amber[200],
+                            color: Colors.red[400],
+                            isSelected: [
+                              widget.track.musicFolder != null,
+                              widget.track.musicFolder == null,
+                            ],
+                            onPressed: (index) {
+                              setState(() {
+                                if (index == 0) {
+                                  // Se il pulsante "Folder" è selezionato
+                                  widget.track.musicFolder = path.relative(
+                                    path.join(
+                                        widget.packPath, '..', '..', 'myMusic'),
+                                    from: musicFolder,
+                                  );
 
-                              //selectedBorderColor: Colors.redAccent,
-                              //selectedColor: Colors.red[700],
-                              //borderRadius: BorderRadius.circular(3),
-                              fillColor: Colors.amber[200],
-                              color: Colors.red[400],
-                              onPressed: (index) => {
-                                    for (int i = 0;
-                                        i < _selectedMusicOption.length;
-                                        i++)
-                                      {
-                                        _selectedMusicOption[i] = i == index,
-                                        if (_selectedMusicOption[1])
-                                          {
-                                            //if number-> remove musicFolder
-                                            widget.track.musicFolder = null,
-                                            musicFolder = "select music",
-                                          },
-                                        setState(() => {}),
-                                      }
-                                  },
-                              isSelected: _selectedMusicOption,
-                              children: icons),
+                                  //   if (widget.track.musicFolder == "." ||
+                                  //       widget.track.musicFolder == ".." ||
+                                  //       widget.track.musicFolder == "myMusic") {
+                                  //     musicFolder = "..TMP..";
+                                  //     widget.track.musicFolder = null;
+                                  //   }
+                                } else {
+                                  // Se il pulsante "Select Music" è selezionato
+                                  widget.track.musicFolder = null;
+
+                                  // musicslotTextField.text =
+                                  //     widget.track.musicId.toString();
+                                }
+                              });
+
+                              RowChangedValue(widget.track, widget.cupIndex,
+                                      widget.rowIndex)
+                                  .dispatch(context);
+
+                              setState(() {});
+                            },
+                            children: icons,
+                          ),
                         ),
                         Visibility(
-                          visible: !_selectedMusicOption[0],
+                          visible: widget.track.musicFolder == null,
                           child: Expanded(
                             child: Center(
                               child: TextField(
@@ -283,46 +319,40 @@ class _CupTableRowState extends State<CupTableRow> {
                           ),
                         ),
                         Visibility(
-                          visible: _selectedMusicOption[0],
+                          visible: widget.track.musicFolder != null ||
+                              musicFolder == "..TMP..",
                           child: Expanded(
+                            flex: 1,
                             child: TextButton(
-                              onPressed: () async => {
-                                // musicFolder = await FilePicker.platform
-                                //     .getDirectoryPath(
-                                //         initialDirectory: path.dirname(
-                                //             path.dirname(widget.packPath)),
-                                //         dialogTitle: 'select music folder'),
+                              onPressed: () async {
                                 musicRes = await FilePicker.platform.pickFiles(
                                     allowMultiple: false,
                                     allowedExtensions: ['mp3', 'wav', 'brstm'],
                                     type: FileType.custom,
                                     initialDirectory: path.join(widget.packPath,
-                                        '..', '..', 'myMusic')),
+                                        '..', '..', 'myMusic'));
+                                musicFolder = musicRes?.paths[0];
 
-                                musicFolder = musicRes?.paths[0],
+                                if (musicFolder == null) {
+                                  musicFolder = null;
+                                  widget.track.musicFolder =
+                                      null; // Assegna null a widget.track.musicFolder
+                                } else {
+                                  // Rimuovi eventuali occorrenze di '..' dal percorso
+                                  musicFolder = musicFolder?.replaceAll(
+                                      RegExp(r'\.\.'), '');
 
-                                if (musicFolder == null)
-                                  {
-                                    musicFolder = "select music",
-                                  }
-                                else
-                                  {
-                                    // widget.track.musicFolder = path.relative(
-                                    //     path.join(widget.packPath, '..', '..',
-                                    //         'myMusic'),
-                                    //     from: musicFolder),
-                                    // print(path.join(widget.packPath, '..', '..',
-                                    //     'myMusic')),
-                                    // print(musicFolder)
-                                    widget.track.musicFolder =
-                                        musicFolder?.replaceFirst(
-                                            RegExp(r'^.*[\\,\/]myMusic*.'), ''),
-                                    //path.basename(musicFolder!)
-                                  },
+                                  widget.track.musicFolder =
+                                      musicFolder?.replaceFirst(
+                                          RegExp(r'^.*[\\,\/]myMusic*.'), '');
+
+                                  //musicFolder = widget.track.musicFolder;
+                                }
+                                // ignore: use_build_context_synchronously
                                 RowChangedValue(widget.track, widget.cupIndex,
                                         widget.rowIndex)
-                                    .dispatch(context),
-                                setState(() => {})
+                                    .dispatch(context);
+                                setState(() {});
                               },
                               child: Text(
                                 path.basename(musicFolder!),

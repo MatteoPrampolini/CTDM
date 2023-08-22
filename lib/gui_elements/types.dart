@@ -21,13 +21,13 @@ class Track {
     if (musicFolder == null) {
       return "Track($name,$type)";
     }
-    return "Track($name,$type)";
+    return "Track($name,$type,$musicFolder)";
   }
 }
 
 class Cup {
   late String cupName;
-  late List<Track> tracks;
+  List<Track> tracks;
   Cup(this.cupName, this.tracks);
   @override
   String toString() {

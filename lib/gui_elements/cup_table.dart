@@ -32,6 +32,8 @@ class _CupTableState extends State<CupTable> {
     cupNameTextField.text = widget.cupName != ""
         ? widget.cupName.replaceAll(r'"', '')
         : "Cup #${widget.cupIndex}";
+
+    //print(widget.cup);
   }
 
   @override
@@ -68,6 +70,7 @@ class _CupTableState extends State<CupTable> {
   @override
   Widget build(BuildContext context) {
     i = 0;
+
     return Padding(
         padding:
             const EdgeInsets.only(top: 40, bottom: 40, left: 100, right: 100),
@@ -84,6 +87,7 @@ class _CupTableState extends State<CupTable> {
                         controller: cupNameTextField,
                         onChanged: (value) => {
                           widget.cupName = value,
+                          cupNameTextField.text = value,
                           CupNameChangedValue(widget.cupIndex, value)
                               .dispatch(context)
                         },

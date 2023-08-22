@@ -119,25 +119,23 @@ class TrackConfigGui extends StatefulWidget {
 
 class _TrackConfigGuiState extends State<TrackConfigGui> {
   //late List<List<Track>> cups = [];
-  late List<Cup> cups = [];
+  List<Cup> cups = [];
   bool keepNintendo = false;
   bool isEditMode = false;
   bool wiimsCup = false;
-  late List<Cup> nintendoCups;
+  final List<Cup> nintendoCups = getNintendoCups();
 
   @override
   void initState() {
     super.initState();
-
     createConfigFile(widget.packPath);
 
     loadMusic(widget.packPath);
 
-    nintendoCups = getNintendoCups();
-    setState(() {
-      //parseConfig(path.join(widget.packPath, 'config.txt'));
-      //print(cups.length);
-    });
+    // setState(() {
+    //   //parseConfig(path.join(widget.packPath, 'config.txt'));
+    //   //print(cups.length);
+    // });
 
     //print(cups);
   }
@@ -297,60 +295,6 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   }
 
   void saveConfig() {
-    //print(cups);
-    // if (cups.length < 4) {
-    //   showDialog(
-    //     context: context,
-    //     builder: (_) => AlertDialog(
-    //       title: const Text(r'Not valid config.'),
-    //       content: SingleChildScrollView(
-    //         child: ListBody(
-    //           children: <Widget>[
-    //             Text(
-    //                 'you made ${cups.length} cups but the required minimum is 4.'),
-    //           ],
-    //         ),
-    //       ),
-    //       actions: <Widget>[
-    //         TextButton(
-    //           child: const Text('OK'),
-    //           onPressed: () {
-    //             Get.back();
-    //             //Navigator.of(context).pop();
-    //           },
-    //         ),
-    //       ],
-    //     ),
-    //   );
-    //   return;
-    // }
-    // if (cups.any((element) =>
-    //     element.where((element2) => element2.type != TrackType.hidden).length <
-    //     4)) {
-    //   showDialog(
-    //     context: context,
-    //     builder: (_) => AlertDialog(
-    //       title: const Text(r'Not valid config.'),
-    //       content: SingleChildScrollView(
-    //         child: ListBody(
-    //           children: const <Widget>[
-    //             Text('All the cups must have at least 4 selactable tracks.'),
-    //           ],
-    //         ),
-    //       ),
-    //       actions: <Widget>[
-    //         TextButton(
-    //           child: const Text('OK'),
-    //           onPressed: () {
-    //             Get.back();
-    //             //Navigator.of(context).pop();
-    //           },
-    //         ),
-    //       ],
-    //     ),
-    //   );
-    //   return;
-    // }
     File configTxt = File(path.join(widget.packPath, 'config.txt'));
     File musicTxt = File(path.join(widget.packPath, 'music.txt'));
     //configTxt.deleteSync();
@@ -370,6 +314,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
     for (var cup in cups) {
       for (Track track in cup.tracks) {
+        if (track.musicFolder == "..") continue;
         if (i == 32) {
           //if in bmg.txt index>32, we are in battle slot. which is not good.
           // skip to custom tracks slots at 044 and beyond.
@@ -452,6 +397,7 @@ N N$nintendoTracksString | """
     for (Cup cup in cups) {
       cup.tracks.clear();
     }
+
     int currentTrackIndex = 0;
     for (Cup cup in cups) {
       for (int i = 0; i < 4; i++) {
@@ -459,10 +405,12 @@ N N$nintendoTracksString | """
           break;
         }
         cup.tracks.add(allTracks[currentTrackIndex]);
-        if (allTracks[currentTrackIndex].type == TrackType.menu && i == 3) {
+        if (allTracks[currentTrackIndex].type == TrackType.menu &&
+            allTracks[currentTrackIndex + 1].type == TrackType.hidden) {
           i--;
         }
-        if (allTracks[currentTrackIndex].type == TrackType.hidden) {
+        if (allTracks[currentTrackIndex].type == TrackType.hidden &&
+            allTracks[currentTrackIndex + 1].type == TrackType.hidden) {
           i--;
         }
         currentTrackIndex++;
@@ -528,16 +476,19 @@ N N$nintendoTracksString | """
     // cups.forEach((element) {
     //   print(element.tracks);
     // });
-    setCupsFromAllTracks(sortTracks(allTracks));
+
+    setState(() {
+      setCupsFromAllTracks(sortTracks(allTracks));
+    });
+
     // cups.forEach((element) {
     //   print(element.tracks);
     // });
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    rebuildAllChildren(context);
+    //rebuildAllChildren(context);
 
     return Scaffold(
         appBar: AppBar(
@@ -586,11 +537,50 @@ N N$nintendoTracksString | """
                                       //   ),
                                       // ),
                                       SizedBox(
-                                          height: 50,
-                                          width: 200,
+                                          height: 30,
+                                          width: 115,
                                           child: ElevatedButton(
-                                              onPressed: () => sortCups(),
-                                              child: const Text("sort"))),
+                                            onPressed: () {
+                                              // Chiamare la funzione sortAlpha() quando il pulsante viene premuto
+                                              //sortAlpha();
+                                              sortCups();
+                                              setState(() {});
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              side: const BorderSide(
+                                                  color: Colors.white70,
+                                                  width: 1.0), // Bordo bianco
+                                              // Colore di sfondo del pulsante
+                                              elevation:
+                                                  2.0, // Elevazione del pulsante
+                                            ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                // Icona
+                                                SizedBox(
+                                                    width:
+                                                        8.0), // Spazio tra l'icona e il testo
+                                                Text(
+                                                  "A-Z Sort", // Testo del pulsante
+                                                  style:
+                                                      TextStyle(fontSize: 16.0),
+                                                ),
+                                              ],
+                                            ),
+                                          )),
+                                      Container(
+                                        margin: const EdgeInsets.only(
+                                            left: 20,
+                                            right:
+                                                80), // Margine a sinistra di 40 pixel
+                                        width:
+                                            2, // Larghezza della linea verticale
+                                        height:
+                                            30, // Altezza desiderata della linea verticale
+                                        color: Colors
+                                            .grey, // Colore della linea verticale
+                                      ),
                                       SizedBox(
                                         height: 50,
                                         width: 280,
