@@ -483,25 +483,31 @@ class _PatchWindowState extends State<PatchWindow> {
       await File(lecodePath)
           .copy(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
       //patch lecode with the new tracks
+      
+      List<String> wlectArgs = [
+        'patch',
+        path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
+        '--overwrite',
+        '--dest',
+        path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
+        '--le-define',
+        path.join(packPath, 'config.txt'),
+        '--lpar', //added
+        path.join(packPath, 'lpar.txt'), //added
+      ];
+      if (isoVersion == "PAL") {
+        wlectArgs.addAll([
+          '--track-dir',
+          path.join(packPath, 'Race', 'Course'),
+          '--copy-tracks',
+          path.join(packPath, 'Race', 'Course', 'tmp'),
+        ]);
+      }
 
       //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
       await Process.run(
           'wlect',
-          [
-            'patch',
-            path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
-            '--overwrite',
-            '--dest',
-            path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
-            '--le-define',
-            path.join(packPath, 'config.txt'),
-            '--track-dir',
-            path.join(packPath, 'Race', 'Course'),
-            '--copy-tracks',
-            path.join(packPath, 'Race', 'Course', 'tmp'),
-            '--lpar', //added
-            path.join(packPath, 'lpar.txt'), //added
-          ],
+          wlectArgs,
           runInShell: true);
     }
 
