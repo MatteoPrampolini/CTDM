@@ -148,12 +148,18 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       String hex = line.substring(0, 3);
       int i = keepNintendo ? 32 : 0;
       for (Cup cup in cups) {
-        if (i == 32) {
-          //if in bmg.txt index>32, we are in battle slot. which is not good.
-          // skip to custom tracks slots at 044 and beyond.
-          i = 68;
-        }
+        // if (i == 32) {
+        //   //if in bmg.txt index>32, we are in battle slot. which is not good.
+        //   // skip to custom tracks slots at 044 and beyond.
+        //   i = 68;
+        // }
         for (Track track in cup.tracks) {
+          if (i == 32) {
+            //if in bmg.txt index>32, we are in battle slot. which is not good.
+            // skip to custom tracks slots at 044 and beyond.
+            i = 68;
+          }
+
           if (int.parse(hex, radix: 16) == i) {
             track.musicFolder = line.substring(4);
           }
@@ -314,11 +320,14 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
     for (var cup in cups) {
       for (Track track in cup.tracks) {
-        if (track.musicFolder == "..") continue;
         if (i == 32) {
           //if in bmg.txt index>32, we are in battle slot. which is not good.
           // skip to custom tracks slots at 044 and beyond.
           i = 68;
+        }
+        if (track.musicFolder == "..") {
+          i++;
+          continue;
         }
 
         if (track.musicFolder != null && track.type != TrackType.menu) {
