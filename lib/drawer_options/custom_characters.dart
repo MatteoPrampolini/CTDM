@@ -367,9 +367,12 @@ Widget _buildGridView(List<MapEntry<String, String>> characters,
           crossAxisCount:
               // ignore: deprecated_member_use
               MediaQueryData.fromView(WidgetsBinding.instance.window)
-                          .size
-                          .width >
-                      930
+                              .size
+                              .width *
+                          MediaQueryData.fromView(
+                              // ignore: deprecated_member_use
+                              WidgetsBinding.instance.window).devicePixelRatio >
+                      1450
                   ? 2
                   : 1,
           mainAxisExtent: 100,

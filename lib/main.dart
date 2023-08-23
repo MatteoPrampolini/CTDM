@@ -120,7 +120,7 @@ Future<void> _main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  await prefs.setString('version', 'v0.9.2');
+  await prefs.setString('version', 'v0.9.3');
   try {
     ProcessResult p =
         await Process.run('wlect', ['--version'], runInShell: true);
@@ -177,9 +177,10 @@ Future<void> _main() async {
       await prefs.setString(key, value);
     }
   });
-
-  await DesktopWindow.setMinWindowSize(const Size(1300, 1050));
-
+  // //await DesktopWindow.setMinWindowSize(const Size(1300, 800));
+  // double devicePixelRatio = MediaQueryData.fromView(WidgetsBinding.instance.window).devicePixelRatio;
+  // DesktopWindow.setMinWindowSize(
+  //     Size(1300 * devicePixelRatio, 800 * devicePixelRatio));
   runApp(const MyApp());
 }
 
@@ -188,6 +189,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //await DesktopWindow.setMinWindowSize(const Size(1300, 800));
+    double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await DesktopWindow.setMinWindowSize(
+        Size(840 * devicePixelRatio, 700 * devicePixelRatio),
+      );
+    });
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'CTDM',
