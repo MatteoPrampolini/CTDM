@@ -120,7 +120,7 @@ Future<void> _main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  await prefs.setString('version', 'v0.9.3');
+  await prefs.setString('version', 'v0.9.2');
   try {
     ProcessResult p =
         await Process.run('wlect', ['--version'], runInShell: true);
@@ -194,7 +194,7 @@ class MyApp extends StatelessWidget {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await DesktopWindow.setMinWindowSize(
-        Size(840 * devicePixelRatio, 700 * devicePixelRatio),
+        Size(840 * devicePixelRatio, 720 * devicePixelRatio),
       );
     });
     return MaterialApp(

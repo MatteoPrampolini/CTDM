@@ -87,7 +87,7 @@ class _CupTableState extends State<CupTable> {
                         controller: cupNameTextField,
                         onChanged: (value) => {
                           widget.cupName = value,
-                          cupNameTextField.text = value,
+                          //cupNameTextField.text = value,
                           CupNameChangedValue(widget.cupIndex, value)
                               .dispatch(context)
                         },

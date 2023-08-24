@@ -55,73 +55,109 @@ final Map<String, String> characters3D = {
   'Funky Kong': 'fk',
   'Dry Bowser': 'bk',
 };
-int nVehiclesPerSize = 16;
+int nVehiclesPerSize = 32;
 final Map<String, String> vehicles = {
   //large
   "Flame Runner": "la_bike",
+  "Flame Runner Co-op": "la_bike_4",
   "Offroader": "la_kart",
+  "Offroader Co-op": "la_kart_4",
   "Wario Bike": "lb_bike",
+  "Wario Bike Co-op": "lb_bike_4",
   "Flame Flyer": "lb_kart",
+  "Flame Flyer Co-op": "lb_kart_4",
   "Shooting Star": "lc_bike",
+  "Shooting Star Co-op": "lc_bike_4",
   "Piranha Prowler": "lc_kart",
+  "Piranha Prowler Co-op": "lc_kart_4",
   "Spear": "ld_bike",
+  "Spear Co-op": "ld_bike_4",
   "Jetsetter": "ld_kart",
+  "Jetsetter Co-op": "ld_kart_4",
   "Standard Bike L": "ldf_bike",
+  "Standard Bike L Co-op": "ldf_bike_4",
   "Standard Kart L": "ldf_kart",
+  "Standard Kart L Co-op": "ldf_kart_4",
   "Standard Bike L (Battle Mode + Blue Team)": "ldf_bike_blue",
+  "Standard Bike L (Battle Mode + Blue Team) Co-op": "ldf_bike_blue_4",
   "Standard Bike L (Battle Mode + Red Team)": "ldf_bike_red",
+  "Standard Bike L (Battle Mode + Red Team) Co-op": "ldf_bike_red_4",
   "Standard Kart L (Battle Mode + Blue Team)": "ldf_kart_blue",
+  "Standard Kart L (Battle Mode + Blue Team) Co-op": "ldf_kart_blue_4",
   "Standard Kart L (Battle Mode + Red Team)": "ldf_kart_red",
+  "Standard Kart L (Battle Mode + Red Team) Co-op": "ldf_kart_red_4",
   "Phantom": "le_bike",
+  "Phantom Co-op": "le_bike_4",
   "Honeycoupe": "le_kart",
+  "Honeycoupe Co-op": "le_kart_4",
   //medium
   "Mach Bike": "ma_bike",
+  "Mach Bike Co-op": "ma_bike_4",
   "Classic Dragster": "ma_kart",
+  "Classic Dragster Co-op": "ma_kart_4",
   "Sugarscoot": "mb_bike",
+  "Sugarscoot Co-op": "mb_bike_4",
   "Wild Wing": "mb_kart",
+  "Wild Wing Co-op": "mb_kart_4",
   "Zip Zip": "mc_bike",
+  "Zip Zip Co-op": "mc_bike_4",
   "Super Blooper": "mc_kart",
+  "Super Blooper Co-op": "mc_kart_4",
   "Sneakster": "md_bike",
+  "Sneakster Co-op": "md_bike_4",
   "Daytripper": "md_kart",
+  "Daytripper Co-op": "md_kart_4",
   "Standard Bike M": "mdf_bike",
+  "Standard Bike M Co-op": "mdf_bike_4",
   "Standard Kart M": "mdf_kart",
+  "Standard Kart M Co-op": "mdf_kart_4",
   "Standard Bike M (Battle Mode + Blue Team)": "mdf_bike_blue",
+  "Standard Bike M (Battle Mode + Blue Team) Co-op": "mdf_bike_blue_4",
   "Standard Bike M (Battle Mode + Red Team)": "mdf_bike_red",
+  "Standard Bike M (Battle Mode + Red Team) Co-op": "mdf_bike_red_4",
   "Standard Kart M (Battle Mode + Blue Team)": "mdf_kart_blue",
+  "Standard Kart M (Battle Mode + Blue Team) Co-op": "mdf_kart_blue_4",
   "Standard Kart M (Battle Mode + Red Team)": "mdf_kart_red",
+  "Standard Kart M (Battle Mode + Red Team) Co-op": "mdf_kart_red_4",
   "Dolphin Dasher": "me_bike",
+  "Dolphin Dasher Co-op": "me_bike_4",
   "Sprinter": "me_kart",
+  "Sprinter Co-op": "me_kart_4",
   //small
   "Bullet Bike": "sa_bike",
+  "Bullet Bike Co-op": "sa_bike_4",
   "Booster Seat": "sa_kart",
+  "Booster Seat Co-op": "sa_kart_4",
   "Bit Bike": "sb_bike",
+  "Bit Bike Co-op": "sb_bike_4",
   "Mini Beast": "sb_kart",
+  "Mini Beast Co-op": "sb_kart_4",
   "Quacker": "sc_bike",
+  "Quacker Co-op": "sc_bike_4",
   "Cheep Charger": "sc_kart",
+  "Cheep Charger Co-op": "sc_kart_4",
   "Magikruiser": "sd_bike",
+  "Magikruiser Co-op": "sd_bike_4",
   "Tiny Titan": "sd_kart",
+  "Tiny Titan Co-op": "sd_kart_4",
   "Standard Bike S": "sdf_bike",
+  "Standard Bike S Co-op": "sdf_bike_4",
   "Standard Kart S": "sdf_kart",
+  "Standard Kart S Co-op": "sdf_kart_4",
   "Standard Bike S (Battle Mode + Blue Team)": "sdf_bike_blue",
+  "Standard Bike S (Battle Mode + Blue Team) Co-op": "sdf_bike_blue_4",
   "Standard Bike S (Battle Mode + Red Team)": "sdf_bike_red",
+  "Standard Bike S (Battle Mode + Red Team) Co-op": "sdf_bike_red_4",
   "Standard Kart S (Battle Mode + Blue Team)": "sdf_kart_blue",
+  "Standard Kart S (Battle Mode + Blue Team) Co-op": "sdf_kart_blue_4",
   "Standard Kart S (Battle Mode + Red Team)": "sdf_kart_red",
+  "Standard Kart S (Battle Mode + Red Team) Co-op": "sdf_kart_red_4",
   "Jet Bubble": "se_bike",
-  "Blue Falcon": "se_kart"
+  "Jet Bubble Co-op": "se_bike_4",
+  "Blue Falcon": "se_kart",
+  "Blue Falcon Co-op": "se_kart_4",
 };
-// createCharacterFolders(Directory dir) async {
-//   if (await dir.exists() == false) {
-//     await dir.create();
-//   }
-//   characters2D.forEach((key, value) async {
-//     if (await Directory(path.join(dir.path, key)).exists() == false) {
-//       await Directory(path.join(dir.path, key)).create();
-//       await Directory(path.join(dir.path, key, 'icons')).create();
-//       await Directory(path.join(dir.path, key, 'karts')).create();
-//       await Directory(path.join(dir.path, key, 'voices')).create();
-//     }
-//   });
-// }
+
 patchWithBrres(Directory extractedSzs, File brress, String subFolderpath) {}
 patchSzsWithImages(String packPath, Directory extractedSzs,
     List<String> charactersTxtLines, int index) async {
@@ -384,10 +420,22 @@ List<CustomCharacter> createListOfCharacter(String packPath) {
 }
 
 File findFilePath(Directory dir, String basename) {
-  File f = dir.listSync(recursive: true).whereType<File>().firstWhere(
-        (element) => element.path.contains(path.basename(basename)),
-        orElse: () => File(path.join(dir.path, basename)),
-      );
+  File f;
+  RegExp("${path.basename(basename.replaceAll('_4', ''))}.szs");
+  if (basename.endsWith("_4")) {
+    f = dir.listSync(recursive: true).whereType<File>().firstWhere(
+          (element) => element.path.contains(RegExp(
+              "${path.basename(basename.replaceAll('_4', ''))}.*_4.szs")),
+          orElse: () => File(path.join(dir.path, basename)),
+        );
+  } else {
+    f = dir.listSync(recursive: true).whereType<File>().firstWhere(
+          (element) => element.path.contains(RegExp(
+              RegExp.escape(path.basename(basename)) + r"(?!.*_4).*.szs")),
+          orElse: () => File(path.join(dir.path, basename)),
+        );
+  }
+
   return f;
 }
 

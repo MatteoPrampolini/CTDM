@@ -483,7 +483,7 @@ class _PatchWindowState extends State<PatchWindow> {
       await File(lecodePath)
           .copy(path.join(packPath, 'rel', "lecode-$isoVersion.bin"));
       //patch lecode with the new tracks
-      
+
       List<String> wlectArgs = [
         'patch',
         path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
@@ -505,10 +505,7 @@ class _PatchWindowState extends State<PatchWindow> {
       }
 
       //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-      await Process.run(
-          'wlect',
-          wlectArgs,
-          runInShell: true);
+      await Process.run('wlect', wlectArgs, runInShell: true);
     }
 
     //move main.dol and patch it with gecko codes
@@ -831,13 +828,14 @@ class _PatchWindowState extends State<PatchWindow> {
             for (File file in vehiclesFilesInKartsFolder) {
               if (!file.path.endsWith(".szs")) continue;
               String cleanFileName = path.basename(file.path);
+              String suffix = file.path.endsWith("_4.szs") ? "_4.szs" : ".szs";
               for (String extraName in characters3D.values) {
                 cleanFileName =
-                    cleanFileName.replaceFirst("-$extraName.szs", '');
+                    cleanFileName.replaceFirst(RegExp("-$extraName.*"), '');
               }
 
               await file.copy(path.join(packPath, 'Race', 'Kart',
-                  "$cleanFileName-${characters3D[name]}.szs"));
+                  "$cleanFileName-${characters3D[name]}$suffix"));
             }
           } else {
             logString(LogType.ERROR,
