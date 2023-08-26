@@ -28,12 +28,14 @@ class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController trackslotTextField;
   late String? musicFolder;
   late TextEditingController musicslotTextField;
-
+  String? errorTextTrackSlot = null;
+  String? errorTextMusicslot = null;
   // ignore: prefer_final_fields
   //late List<bool> _selectedMusicOption;
   @override
   void initState() {
     //print(widget.track);
+
     setColor();
     super.initState();
     trackNameTextField = TextEditingController();
@@ -42,6 +44,9 @@ class _CupTableRowState extends State<CupTableRow> {
     musicslotTextField = TextEditingController();
     musicFolder = widget.track.musicFolder ?? "select music";
 
+    trackNameTextField.text = widget.track.name;
+    musicslotTextField.text = widget.track.musicId.toString();
+    trackslotTextField.text = widget.track.slotId.toString();
     // _selectedMusicOption = musicFolder != "select music"
     //     ? <bool>[true, false]
     //     : <bool>[false, true];
@@ -77,16 +82,22 @@ class _CupTableRowState extends State<CupTableRow> {
 
   @override
   Widget build(BuildContext context) {
-    trackNameTextField.text = widget.track.name;
-    musicslotTextField.text = widget.track.musicId.toString();
-    trackslotTextField.text = widget.track.slotId.toString();
-    //musicFolder = widget.track.musicFolder; // ?? "select music";
+    musicFolder = widget.track.musicFolder; // ?? "select music";
     musicFolder = widget.track.musicFolder;
     if (widget.track.musicFolder == null) musicFolder = "select music";
     //_selectedMusicOption = <bool>[true, false];
-
+    trackNameTextField.text = widget.track.name;
+    if (errorTextMusicslot == null) {
+      musicslotTextField.text = widget.track.musicId.toString();
+    }
+    if (errorTextTrackSlot == null) {
+      trackslotTextField.text = widget.track.slotId.toString();
+    }
     trackNameTextField.text = widget.track.name;
 
+    // RegExp(r'^[1-8][1-4]$').hasMatch(widget.track.slotId.toString())
+    //     ? ""
+    //     : "error";
     setColor();
     FilePickerResult? result;
     FilePickerResult? musicRes;
@@ -162,29 +173,36 @@ class _CupTableRowState extends State<CupTableRow> {
               decoration:
                   BoxDecoration(border: Border.all(color: Colors.black)),
               child: Center(
-                child: TextField(
-                  controller: trackslotTextField,
-                  onChanged: (value) => {
-                    if (int.tryParse(value) == null)
-                      {}
-                    else
-                      {
-                        widget.track.slotId = int.tryParse(value)!,
-                        RowChangedValue(
-                                widget.track, widget.cupIndex, widget.rowIndex)
-                            .dispatch(context)
-                      }
-                  },
-                  style: const TextStyle(color: Colors.black87),
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(2),
-                    FilteringTextInputFormatter.allow(RegExp(r'[1-8]'))
-                  ],
+                  child: TextField(
+                controller: trackslotTextField,
+                onChanged: (value) {
+                  if (int.tryParse(value) != null &&
+                      RegExp(r'^[1-8][1-4]$').hasMatch(value)) {
+                    widget.track.slotId = int.parse(value);
+                    RowChangedValue(
+                            widget.track, widget.cupIndex, widget.rowIndex)
+                        .dispatch(context);
+                    setState(() {
+                      errorTextTrackSlot = null;
+                    });
+                  } else {
+                    setState(() {
+                      errorTextTrackSlot = 'Invalid';
+                    });
+                  }
+                },
+                style: const TextStyle(color: Colors.black87),
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(2),
+                  FilteringTextInputFormatter.allow(RegExp(r'[1-8]')),
+                ],
+                decoration: InputDecoration(
+                  errorText: errorTextTrackSlot,
                 ),
-              ),
+              )),
             ),
           ),
           Expanded(
@@ -291,19 +309,24 @@ class _CupTableRowState extends State<CupTableRow> {
                           visible: widget.track.musicFolder == null,
                           child: Expanded(
                             child: Center(
-                              child: TextField(
+                              child: TextFormField(
                                 controller: musicslotTextField,
-                                onChanged: (value) => {
-                                  if (int.tryParse(value) == null)
-                                    {}
-                                  else
-                                    {
-                                      widget.track.musicId =
-                                          int.tryParse(value)!,
-                                      RowChangedValue(widget.track,
-                                              widget.cupIndex, widget.rowIndex)
-                                          .dispatch(context)
-                                    }
+                                onChanged: (value) {
+                                  if (int.tryParse(value) != null &&
+                                      RegExp(r'^[1-8][1-4]$').hasMatch(value)) {
+                                    widget.track.musicId = int.tryParse(value)!;
+                                    RowChangedValue(widget.track,
+                                            widget.cupIndex, widget.rowIndex)
+                                        .dispatch(context);
+
+                                    setState(() {
+                                      errorTextMusicslot = null;
+                                    });
+                                  } else {
+                                    setState(() {
+                                      errorTextMusicslot = 'Invalid';
+                                    });
+                                  }
                                 },
                                 style: const TextStyle(color: Colors.black87),
                                 textAlign: TextAlign.center,
@@ -314,6 +337,11 @@ class _CupTableRowState extends State<CupTableRow> {
                                   FilteringTextInputFormatter.allow(
                                       RegExp(r'[1-8]'))
                                 ],
+                                decoration: InputDecoration(
+                                  errorText:
+                                      errorTextMusicslot, // Visualizza il messaggio di errore qui
+                                  // Altri attributi di decorazione del campo
+                                ),
                               ),
                             ),
                           ),
