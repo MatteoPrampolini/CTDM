@@ -399,7 +399,7 @@ N N$nintendoTracksString | """
 
         break;
     }
-    return '$typeLetter ${track.musicId}; T${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
+    return '$typeLetter T${track.musicId}; T${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
   }
 
   void setCupsFromAllTracks(List<Track> allTracks) {
