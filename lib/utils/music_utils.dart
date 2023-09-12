@@ -5,7 +5,10 @@ import 'package:ctdm/utils/log_utils.dart';
 import 'package:path/path.dart' as path;
 
 bool isFastBrstm(String path) {
-  return path.endsWith('_f.brstm') || path.endsWith('_F.brstm');
+  return path.endsWith('_f.brstm') ||
+      path.endsWith('_F.brstm') ||
+      path.endsWith('_f.wav') ||
+      path.endsWith('_F.wav');
 }
 
 bool isFfmpegInstalled() {
@@ -42,10 +45,11 @@ Future<void> fileToBrstm(
   File normalFile = await audioToWavAdpcm(
       normalizeFile.path, tmpFilePath, maxVolume); //create wav
 
-  File fastFile =
-      await createFastCopy(normalFile.path, tmpFilePathFast); //create fast wav
+  File fastFile = await createFastCopy(normalFile.path, tmpFilePathFast);
+  //create fast wav
   await callBrstmConverter(
       normalFile.path, outputFolder, id, isFastBrstm(tmpFilePath));
+
   await callBrstmConverter(
       fastFile.path, outputFolder, id, isFastBrstm(tmpFilePathFast));
 }
@@ -91,7 +95,7 @@ Future<File> audioToWavAdpcm(
 }
 
 Future<File> createFastCopy(String tmpFilePath, String tmpFilePathFast) async {
-  Process.run(
+  await Process.run(
       'ffmpeg',
       [
         '-y',

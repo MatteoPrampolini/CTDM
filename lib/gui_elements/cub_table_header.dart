@@ -69,6 +69,7 @@ class _CupTableHeaderState extends State<CupTableHeader> {
                   BoxDecoration(border: Border.all(color: Colors.black)),
               child: const Center(
                 child: Text("track slot",
+                    
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.black87)),
               ),

@@ -28,8 +28,8 @@ class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController trackslotTextField;
   late String? musicFolder;
   late TextEditingController musicslotTextField;
-  String? errorTextTrackSlot = null;
-  String? errorTextMusicslot = null;
+  String? errorTextTrackSlot;
+  String? errorTextMusicslot;
   // ignore: prefer_final_fields
   //late List<bool> _selectedMusicOption;
   @override

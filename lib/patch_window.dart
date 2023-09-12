@@ -1303,6 +1303,7 @@ class AfterPatchOptions extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                
               },
               child: const Text("Close"),
             ),
@@ -1312,3 +1313,4 @@ class AfterPatchOptions extends StatelessWidget {
     );
   }
 }
+

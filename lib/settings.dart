@@ -35,9 +35,10 @@ class _SettingsState extends State<Settings> {
   Future<void> loadSettings() async {
     prefs = await SharedPreferences.getInstance();
 
-    version = prefs.getString("version")!;
+    
 
     setState(() {
+      version = prefs.getString("version")!;
       workspace = prefs.getString('workspace')!;
       riivolution = prefs.getString('Riivolution')!;
       dolphin = prefs.getString('dolphin')!;

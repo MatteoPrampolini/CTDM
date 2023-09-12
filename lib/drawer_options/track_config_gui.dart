@@ -399,6 +399,7 @@ N N$nintendoTracksString | """
 
         break;
     }
+    
     return '$typeLetter T${track.musicId}; T${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
   }
 
