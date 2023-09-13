@@ -8,7 +8,7 @@ enum TrackType { base, menu, hidden }
 class Track {
   late String name;
   late int slotId;
-  late int musicId;
+  late String musicId;
   late String path;
   late TrackType type;
   late String? musicFolder;

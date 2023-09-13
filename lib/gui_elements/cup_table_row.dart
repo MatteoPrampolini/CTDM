@@ -312,9 +312,8 @@ class _CupTableRowState extends State<CupTableRow> {
                               child: TextFormField(
                                 controller: musicslotTextField,
                                 onChanged: (value) {
-                                  if (int.tryParse(value) != null &&
-                                      RegExp(r'^[1-8][1-4]$').hasMatch(value)) {
-                                    widget.track.musicId = int.tryParse(value)!;
+                                  if (isValidMusicSlot(value)) {
+                                    widget.track.musicId = value;
                                     RowChangedValue(widget.track,
                                             widget.cupIndex, widget.rowIndex)
                                         .dispatch(context);
@@ -330,12 +329,9 @@ class _CupTableRowState extends State<CupTableRow> {
                                 },
                                 style: const TextStyle(color: Colors.black87),
                                 textAlign: TextAlign.center,
-                                keyboardType: TextInputType.number,
+                                keyboardType: TextInputType.text,
                                 inputFormatters: <TextInputFormatter>[
-                                  FilteringTextInputFormatter.digitsOnly,
-                                  LengthLimitingTextInputFormatter(2),
-                                  FilteringTextInputFormatter.allow(
-                                      RegExp(r'[1-8]'))
+                                  LengthLimitingTextInputFormatter(3),
                                 ],
                                 decoration: InputDecoration(
                                   errorText:
@@ -415,3 +411,30 @@ const List<Widget> icons = <Widget>[
     size: 25,
   )
 ];
+
+bool isValidMusicSlot(String text) {
+  if (text.length < 2 || text.length > 3) return false;
+
+  //Arena
+  if (text.length == 3) {
+    if (text.characters.elementAt(0) != "A" &&
+        text.characters.elementAt(0) != "a") {
+      return false;
+    }
+    if (!RegExp(r'[1-2]').hasMatch(text.characters.elementAt(1))) {
+      return false;
+    }
+    if (!RegExp(r'[1-5]').hasMatch(text.characters.elementAt(2))) {
+      return false;
+    }
+    return true;
+  }
+  //Normal
+  if (!RegExp(r'[1-8]').hasMatch(text.characters.elementAt(0))) {
+    return false;
+  }
+  if (!RegExp(r'[1-4]').hasMatch(text.characters.elementAt(1))) {
+    return false;
+  }
+  return true;
+}

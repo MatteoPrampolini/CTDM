@@ -90,7 +90,7 @@ Future<String> runOnDolphin(List<String> parameters) async {
   var (packName, packId) = getPackNameAndId(packPath);
   replaceParamsInJson(File(path.join(packPath, "$packName.json")), packName,
       packId, game, dolphinPath);
-  Process.run(dolphinPath, ['-e', presetPath, '-b'], runInShell: false);
+  Process.run(dolphinPath, ['-e', presetPath], runInShell: false);
   // print(p.stderr);
   // print(p.stdout);
   //return p.pid.toString();

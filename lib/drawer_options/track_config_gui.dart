@@ -15,7 +15,7 @@ List<Track> splitCupListsFromText(String str) {
 }
 
 Track parseTrackLine(String trackLine) {
-  Track tmp = Track('', 0, 0, '', TrackType.base);
+  Track tmp = Track('', 0, '0', '', TrackType.base);
   int i = 0;
   for (String param in trackLine.split(r';')) {
     if (param.trim() == "") continue;
@@ -25,7 +25,8 @@ Track parseTrackLine(String trackLine) {
         //print(RegExp('[0-9]+').stringMatch(param));
         //param = param.trim().replaceRange(0, 2, '');
         //print(param);
-        tmp.musicId = int.parse(RegExp('[0-9]+').stringMatch(param)!);
+        tmp.musicId = param.replaceFirst(RegExp(r'[a-zA-Z]\s+T?'),
+            ''); //int.parse(RegExp('[0-9]+').stringMatch(param)!);
         break;
       case 1:
         tmp.slotId = int.parse(RegExp('[0-9]+').stringMatch(param)!);
@@ -59,43 +60,40 @@ Track parseTrackLine(String trackLine) {
 List<Cup> getNintendoCups() {
   List<Cup> nintendo = [];
   List<Track> trackList = [
-    Track('Luigi Circuit', 11, 11, 'original file', TrackType.base),
-    Track('Moo Moo Meadows', 12, 12, 'original file', TrackType.base),
-    Track('Mushroom Gorge', 13, 13, 'original file', TrackType.base),
-    Track("Toad's Factory", 14, 14, 'original file', TrackType.base),
-
-    Track('Mario Circuit', 21, 21, 'original file', TrackType.base),
-    Track('Coconut Mall', 22, 22, 'original file', TrackType.base),
-    Track('DK Summit', 23, 23, 'original file', TrackType.base),
-    Track("Wario's Gold Mine", 24, 24, 'original file', TrackType.base),
-    //CONTINUA TU
-    Track('Daisy Circuit', 31, 31, 'original file', TrackType.base),
-    Track('Koopa Cape', 32, 32, 'original file', TrackType.base),
-    Track('Maple Treeway', 33, 33, 'original file', TrackType.base),
-    Track('Grumble Volcano', 34, 34, 'original file', TrackType.base),
-    Track('Dry Dry Ruins', 41, 41, 'original file', TrackType.base),
-    Track('Moonview Highway', 42, 42, 'original file', TrackType.base),
-    Track("Bowser's Castle", 43, 43, 'original file', TrackType.base),
-    Track('Rainbow Road', 44, 44, 'original file', TrackType.base),
-
-    Track('GCN Peach Beach', 51, 51, 'original file', TrackType.base),
-    Track('DS Yoshi Falls', 52, 52, 'original file', TrackType.base),
-    Track('SNES Ghost Valley 2', 53, 53, 'original file', TrackType.base),
-    Track('N64 Mario Raceway', 54, 54, 'original file', TrackType.base),
-    Track('N64 Sherbert Land', 61, 61, 'original file', TrackType.base),
-    Track('GBA Shy Guy Beach', 62, 62, 'original file', TrackType.base),
-    Track('DS Delfino Square', 63, 63, 'original file', TrackType.base),
-    Track('GCN Waluigi Stadium', 64, 64, 'original file', TrackType.base),
-
-    Track('DS Desert Hills', 71, 71, 'original file', TrackType.base),
-    Track('GBA Bowser Castle 3', 72, 72, 'original file', TrackType.base),
-    Track("N64 DK's Jungle Parkway", 73, 73, 'original file', TrackType.base),
-    Track('GCN Mario Circuit', 74, 74, 'original file', TrackType.base),
-    Track('SNES Mario Circuit 3', 81, 81, 'original file', TrackType.base),
-    Track('DS Peach Gardens', 82, 82, 'original file', TrackType.base),
-    Track('GCN DK Mountain', 83, 83, 'original file', TrackType.base),
-    Track("N64 Bowser's Castle", 84, 84, 'original file', TrackType.base),
+    Track('Luigi Circuit', 11, '11', 'original file', TrackType.base),
+    Track('Moo Moo Meadows', 12, '12', 'original file', TrackType.base),
+    Track('Mushroom Gorge', 13, '13', 'original file', TrackType.base),
+    Track("Toad's Factory", 14, '14', 'original file', TrackType.base),
+    Track('Mario Circuit', 21, '21', 'original file', TrackType.base),
+    Track('Coconut Mall', 22, '22', 'original file', TrackType.base),
+    Track('DK Summit', 23, '23', 'original file', TrackType.base),
+    Track("Wario's Gold Mine", 24, '24', 'original file', TrackType.base),
+    Track('Daisy Circuit', 31, '31', 'original file', TrackType.base),
+    Track('Koopa Cape', 32, '32', 'original file', TrackType.base),
+    Track('Maple Treeway', 33, '33', 'original file', TrackType.base),
+    Track('Grumble Volcano', 34, '34', 'original file', TrackType.base),
+    Track('Dry Dry Ruins', 41, '41', 'original file', TrackType.base),
+    Track('Moonview Highway', 42, '42', 'original file', TrackType.base),
+    Track("Bowser's Castle", 43, '43', 'original file', TrackType.base),
+    Track('Rainbow Road', 44, '44', 'original file', TrackType.base),
+    Track('GCN Peach Beach', 51, '51', 'original file', TrackType.base),
+    Track('DS Yoshi Falls', 52, '52', 'original file', TrackType.base),
+    Track('SNES Ghost Valley 2', 53, '53', 'original file', TrackType.base),
+    Track('N64 Mario Raceway', 54, '54', 'original file', TrackType.base),
+    Track('N64 Sherbert Land', 61, '61', 'original file', TrackType.base),
+    Track('GBA Shy Guy Beach', 62, '62', 'original file', TrackType.base),
+    Track('DS Delfino Square', 63, '63', 'original file', TrackType.base),
+    Track('GCN Waluigi Stadium', 64, '64', 'original file', TrackType.base),
+    Track('DS Desert Hills', 71, '71', 'original file', TrackType.base),
+    Track('GBA Bowser Castle 3', 72, '72', 'original file', TrackType.base),
+    Track("N64 DK's Jungle Parkway", 73, '73', 'original file', TrackType.base),
+    Track('GCN Mario Circuit', 74, '74', 'original file', TrackType.base),
+    Track('SNES Mario Circuit 3', 81, '81', 'original file', TrackType.base),
+    Track('DS Peach Gardens', 82, '82', 'original file', TrackType.base),
+    Track('GCN DK Mountain', 83, '83', 'original file', TrackType.base),
+    Track("N64 Bowser's Castle", 84, '84', 'original file', TrackType.base),
   ];
+
   nintendo.add(Cup('Mushroom Cup', trackList.getRange(0, 4).toList()));
   nintendo.add(Cup('Shell Cup', trackList.getRange(4 * 4, (4 * 5)).toList()));
   nintendo.add(Cup('Flower Cup', trackList.getRange(4 * 1, (4 * 2)).toList()));
@@ -263,10 +261,10 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         if (n.type == TrackType.base) {
           cups[n.cupIndex - 1]
               .tracks
-              .add(Track('', 11, 11, "-----ADD TRACK-----", n.type));
+              .add(Track('', 11, '11', "-----ADD TRACK-----", n.type));
         }
         if (n.type == TrackType.menu) {
-          cups[n.cupIndex - 1].tracks.add(Track('', 11, 11, "temp", n.type));
+          cups[n.cupIndex - 1].tracks.add(Track('', 11, '11', "temp", n.type));
         }
         //if i have to insert a basetrack inside a specific submenu
       } else {
@@ -274,7 +272,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         int rightPlace = n.submenuIndex!;
         //print(n.submenuIndex);
         cups[n.cupIndex - 1].tracks.insert(
-            rightPlace, Track('', 11, 11, "-----ADD TRACK-----", n.type));
+            rightPlace, Track('', 11, '11', "-----ADD TRACK-----", n.type));
       }
     });
     //print(cups[n.cupIndex - 1]);
@@ -399,7 +397,9 @@ N N$nintendoTracksString | """
 
         break;
     }
-    
+    if (track.musicId.startsWith(RegExp('[Aa]'))) {
+      return '$typeLetter ${track.musicId}; T${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
+    }
     return '$typeLetter T${track.musicId}; T${track.slotId}; $code; "${track.path}"; "${track.name}";\n';
   }
 
@@ -645,25 +645,25 @@ N N$nintendoTracksString | """
                                                     Track(
                                                         'All Tracks',
                                                         0,
-                                                        0,
+                                                        '0',
                                                         'Random',
                                                         TrackType.base),
                                                     Track(
                                                         'Original Tracks',
                                                         0,
-                                                        0,
+                                                        '0',
                                                         'Random',
                                                         TrackType.base),
                                                     Track(
                                                         "Custom Tracks",
                                                         0,
-                                                        0,
+                                                        '0',
                                                         'Random',
                                                         TrackType.base),
                                                     Track(
                                                         'New Tracks',
                                                         0,
-                                                        0,
+                                                        '0',
                                                         'Random',
                                                         TrackType.base)
                                                   ],
