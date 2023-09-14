@@ -4,6 +4,7 @@ import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/drawer_options/custom_characters.dart';
 import 'package:ctdm/drawer_options/lpar_config.dart';
 import 'package:ctdm/drawer_options/multiplayer.dart';
+import 'package:ctdm/drawer_options/music_editor.dart';
 import 'package:ctdm/drawer_options/rename_pack.dart';
 import 'package:ctdm/drawer_options/select_gecko.dart';
 //import 'package:ctdm/drawer_options/track_config.dart';
@@ -43,9 +44,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         // Add a ListView to the drawer. This ensures the user can scroll
         // through the options in the drawer if there isn't enough vertical
         // space to fit everything.
-        child: ListView(
-      // Important: Remove any padding from the ListView.
-      padding: EdgeInsets.zero,
+        child: Column(
       children: [
         SizedBox(
           height: 89,
@@ -174,6 +173,42 @@ class _CustomDrawerState extends State<CustomDrawer> {
             // Update the state of the app.
             // ...
           },
+        ),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const Divider(),
+              const Text(
+                "Additional tools",
+                style: TextStyle(color: Colors.white60),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: ListTile(
+                  leading: const Icon(Icons.music_note),
+                  iconColor: Colors.amberAccent,
+                  enabled: widget.xmlExist,
+                  title: const Text(
+                    'Music Editor',
+                    style: TextStyle(color: Colors.amberAccent),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MusicEditor(widget.packPath))).then((value) =>
+                        setState(() => DrawerOnExit().dispatch(context)));
+
+                    //GeckoCodes(widget.packPath)));
+                    // Update the state of the app.
+                    // ...
+                  },
+                ),
+              ),
+            ],
+          ),
         )
       ],
     ));
