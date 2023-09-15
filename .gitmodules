@@ -1,0 +1,3 @@
+[submodule "brstm_player_submodule"]
+	path = brstm_player_submodule
+	url = https://github.com/marco-04/brstm_player.git
