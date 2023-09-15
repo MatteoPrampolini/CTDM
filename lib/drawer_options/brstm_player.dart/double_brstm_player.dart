@@ -13,7 +13,7 @@ class _DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
   Widget build(BuildContext context) {
     return const Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [BrstmPlayer(), BrstmPlayer()],
+      children: [BrstmPlayer(), Divider(), BrstmPlayer()],
     );
   }
 }

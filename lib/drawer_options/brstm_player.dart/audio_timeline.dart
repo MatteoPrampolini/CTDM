@@ -23,22 +23,35 @@ class AudioTimeline extends StatefulWidget {
 
 class AudioTimelineState extends State<AudioTimeline> {
   double sliderValue = 0.0;
-  double _loopPoint = 0.0;
+
   bool isPlaying = false;
   late Timer _timer;
+
+  @override
+  void dispose() {
+    //_timer.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     sliderValue = widget.currentPosition;
-    _loopPoint = widget.loopPoint;
   }
 
   void togglePlay() {
     isPlaying = !isPlaying;
 
+    if (!mounted) {
+      _timer.cancel();
+      return;
+    }
     if (isPlaying) {
       _timer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
+        if (!mounted) {
+          _timer.cancel();
+          return;
+        }
         setState(() {
           if (sliderValue < widget.duration) {
             sliderValue += 1.0;
