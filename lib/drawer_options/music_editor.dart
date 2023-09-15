@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ctdm/drawer_options/brstm_player.dart/double_brstm_player.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,7 @@ class _MusicEditorState extends State<MusicEditor> {
                   ),
                 IconButton(
                     onPressed: () => {
-                          setState(() => addFileVisibile = true),
+                          setState(() => addFileVisibile = !addFileVisibile),
                         },
                     icon: const Icon(
                       Icons.add,
@@ -126,17 +127,23 @@ class _MusicEditorState extends State<MusicEditor> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text(
-                              "Drop file",
+                              "Drop file Here",
+                              textAlign: TextAlign.center,
                               style: TextStyle(
-                                  fontSize: 32,
+                                  fontSize: 48,
                                   color: Colors.redAccent,
                                   decoration: TextDecoration.underline),
                             ),
-                            const Text("or"),
-                            TextButton(
+                            const Icon(Icons.audio_file_outlined,
+                                color: Colors.redAccent, size: 48),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 40.0),
+                              child: Text("or"),
+                            ),
+                            ElevatedButton(
                                 onPressed: () {},
                                 child: const Text(
-                                  "choose",
+                                  "Browse files",
                                   style: TextStyle(fontSize: 24),
                                 ))
                           ],
@@ -145,7 +152,19 @@ class _MusicEditorState extends State<MusicEditor> {
                 ),
               ))),
             ),
-          )
+          ),
+          Visibility(
+              visible: !addFileVisibile,
+              child: Center(
+                  child: SizedBox.expand(
+                      child: Padding(
+                padding: EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width / 5 + 5,
+                    top: 5,
+                    bottom: 5,
+                    right: 5),
+                child: const DoubleBrstmPlayer(),
+              ))))
         ]));
   }
 }
