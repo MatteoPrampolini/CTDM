@@ -20,6 +20,7 @@ class _MusicEditorState extends State<MusicEditor> {
   List<Directory> folderList = [];
   int selectedFolder = 0;
   late String myMusicFolder;
+  GlobalKey<DoubleBrstmPlayerState> doublePlayerKey = GlobalKey();
 
   bool addFileVisibile = false;
   @override
@@ -86,6 +87,7 @@ class _MusicEditorState extends State<MusicEditor> {
                       maxLines: 2,
                     ),
                     onTap: () => {
+                      doublePlayerKey.currentState?.stopAll(),
                       setState(
                         () => selectedFolder = i,
                       )
@@ -163,7 +165,10 @@ class _MusicEditorState extends State<MusicEditor> {
                     top: 5,
                     bottom: 5,
                     right: 5),
-                child: const DoubleBrstmPlayer(),
+                child: DoubleBrstmPlayer(
+                  folderList[selectedFolder].path,
+                  key: doublePlayerKey,
+                ),
               ))))
         ]));
   }
