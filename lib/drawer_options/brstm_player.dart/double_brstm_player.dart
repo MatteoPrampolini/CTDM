@@ -5,6 +5,7 @@ import 'package:ctdm/drawer_options/brstm_player.dart/player.dart';
 import 'package:ctdm/utils/music_utils.dart';
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class DoubleBrstmPlayer extends StatefulWidget {
   String folderPath;
   DoubleBrstmPlayer(this.folderPath, {super.key});
@@ -20,29 +21,43 @@ class DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
 
   @override
   void initState() {
-    fileList =
-        Directory(widget.folderPath).listSync().whereType<File>().toList();
+    selectedFileChange(widget.folderPath);
+    updateFileList(widget.folderPath);
     super.initState();
   }
 
-  void stopAll() {
-    brstmPlayerKey1.currentState?.reset();
-    brstmPlayerKey2.currentState?.reset();
+  @override
+  void dispose() async {
+    // await brstmPlayerKey1.currentState?.mpv.quit();
+    // await brstmPlayerKey2.currentState?.mpv.quit();
+
+    super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  selectedFileChange(String subFolderPath) async {
+    updateFileList(subFolderPath);
+    brstmPlayerKey1.currentState?.reset(BRSTM(fileList[0].path));
+    brstmPlayerKey2.currentState?.reset(BRSTM(fileList[1].path));
+    brstmPlayerKey1.currentState?.reloadFile();
+    brstmPlayerKey2.currentState?.reloadFile();
+    setState(() {});
+  }
+
+  void updateFileList(subFolderPath) {
     fileList = [
-      Directory(widget.folderPath)
+      Directory(subFolderPath)
           .listSync()
           .whereType<File>()
           .firstWhere((element) => !isFastBrstm(element.path)),
-      Directory(widget.folderPath)
+      Directory(subFolderPath)
           .listSync()
           .whereType<File>()
           .firstWhere((element) => isFastBrstm(element.path))
     ];
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ctdm/easter_egg.dart';
 import 'package:ctdm/main.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +22,8 @@ class _SettingsState extends State<Settings> {
   String riivolution = "";
   String dolphin = "";
   String game = "";
-  //late int isoVersionNumber = 1;
-  // ignore: non_constant_identifier_names
-  //final List<String> VERSIONS = ["PAL", "USA", "JAP", "KOR"];
+
+  int _easterEggCounter = 0;
 
   @override
   void initState() {
@@ -35,14 +35,22 @@ class _SettingsState extends State<Settings> {
   Future<void> loadSettings() async {
     prefs = await SharedPreferences.getInstance();
 
-    
-
     setState(() {
       version = prefs.getString("version")!;
       workspace = prefs.getString('workspace')!;
       riivolution = prefs.getString('Riivolution')!;
       dolphin = prefs.getString('dolphin')!;
       game = prefs.getString('game')!;
+    });
+  }
+
+  void _handleTap() {
+    setState(() {
+      _easterEggCounter++;
+      if (_easterEggCounter >= 7) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const EasterEgg()));
+      }
     });
   }
 
@@ -79,9 +87,13 @@ class _SettingsState extends State<Settings> {
             children: [
               Align(
                 alignment: Alignment.topRight,
-                child: Text(
-                  "CTDM $version",
-                  style: const TextStyle(color: Colors.white54, fontSize: 20),
+                child: GestureDetector(
+                  onTap: _handleTap,
+                  behavior: HitTestBehavior.translucent,
+                  child: Text(
+                    "CTDM $version",
+                    style: const TextStyle(color: Colors.white54, fontSize: 20),
+                  ),
                 ),
               ),
               SettingOptionFolder(

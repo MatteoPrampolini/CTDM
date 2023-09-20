@@ -87,10 +87,10 @@ class _MusicEditorState extends State<MusicEditor> {
                       maxLines: 2,
                     ),
                     onTap: () => {
-                      doublePlayerKey.currentState?.stopAll(),
-                      setState(
-                        () => selectedFolder = i,
-                      )
+                      selectedFolder = i,
+                      doublePlayerKey.currentState
+                          ?.selectedFileChange(folderList[selectedFolder].path),
+                      setState(() => {})
                     },
                   ),
                 IconButton(

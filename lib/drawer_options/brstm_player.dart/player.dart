@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'loop_point_timeline.dart';
 
+// ignore: must_be_immutable
 class BrstmPlayer extends StatefulWidget {
   BRSTM file;
   BrstmPlayer(this.file, {super.key});
@@ -16,9 +17,18 @@ class BrstmPlayer extends StatefulWidget {
 }
 
 class BrstmPlayerState extends State<BrstmPlayer> {
+  late BRSTM file;
+
+  int _loopStart = 0;
+  int _loopEnd = 0;
+  int _totalSamples = 0;
+  int _sampleRate = 0;
+  bool _isFileLoaded = false;
   bool _isPlaying = false;
-  bool _edit_loopoint_visibility = false;
+  bool _editLoopointVisibility = false;
   GlobalKey<AudioTimelineState> audioTimelineKey = GlobalKey();
+  GlobalKey<PlayButtonState> playButtonKey = GlobalKey();
+
   MPVPlayer mpv = MPVPlayer();
 
   @override
@@ -27,44 +37,81 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     super.dispose();
   }
 
-  void reset() {
-    mpv.stop();
+  reset(BRSTM brstm) async {
+    await mpv.quit();
+
+    playButtonKey.currentState?.isPlaying = false;
     audioTimelineKey.currentState?.isPlaying = false;
+    playButtonKey.currentState?.setState(() {});
     audioTimelineKey.currentState?.sliderValue = 0;
     _isPlaying = false;
+    _isFileLoaded = false;
+    file.close();
+
+    file = brstm;
   }
 
   @override
   void initState() {
+    file = widget.file;
+
     mpv.binary = "mpv";
-    mpv.pipe = r"\\.\pipe\mpvsocket_" "${widget.file.getFilePath()!}";
+    mpv.pipe =
+        (Platform.isWindows ? r"\\.\pipe\mpvsocket_" : "/tmp/mpvsocket_") +
+            path.basenameWithoutExtension(file.getFilePath()!);
+
     if (File(mpv.pipe).existsSync()) {
       File(mpv.pipe).deleteSync();
     }
     //"${path.basename(widget.file.getFilePath()!)}";
-    mpv.updateInterval = 300;
-    mpv.start();
+
+    reloadFile();
     super.initState();
+    setState(() {});
   }
 
-  void _init() async {
-    await mpv.loadFile(widget.file.getFilePath()!);
+  reloadFile() {
+    file.open();
+    file.readSync();
+    mpv.updateInterval = 300;
+
+    file.open();
+    file.readSync();
+    _loopStart = file.getLoopStart()!;
+    _loopEnd = file.getLoopEnd()!;
+    _totalSamples = file.getTotalSamples()!;
+    _sampleRate = file.getSampleRate()!;
+    audioTimelineKey.currentState?.filechanged(file);
+
+    setState(() {});
   }
 
-  Future<bool> togglePlay() async {
-    _isPlaying = !_isPlaying;
+  Future<bool> togglePlay({bool? value}) async {
+    _isPlaying = value ?? !_isPlaying;
+    playButtonKey.currentState?.isPlaying = _isPlaying;
 
-    audioTimelineKey.currentState?.togglePlay();
-    print(audioTimelineKey.currentState!.sliderValue);
-    if (_isPlaying) {
-      if (audioTimelineKey.currentState!.sliderValue == 0) {
-        await mpv.loadFile(widget.file.getFilePath()!);
-      } else {
+    if (!mpv.getRunningState()) {
+      await mpv.start();
+      await mpv.loadFile(file.getFilePath()!);
+      _isFileLoaded = true;
+      if (audioTimelineKey.currentState!.sliderValue > 0) {
+        await mpv.pause();
+        await Future.delayed(const Duration(seconds: 1));
         await mpv.seek(audioTimelineKey.currentState!.sliderValue);
+        //await mpv.play();
+      }
+    }
+    audioTimelineKey.currentState?.togglePlay();
+    if (_isPlaying) {
+      if (!_isFileLoaded) {
+        await mpv.loadFile(file.getFilePath()!);
+
+        _isFileLoaded = true;
+      } else {
         await mpv.play();
       }
     } else {
-      await mpv.stop(); //pause() when fixed.
+      await mpv.pause();
     }
 
     // if (_isPlaying) {
@@ -75,6 +122,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     // }
 
     setState(() {});
+
     return _isPlaying;
   }
 
@@ -92,7 +140,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
                         Colors.amberAccent)), // Change the color here,
                 onPressed: () => {
                       setState(() {
-                        _edit_loopoint_visibility = !_edit_loopoint_visibility;
+                        _editLoopointVisibility = !_editLoopointVisibility;
                       })
                     },
                 child: const Text(
@@ -114,23 +162,43 @@ class BrstmPlayerState extends State<BrstmPlayer> {
               maintainSize: true,
               maintainState: true,
               maintainAnimation: true,
-              visible: _edit_loopoint_visibility,
+              visible: _editLoopointVisibility,
               child: LoopPointTimeline(
-                  duration: 400,
-                  startLoop: 0,
-                  endLoop: 1,
-                  onLoopPointChange: (double) => {print("changed")}),
+                  totalSamples: _totalSamples,
+                  startLoop: _loopStart,
+                  endLoop: _loopEnd,
+                  sampleRate: _sampleRate,
+                  onLoopPointChange: (n) => {print("changed")}),
             ),
             AudioTimeline(
                 key: audioTimelineKey,
                 currentPosition: 0,
-                duration: 400,
+                duration: widget.file.getDuration()!,
                 loopPoint: 100,
-                onSeek: (value) {
+                onChangeStart: (db) async => {
+                      if (playButtonKey.currentState!.isPlaying) {togglePlay()},
+                      if (audioTimelineKey.currentState!.isPlaying)
+                        {
+                          audioTimelineKey.currentState?.setState(() {
+                            audioTimelineKey.currentState?.isPlaying = false;
+                          })
+                        },
+                      await mpv.pause()
+                    },
+                onSeek: (value) async {
                   audioTimelineKey.currentState?.sliderValue = value;
                 },
+                onChangeEnd: (value) async => {
+                      if (value <= file.getDuration()!)
+                        {
+                          await mpv
+                              .seek(audioTimelineKey.currentState!.sliderValue),
+                          if (audioTimelineKey.currentState!.isPlaying)
+                            {await togglePlay()}
+                        }
+                    },
                 onLoopPointChange: (value) {}),
-            PlayButton(togglePlay),
+            PlayButton(togglePlay, key: playButtonKey),
           ],
         ),
       ],
@@ -143,10 +211,10 @@ class PlayButton extends StatefulWidget {
   const PlayButton(this.parentTogglePlay, {super.key});
 
   @override
-  State<PlayButton> createState() => _PlayButtonState();
+  State<PlayButton> createState() => PlayButtonState();
 }
 
-class _PlayButtonState extends State<PlayButton> {
+class PlayButtonState extends State<PlayButton> {
   bool isPlaying = false;
   @override
   Widget build(BuildContext context) {
@@ -156,7 +224,7 @@ class _PlayButtonState extends State<PlayButton> {
         color: Colors.white,
         icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
         onPressed: () async => {
-          isPlaying = await widget.parentTogglePlay(),
+          isPlaying = await widget.parentTogglePlay() //setState(() => {})
         },
       ),
     );

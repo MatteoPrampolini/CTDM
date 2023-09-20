@@ -12,6 +12,9 @@ Future<String> zipPack(List<String> parameters) async {
     'Race',
     'static',
     'thp',
+    'Scene',
+    'rel',
+    'sys',
   ];
   final archive = Archive();
 

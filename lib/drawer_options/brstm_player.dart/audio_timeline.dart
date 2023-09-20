@@ -1,11 +1,15 @@
 import 'dart:async';
 
+import 'package:brstm_player/brstm.dart';
 import 'package:flutter/material.dart';
 
 class AudioTimeline extends StatefulWidget {
   final double currentPosition;
   final double duration;
   final ValueChanged<double> onSeek;
+  final ValueChanged<double> onChangeStart;
+  final ValueChanged<double> onChangeEnd;
+
   final double loopPoint;
   final ValueChanged<double> onLoopPointChange;
 
@@ -13,6 +17,8 @@ class AudioTimeline extends StatefulWidget {
     required this.currentPosition,
     required this.duration,
     required this.onSeek,
+    required this.onChangeStart,
+    required this.onChangeEnd,
     required this.loopPoint,
     required this.onLoopPointChange,
     Key? key,
@@ -23,20 +29,52 @@ class AudioTimeline extends StatefulWidget {
 
 class AudioTimelineState extends State<AudioTimeline> {
   double sliderValue = 0.0;
+  double _fileDuration = 0.0;
 
   bool isPlaying = false;
   late Timer _timer;
-
   @override
   void dispose() {
-    //_timer.cancel();
+    _timer.cancel();
     super.dispose();
+  }
+
+  void _timerFunc() {
+    if (!mounted) {
+      _timer.cancel();
+      return;
+    }
+    if (isPlaying) {
+      if (sliderValue < _fileDuration) {
+        sliderValue += 1.0;
+
+        if (sliderValue > _fileDuration) {
+          sliderValue = _fileDuration;
+        }
+      }
+    }
+  }
+
+  void filechanged(BRSTM brstm) {
+    isPlaying = false;
+    brstm.open();
+    brstm.readSync();
+    setState(() {
+      _fileDuration = brstm.getDuration()!;
+      // _loopStart = brstm.getLoopStart()!;
+      // _loopEnd = brstm.getLoopEnd()!;
+    });
   }
 
   @override
   void initState() {
     super.initState();
     sliderValue = widget.currentPosition;
+    _fileDuration = widget.duration;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _timerFunc();
+      setState(() {});
+    });
   }
 
   void togglePlay() {
@@ -46,32 +84,10 @@ class AudioTimelineState extends State<AudioTimeline> {
       _timer.cancel();
       return;
     }
-    if (isPlaying) {
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (!mounted) {
-          _timer.cancel();
-          return;
-        }
-        setState(() {
-          if (sliderValue < widget.duration) {
-            sliderValue += 1.0;
-
-            if (sliderValue > widget.duration) {
-              sliderValue = widget.duration;
-            }
-            widget.onSeek(sliderValue);
-          }
-        });
-      });
-    } else {
-      _timer.cancel();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Aggiorna il valore dello slider con la posizione corrente
-
     return SizedBox(
       width: 300,
       child: Stack(
@@ -88,7 +104,7 @@ class AudioTimelineState extends State<AudioTimeline> {
                   style: const TextStyle(color: Colors.white70),
                 ), // Aggiungi il testo per il valore minimo
                 Text(
-                  formatDuration(widget.duration.toInt()),
+                  formatDuration(_fileDuration.toInt()),
                   style: const TextStyle(color: Colors.white70),
                 ), // Aggiungi il testo per il valore massimo in minuti
               ],
@@ -96,8 +112,9 @@ class AudioTimelineState extends State<AudioTimeline> {
           ),
           Slider(
             min: 0.0,
-            max: widget.duration,
-            value: sliderValue,
+            max: _fileDuration > 0 ? _fileDuration : 999,
+            value: sliderValue > _fileDuration ? 0 : sliderValue,
+            onChangeStart: (value) async => {widget.onChangeStart(value)},
             onChanged: (value) {
               //_sliderValue = value;
               widget.onSeek(value);
@@ -105,10 +122,7 @@ class AudioTimelineState extends State<AudioTimeline> {
                 sliderValue = value;
               });
             },
-            // onChangeEnd: (value) {
-            //   // Chiamato quando l'utente rilascia lo slider
-            //   widget.onSeek(value); // Aggiorna la posizione della canzone
-            // },
+            onChangeEnd: (value) async => {widget.onChangeEnd(value)},
           ),
         ],
       ),
