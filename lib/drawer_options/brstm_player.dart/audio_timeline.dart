@@ -122,7 +122,12 @@ class AudioTimelineState extends State<AudioTimeline> {
                 sliderValue = value;
               });
             },
-            onChangeEnd: (value) async => {widget.onChangeEnd(value)},
+            onChangeEnd: (value) async => {
+              widget.onChangeEnd(value),
+              setState(() {
+                sliderValue = value;
+              })
+            },
           ),
         ],
       ),

@@ -50,6 +50,9 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     file.close();
 
     file = brstm;
+    audioTimelineKey.currentState?.setState(() {
+      audioTimelineKey.currentState?.filechanged(brstm);
+    });
   }
 
   @override
@@ -93,24 +96,34 @@ class BrstmPlayerState extends State<BrstmPlayer> {
 
     if (!mpv.getRunningState()) {
       await mpv.start(hangIndefinitely: true);
-      await mpv.loadFile(file.getFilePath()!);
-      _isFileLoaded = true;
-      if (audioTimelineKey.currentState!.sliderValue > 0) {
-        await mpv.pause();
-        await Future.delayed(const Duration(seconds: 1));
-        await mpv.seek(audioTimelineKey.currentState!.sliderValue);
-        //await mpv.play();
-      }
+
+      // await mpv.loadFile(file.getFilePath()!);
+      // _isFileLoaded = true;
+      // if (audioTimelineKey.currentState!.sliderValue > 0) {
+      //   await mpv.pause();
+      //   await Future.delayed(const Duration(seconds: 1));
+      //   await mpv.seek(audioTimelineKey.currentState!.sliderValue);
+      //   //await mpv.play();
+      // }
     }
-    audioTimelineKey.currentState?.togglePlay();
+
     if (_isPlaying) {
-      if (!_isFileLoaded) {
+      //if it should play
+      if (!mpv.isPlaying) {
+        await Future.delayed(const Duration(milliseconds: 300));
         await mpv.loadFile(file.getFilePath()!);
 
         _isFileLoaded = true;
-      } else {
-        await mpv.play();
       }
+      if (audioTimelineKey.currentState!.sliderValue > 0) {
+        await mpv.pause();
+        //await Future.delayed(const Duration(milliseconds: 300));
+        await mpv.seek(audioTimelineKey.currentState!.sliderValue);
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+      //await mpv.play();
+      //await Future.delayed(const Duration(milliseconds: 300));
+      await mpv.play();
     } else {
       await mpv.pause();
     }
@@ -121,7 +134,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     // } else {
     //   await mpv.pause();
     // }
-
+    audioTimelineKey.currentState?.togglePlay();
     setState(() {});
 
     return _isPlaying;
@@ -174,29 +187,33 @@ class BrstmPlayerState extends State<BrstmPlayer> {
             AudioTimeline(
                 key: audioTimelineKey,
                 currentPosition: 0,
-                duration: widget.file.getDuration()!,
+                duration: file.getDuration()!,
                 loopPoint: 100,
                 onChangeStart: (db) async => {
                       if (playButtonKey.currentState!.isPlaying) {togglePlay()},
-                      if (audioTimelineKey.currentState!.isPlaying)
-                        {
-                          audioTimelineKey.currentState?.setState(() {
-                            audioTimelineKey.currentState?.isPlaying = false;
-                          })
-                        },
-                      await mpv.pause()
+                      // if (audioTimelineKey.currentState!.isPlaying)
+                      //   {
+                      //     audioTimelineKey.currentState?.setState(() {
+                      //       audioTimelineKey.currentState?.isPlaying = false;
+                      //     })
+                      //   },
+                      // await mpv.pause()
                     },
                 onSeek: (value) async {
                   audioTimelineKey.currentState?.sliderValue = value;
                 },
                 onChangeEnd: (value) async => {
-                      if (value <= file.getDuration()!)
-                        {
-                          await mpv
-                              .seek(audioTimelineKey.currentState!.sliderValue),
-                          if (audioTimelineKey.currentState!.isPlaying)
-                            {await togglePlay()}
-                        }
+                      // if(mpv.isPlaying){
+                      //   await togglePlay()
+                      // }
+                      // print(audioTimelineKey.currentState!.sliderValue),
+                      // if (value <= file.getDuration()!)
+                      //   {
+                      //     await mpv
+                      //         .seek(audioTimelineKey.currentState!.sliderValue),
+                      //     if (audioTimelineKey.currentState!.isPlaying)
+                      //       {await togglePlay()}
+                      //   }
                     },
                 onLoopPointChange: (value) {}),
             PlayButton(togglePlay, key: playButtonKey),
