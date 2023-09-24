@@ -34,6 +34,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
   @override
   void dispose() {
     mpv.quit();
+
     super.dispose();
   }
 
@@ -91,7 +92,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     playButtonKey.currentState?.isPlaying = _isPlaying;
 
     if (!mpv.getRunningState()) {
-      await mpv.start();
+      await mpv.start(hangIndefinitely: true);
       await mpv.loadFile(file.getFilePath()!);
       _isFileLoaded = true;
       if (audioTimelineKey.currentState!.sliderValue > 0) {

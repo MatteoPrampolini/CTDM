@@ -9,12 +9,13 @@ Future<String> zipPack(List<String> parameters) async {
   final dirToZip = [
     'codes',
     'Demo',
+    'Music',
     'Race',
-    'static',
-    'thp',
-    'Scene',
     'rel',
+    'Scene',
+    'static',
     'sys',
+    'thp',
   ];
   final archive = Archive();
 
