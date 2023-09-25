@@ -174,7 +174,11 @@ Future<void> _main() async {
   // defaultSettingsValues.remove('dolphin');
   defaultSettingsValues.forEach((key, value) async {
     if (!prefs.containsKey(key)) {
-      await prefs.setString(key, value);
+      if (['debug'].contains(key)) {
+        await prefs.setBool(key, value);
+      } else {
+        await prefs.setString(key, value);
+      }
     }
   });
   // //await DesktopWindow.setMinWindowSize(const Size(1300, 800));

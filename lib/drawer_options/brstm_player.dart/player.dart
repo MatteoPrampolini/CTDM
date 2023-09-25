@@ -23,7 +23,6 @@ class BrstmPlayerState extends State<BrstmPlayer> {
   int _loopEnd = 0;
   int _totalSamples = 0;
   int _sampleRate = 0;
-  bool _isFileLoaded = false;
   bool _isPlaying = false;
   bool _editLoopointVisibility = false;
   GlobalKey<AudioTimelineState> audioTimelineKey = GlobalKey();
@@ -46,7 +45,6 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     playButtonKey.currentState?.setState(() {});
     audioTimelineKey.currentState?.sliderValue = 0;
     _isPlaying = false;
-    _isFileLoaded = false;
     file.close();
 
     file = brstm;
@@ -112,8 +110,6 @@ class BrstmPlayerState extends State<BrstmPlayer> {
       if (!mpv.isPlaying) {
         await Future.delayed(const Duration(milliseconds: 300));
         await mpv.loadFile(file.getFilePath()!);
-
-        _isFileLoaded = true;
       }
       if (audioTimelineKey.currentState!.sliderValue > 0) {
         await mpv.pause();

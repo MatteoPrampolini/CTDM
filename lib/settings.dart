@@ -74,6 +74,8 @@ class _SettingsState extends State<Settings> {
           color: Colors.red.shade700, //change your color here
         ),
         backgroundColor: Colors.amber,
+        actionsIconTheme: IconThemeData(color: Colors.red.shade700, size: 40),
+        
         title: const Text(
           'Settings',
           style: TextStyle(color: Colors.black),
@@ -349,11 +351,12 @@ class _SettingOptionFolderState extends State<SettingOptionFolder> {
   }
 }
 
-Map<String, String> defaultSettingsValues = {
+Map<String, dynamic> defaultSettingsValues = {
   'workspace': '',
   'Riivolution': getDeafultRiivoFolder(),
   'dolphin': '',
   'game': '',
+  'debug': false
 };
 
 String getDeafultRiivoFolder() {

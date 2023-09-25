@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:ctdm/gui_elements/cup_table.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../gui_elements/types.dart';
 
+const String debugTrack = 'Short Way Beta 2 (old_koopa_gba)';
+const int debugSlot = 73;
 List<Track> splitCupListsFromText(String str) {
   List<Track> trackList = [];
   for (String line in str.split("\n")) {
@@ -122,14 +125,14 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   bool isEditMode = false;
   bool wiimsCup = false;
   final List<Cup> nintendoCups = getNintendoCups();
-
+  bool debugMode = false;
   @override
   void initState() {
     super.initState();
     createConfigFile(widget.packPath);
 
     loadMusic(widget.packPath);
-
+    loadPrefs();
     // setState(() {
     //   //parseConfig(path.join(widget.packPath, 'config.txt'));
     //   //print(cups.length);
@@ -166,6 +169,12 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         }
       }
     }
+  }
+
+  void loadPrefs() async {
+    SharedPreferences tmp = await SharedPreferences.getInstance();
+    debugMode = tmp.getBool('debug')!;
+    setState(() {});
   }
 
   void createConfigFile(String packPath) {
@@ -476,6 +485,20 @@ N N$nintendoTracksString | """
     return sortedTracks;
   }
 
+  void _debugReplace() {
+    for (var i = 0; i < cups.length; i++) {
+      for (var j = 0; j < cups[i].tracks.length; j++) {
+        cups[i].tracks[j].path = debugTrack;
+        cups[i].tracks[j].slotId = debugSlot;
+        // for (var track in cup.tracks) {
+        //   track.path = debugTrack;
+        //   track.slotId = debugSlot;
+      }
+    }
+
+    setState(() {});
+  }
+
   sortCups() {
     List<Track> allTracks = List.empty(growable: true);
     for (var cup in cups) {
@@ -546,6 +569,7 @@ N N$nintendoTracksString | """
                                       //     },
                                       //   ),
                                       // ),
+
                                       SizedBox(
                                           height: 30,
                                           width: 115,
@@ -620,6 +644,30 @@ N N$nintendoTracksString | """
                                         ),
                                       ),
                                     ]),
+                              ),
+                              Visibility(
+                                child: SizedBox(
+                                    height: 30,
+                                    width: 100,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        // Chiamare la funzione sortAlpha() quando il pulsante viene premuto
+                                        //sortAlpha();
+                                        _debugReplace();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        side: const BorderSide(
+                                            color: Colors.white70,
+                                            width: 1.0), // Bordo bianco
+                                        // Colore di sfondo del pulsante
+                                        elevation:
+                                            2.0, // Elevazione del pulsante
+                                      ),
+                                      child: const Text(
+                                        "DEBUG MODE", // Testo del pulsante
+                                        style: TextStyle(fontSize: 16.0),
+                                      ),
+                                    )),
                               ),
                               const Divider(),
                               keepNintendo
