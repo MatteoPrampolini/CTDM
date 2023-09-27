@@ -27,9 +27,10 @@ class BrstmPlayerState extends State<BrstmPlayer> {
   bool _editLoopointVisibility = false;
   GlobalKey<AudioTimelineState> audioTimelineKey = GlobalKey();
   GlobalKey<PlayButtonState> playButtonKey = GlobalKey();
-
+  GlobalKey<LoopPointTimelineState> loopPointTimelineKey = GlobalKey();
+  double _size = 300;
   MPVPlayer mpv = MPVPlayer();
-
+  double zoomMolt = 1;
   @override
   void dispose() {
     mpv.quit();
@@ -50,17 +51,22 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     file = brstm;
     audioTimelineKey.currentState?.setState(() {
       audioTimelineKey.currentState?.filechanged(brstm);
+      loopPointTimelineKey.currentState?.filechanged(brstm);
     });
   }
 
   @override
   void initState() {
     file = widget.file;
-
+    mpv.updateInterval = 300;
     mpv.binary = "mpv";
-    mpv.pipe =
-        (Platform.isWindows ? r"\\.\pipe\mpvsocket_" : "/tmp/mpvsocket_") +
-            path.basenameWithoutExtension(file.getFilePath()!);
+    final String suffix =
+        widget.file.getFilePath()!.contains(RegExp(r"_[fF]\.brstm$"))
+            ? "_fast"
+            : "_normal";
+    mpv.pipe = Platform.isWindows
+        ? r"\\.\pipe\mpvsocket_CTDM" + suffix
+        : "/tmp/mpvsocket_CTDM$suffix";
 
     if (File(mpv.pipe).existsSync()) {
       File(mpv.pipe).deleteSync();
@@ -75,15 +81,13 @@ class BrstmPlayerState extends State<BrstmPlayer> {
   reloadFile() {
     file.open();
     file.readSync();
-    mpv.updateInterval = 300;
 
-    file.open();
-    file.readSync();
     _loopStart = file.getLoopStart()!;
     _loopEnd = file.getLoopEnd()!;
     _totalSamples = file.getTotalSamples()!;
     _sampleRate = file.getSampleRate()!;
     audioTimelineKey.currentState?.filechanged(file);
+    loopPointTimelineKey.currentState?.filechanged(file);
 
     setState(() {});
   }
@@ -94,7 +98,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
 
     if (!mpv.getRunningState()) {
       await mpv.start(hangIndefinitely: true);
-
+      //await Future.delayed(const Duration(milliseconds: 300));
       // await mpv.loadFile(file.getFilePath()!);
       // _isFileLoaded = true;
       // if (audioTimelineKey.currentState!.sliderValue > 0) {
@@ -108,9 +112,9 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     if (_isPlaying) {
       //if it should play
       if (!mpv.isPlaying) {
-        await Future.delayed(const Duration(milliseconds: 300));
         await mpv.loadFile(file.getFilePath()!);
       }
+
       if (audioTimelineKey.currentState!.sliderValue > 0) {
         await mpv.pause();
         //await Future.delayed(const Duration(milliseconds: 300));
@@ -138,82 +142,169 @@ class BrstmPlayerState extends State<BrstmPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    _size = (MediaQuery.of(context).size.width * 0.20);
     return Stack(
       children: [
         Align(
           alignment: Alignment.bottomLeft,
           child: Padding(
-            padding: const EdgeInsets.only(left: 40.0, top: 40),
-            child: ElevatedButton(
-                style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        Colors.amberAccent)), // Change the color here,
-                onPressed: () => {
-                      setState(() {
-                        _editLoopointVisibility = !_editLoopointVisibility;
-                      })
-                    },
-                child: const Text(
-                  "Edit Loop Points",
-                  style: TextStyle(color: Colors.black87),
-                )),
+            padding: EdgeInsets.only(
+                left: 40.0 + (_editLoopointVisibility ? 0 : 25), top: 40),
+            child: Column(
+              children: [
+                ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            Colors.amberAccent)), // Change the color here,
+                    onPressed: () => {
+                          setState(() {
+                            _editLoopointVisibility = !_editLoopointVisibility;
+                          })
+                        },
+                    child: const Text(
+                      "Edit Loop Points",
+                      style: TextStyle(color: Colors.black87),
+                    )),
+                Visibility(
+                    visible: _editLoopointVisibility,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: SizedBox(
+                        width: 200,
+                        height: 120,
+                        //  color: Colors.amber,
+                        child: Column(
+                          children: [
+                            const Text("zoom"),
+                            Stack(
+                              children: [
+                                const Positioned(
+                                  left: 20,
+                                  right: 20,
+                                  top: 20,
+                                  bottom: 0,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "x1",
+                                        style: TextStyle(color: Colors.white70),
+                                      ), // Aggiungi il testo per il valore minimo
+                                      Text(
+                                        "x2",
+                                      ), // Aggiungi il testo per il valore massimo in minuti
+                                    ],
+                                  ),
+                                ),
+                                Slider(
+                                  value: zoomMolt,
+                                  onChanged: (value) => {
+                                    setState(
+                                      () => zoomMolt = value,
+                                    ),
+                                  },
+                                  onChangeEnd: (value) => {
+                                    audioTimelineKey.currentState?.setState(() {
+                                      audioTimelineKey.currentState
+                                          ?.updateSize(value * _size);
+                                    }),
+                                    loopPointTimelineKey.currentState
+                                        ?.setState(() {
+                                      loopPointTimelineKey.currentState
+                                          ?.updateSize(value * _size);
+                                    })
+                                  },
+                                  min: 1,
+                                  max: 2,
+                                )
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 25.0),
+                              child: ElevatedButton(
+                                  style: const ButtonStyle(
+                                      backgroundColor: MaterialStatePropertyAll(
+                                          Colors.amberAccent)),
+                                  onPressed: () => {print("loop Points saved")},
+                                  child: const Text(
+                                    "Save",
+                                    style: TextStyle(color: Colors.black87),
+                                  )),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ))
+              ],
+            ),
           ),
         ),
-        Column(
-          children: [
-            SizedBox(
-                width: MediaQuery.of(context).size.width * 0.7,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.only(bottom: 80, left: 40, right: 40),
-                  child: Text(path.basename(widget.file.getFilePath()!)),
-                )),
-            Visibility(
-              maintainSize: true,
-              maintainState: true,
-              maintainAnimation: true,
-              visible: _editLoopointVisibility,
-              child: LoopPointTimeline(
-                  totalSamples: _totalSamples,
-                  startLoop: _loopStart,
-                  endLoop: _loopEnd,
-                  sampleRate: _sampleRate,
-                  onLoopPointChange: (n) => {print("changed")}),
-            ),
-            AudioTimeline(
-                key: audioTimelineKey,
-                currentPosition: 0,
-                duration: file.getDuration()!,
-                loopPoint: 100,
-                onChangeStart: (db) async => {
-                      if (playButtonKey.currentState!.isPlaying) {togglePlay()},
-                      // if (audioTimelineKey.currentState!.isPlaying)
-                      //   {
-                      //     audioTimelineKey.currentState?.setState(() {
-                      //       audioTimelineKey.currentState?.isPlaying = false;
-                      //     })
-                      //   },
-                      // await mpv.pause()
-                    },
-                onSeek: (value) async {
-                  audioTimelineKey.currentState?.sliderValue = value;
-                },
-                onChangeEnd: (value) async => {
-                      // if(mpv.isPlaying){
-                      //   await togglePlay()
-                      // }
-                      // print(audioTimelineKey.currentState!.sliderValue),
-                      // if (value <= file.getDuration()!)
-                      //   {
-                      //     await mpv
-                      //         .seek(audioTimelineKey.currentState!.sliderValue),
-                      //     if (audioTimelineKey.currentState!.isPlaying)
-                      //       {await togglePlay()}
-                      //   }
-                    },
-                onLoopPointChange: (value) {}),
-            PlayButton(togglePlay, key: playButtonKey),
-          ],
+        Padding(
+          padding: const EdgeInsets.only(bottom: 80, left: 40, right: 40),
+          child: Text(path.basename(widget.file.getFilePath()!)),
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: 25 * zoomMolt * zoomMolt),
+          child: Column(
+            children: [
+              SizedBox(
+                width: (MediaQuery.of(context).size.width * 0.7) * zoomMolt,
+                child: const Padding(
+                    padding: EdgeInsets.only(bottom: 80, left: 40, right: 40),
+                    child: Text("")),
+              ),
+              Visibility(
+                maintainSize: true,
+                maintainState: true,
+                maintainAnimation: true,
+                visible: _editLoopointVisibility,
+                child: LoopPointTimeline(
+                    size: _size,
+                    key: loopPointTimelineKey,
+                    totalSamples: _totalSamples,
+                    startLoop: _loopStart,
+                    endLoop: _loopEnd,
+                    sampleRate: _sampleRate,
+                    onLoopPointChange: (n) => {}),
+              ),
+              AudioTimeline(
+                  size: _size * zoomMolt,
+                  key: audioTimelineKey,
+                  currentPosition: 0,
+                  duration: file.getDuration()!,
+                  loopPoint: 100,
+                  onChangeStart: (db) async => {
+                        if (playButtonKey.currentState!.isPlaying)
+                          {togglePlay()},
+                        // if (audioTimelineKey.currentState!.isPlaying)
+                        //   {
+                        //     audioTimelineKey.currentState?.setState(() {
+                        //       audioTimelineKey.currentState?.isPlaying = false;
+                        //     })
+                        //   },
+                        // await mpv.pause()
+                      },
+                  onSeek: (value) async {
+                    audioTimelineKey.currentState?.sliderValue = value;
+                  },
+                  onChangeEnd: (value) async => {
+                        // if(mpv.isPlaying){
+                        //   await togglePlay()
+                        // }
+                        // print(audioTimelineKey.currentState!.sliderValue),
+                        // if (value <= file.getDuration()!)
+                        //   {
+                        //     await mpv
+                        //         .seek(audioTimelineKey.currentState!.sliderValue),
+                        //     if (audioTimelineKey.currentState!.isPlaying)
+                        //       {await togglePlay()}
+                        //   }
+                      },
+                  onLoopPointChange: (value) {}),
+              PlayButton(togglePlay, key: playButtonKey),
+            ],
+          ),
         ),
       ],
     );

@@ -198,7 +198,7 @@ class MyApp extends StatelessWidget {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await DesktopWindow.setMinWindowSize(
-        Size(840 * devicePixelRatio, 720 * devicePixelRatio),
+        Size(935 * devicePixelRatio, 720 * devicePixelRatio),
       );
     });
     return MaterialApp(

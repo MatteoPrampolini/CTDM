@@ -87,6 +87,7 @@ class _MusicEditorState extends State<MusicEditor> {
                       maxLines: 2,
                     ),
                     onTap: () => {
+                      addFileVisibile = false,
                       selectedFolder = i,
                       doublePlayerKey.currentState
                           ?.selectedFileChange(folderList[selectedFolder].path),

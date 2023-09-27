@@ -28,9 +28,6 @@ class DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
 
   @override
   void dispose() async {
-    // await brstmPlayerKey1.currentState?.mpv.quit();
-    // await brstmPlayerKey2.currentState?.mpv.quit();
-
     super.dispose();
   }
 
@@ -38,8 +35,8 @@ class DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
     updateFileList(subFolderPath);
     brstmPlayerKey1.currentState?.reset(BRSTM(fileList[0].path));
     brstmPlayerKey2.currentState?.reset(BRSTM(fileList[1].path));
-    brstmPlayerKey1.currentState?.reloadFile();
-    brstmPlayerKey2.currentState?.reloadFile();
+    // brstmPlayerKey1.currentState?.reloadFile();
+    // brstmPlayerKey2.currentState?.reloadFile();
     setState(() {});
   }
 
@@ -63,7 +60,7 @@ class DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
       children: [
         BrstmPlayer(BRSTM(fileList[0].path), key: brstmPlayerKey1),
         const Divider(),
-        BrstmPlayer(BRSTM(fileList[1].path), key: brstmPlayerKey2)
+        BrstmPlayer(BRSTM(fileList[1].path), key: brstmPlayerKey2),
       ],
     );
   }

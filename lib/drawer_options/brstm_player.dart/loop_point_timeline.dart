@@ -7,6 +7,7 @@ class LoopPointTimeline extends StatefulWidget {
   final int totalSamples;
   final int endLoop;
   final int sampleRate;
+  final double size;
   final ValueChanged<double> onLoopPointChange;
 
   const LoopPointTimeline({
@@ -15,18 +16,20 @@ class LoopPointTimeline extends StatefulWidget {
     required this.endLoop,
     required this.sampleRate,
     required this.onLoopPointChange,
+    required this.size,
     Key? key,
   }) : super(key: key);
 
   @override
-  State<LoopPointTimeline> createState() => _LoopPointTimelineState();
+  State<LoopPointTimeline> createState() => LoopPointTimelineState();
 }
 
-class _LoopPointTimelineState extends State<LoopPointTimeline> {
+class LoopPointTimelineState extends State<LoopPointTimeline> {
   int _startLoop = 0;
   int _endLoop = 1;
   int _totalSamples = 2;
   int _sampleRate = 0;
+  late double _size;
   @override
   void initState() {
     super.initState();
@@ -34,7 +37,7 @@ class _LoopPointTimelineState extends State<LoopPointTimeline> {
     _endLoop = widget.endLoop;
     _totalSamples = widget.totalSamples;
     _sampleRate = widget.sampleRate;
-
+    _size = widget.size;
     setState(() {});
   }
 
@@ -49,10 +52,14 @@ class _LoopPointTimelineState extends State<LoopPointTimeline> {
     });
   }
 
+  void updateSize(double value) {
+    _size = value;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 300,
+      width: _size,
       child: Stack(
         children: [
           Positioned(

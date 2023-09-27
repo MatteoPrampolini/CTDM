@@ -12,7 +12,7 @@ class AudioTimeline extends StatefulWidget {
 
   final double loopPoint;
   final ValueChanged<double> onLoopPointChange;
-
+  final double size;
   const AudioTimeline({
     required this.currentPosition,
     required this.duration,
@@ -21,6 +21,7 @@ class AudioTimeline extends StatefulWidget {
     required this.onChangeEnd,
     required this.loopPoint,
     required this.onLoopPointChange,
+    required this.size,
     Key? key,
   }) : super(key: key);
   @override
@@ -30,7 +31,7 @@ class AudioTimeline extends StatefulWidget {
 class AudioTimelineState extends State<AudioTimeline> {
   double sliderValue = 0.0;
   double _fileDuration = 0.0;
-
+  late double _size;
   bool isPlaying = false;
   late Timer _timer;
   @override
@@ -66,9 +67,14 @@ class AudioTimelineState extends State<AudioTimeline> {
     });
   }
 
+  void updateSize(double value) {
+    _size = value;
+  }
+
   @override
   void initState() {
     super.initState();
+    _size = widget.size;
     sliderValue = widget.currentPosition;
     _fileDuration = widget.duration;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -89,7 +95,7 @@ class AudioTimelineState extends State<AudioTimeline> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 300,
+      width: _size,
       child: Stack(
         children: [
           Positioned(
