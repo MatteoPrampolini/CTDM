@@ -166,10 +166,16 @@ class _MusicEditorState extends State<MusicEditor> {
                     top: 5,
                     bottom: 5,
                     right: 5),
-                child: DoubleBrstmPlayer(
-                  folderList[selectedFolder].path,
-                  key: doublePlayerKey,
-                ),
+                child: folderList.isNotEmpty
+                    ? DoubleBrstmPlayer(
+                        folderList[selectedFolder].path,
+                        key: doublePlayerKey,
+                      )
+                    : const Center(
+                        child: Text(
+                        "myMusic folder is empty.",
+                        style: TextStyle(color: Colors.white54, fontSize: 20),
+                      )),
               ))))
         ]));
   }
