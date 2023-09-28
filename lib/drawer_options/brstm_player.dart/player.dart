@@ -21,7 +21,6 @@ class BrstmPlayerState extends State<BrstmPlayer> {
 
   int _loopStart = 0;
   int _loopEnd = 0;
-  int _totalSamples = 0;
   int _sampleRate = 0;
   bool _isPlaying = false;
   bool _editLoopointVisibility = false;
@@ -51,6 +50,8 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     file = brstm;
     audioTimelineKey.currentState?.setState(() {
       audioTimelineKey.currentState?.filechanged(brstm);
+    });
+    loopPointTimelineKey.currentState?.setState(() {
       loopPointTimelineKey.currentState?.filechanged(brstm);
     });
   }
@@ -84,7 +85,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
 
     _loopStart = file.getLoopStart()!;
     _loopEnd = file.getLoopEnd()!;
-    _totalSamples = file.getTotalSamples()!;
+
     _sampleRate = file.getSampleRate()!;
     audioTimelineKey.currentState?.filechanged(file);
     loopPointTimelineKey.currentState?.filechanged(file);
@@ -123,6 +124,8 @@ class BrstmPlayerState extends State<BrstmPlayer> {
       }
       //await mpv.play();
       //await Future.delayed(const Duration(milliseconds: 300));
+      await mpv.enableLoop();
+      mpv.setLoopPoint(_loopStart / _sampleRate);
       await mpv.play();
     } else {
       await mpv.pause();
@@ -140,6 +143,10 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     return _isPlaying;
   }
 
+  void onLoopPointReached() async {
+    await mpv.seek(_loopStart / _sampleRate);
+  }
+
   @override
   Widget build(BuildContext context) {
     _size = (MediaQuery.of(context).size.width * 0.20);
@@ -149,7 +156,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
           alignment: Alignment.bottomLeft,
           child: Padding(
             padding: EdgeInsets.only(
-                left: 40.0 + (_editLoopointVisibility ? 0 : 25), top: 40),
+                left: 40.0 + (_editLoopointVisibility ? 0 : 25), top: 30),
             child: Column(
               children: [
                 ElevatedButton(
@@ -171,7 +178,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
                       padding: const EdgeInsets.only(top: 20.0),
                       child: SizedBox(
                         width: 200,
-                        height: 120,
+                        height: 160,
                         //  color: Colors.amber,
                         child: Column(
                           children: [
@@ -220,13 +227,18 @@ class BrstmPlayerState extends State<BrstmPlayer> {
                                 )
                               ],
                             ),
+                            Text("Start sample: $_loopStart"),
                             Padding(
                               padding: const EdgeInsets.only(top: 25.0),
                               child: ElevatedButton(
                                   style: const ButtonStyle(
                                       backgroundColor: MaterialStatePropertyAll(
                                           Colors.amberAccent)),
-                                  onPressed: () => {print("loop Points saved")},
+                                  onPressed: () => {
+                                        file.setLoopPointSampleStart(
+                                            _loopStart.toInt()),
+                                        reset(BRSTM(file.getFilePath()!))
+                                      },
                                   child: const Text(
                                     "Save",
                                     style: TextStyle(color: Colors.black87),
@@ -262,18 +274,26 @@ class BrstmPlayerState extends State<BrstmPlayer> {
                 child: LoopPointTimeline(
                     size: _size,
                     key: loopPointTimelineKey,
-                    totalSamples: _totalSamples,
                     startLoop: _loopStart,
                     endLoop: _loopEnd,
                     sampleRate: _sampleRate,
-                    onLoopPointChange: (n) => {}),
+                    onLoopPointChangeEnd: (n) {
+                      //file.setLoopPointSampleStart(n.start.toInt());
+                    },
+                    onLoopPointChange: (n) => {
+                          _loopStart = n.toInt(),
+                          setState(() => {}),
+                        }),
               ),
               AudioTimeline(
                   size: _size * zoomMolt,
                   key: audioTimelineKey,
                   currentPosition: 0,
                   duration: file.getDuration()!,
-                  loopPoint: 100,
+                  loopPointStart: file.getLoopStart()!,
+                  loopPointEnd: file.getLoopEnd()!,
+                  sampleRate: file.getSampleRate()!,
+                  onLoopPointReached: onLoopPointReached,
                   onChangeStart: (db) async => {
                         if (playButtonKey.currentState!.isPlaying)
                           {togglePlay()},

@@ -10,18 +10,25 @@ class AudioTimeline extends StatefulWidget {
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
 
-  final double loopPoint;
   final ValueChanged<double> onLoopPointChange;
   final double size;
+  final int loopPointStart;
+  final int loopPointEnd;
+  final int sampleRate;
+  final Function onLoopPointReached;
+
   const AudioTimeline({
     required this.currentPosition,
     required this.duration,
     required this.onSeek,
     required this.onChangeStart,
     required this.onChangeEnd,
-    required this.loopPoint,
+    required this.loopPointStart,
+    required this.loopPointEnd,
+    required this.onLoopPointReached,
     required this.onLoopPointChange,
     required this.size,
+    required this.sampleRate,
     Key? key,
   }) : super(key: key);
   @override
@@ -31,6 +38,9 @@ class AudioTimeline extends StatefulWidget {
 class AudioTimelineState extends State<AudioTimeline> {
   double sliderValue = 0.0;
   double _fileDuration = 0.0;
+  int _loopStart = 0;
+  int _loopEnd = 0;
+  int _sampleRate = 0;
   late double _size;
   bool isPlaying = false;
   late Timer _timer;
@@ -40,18 +50,21 @@ class AudioTimelineState extends State<AudioTimeline> {
     super.dispose();
   }
 
-  void _timerFunc() {
+  void _timerFunc() async {
     if (!mounted) {
       _timer.cancel();
       return;
     }
     if (isPlaying) {
-      if (sliderValue < _fileDuration) {
+      if (sliderValue * _sampleRate < _loopEnd) {
         sliderValue += 1.0;
+      }
 
-        if (sliderValue > _fileDuration) {
-          sliderValue = _fileDuration;
-        }
+      if (sliderValue * _sampleRate >= _loopEnd) {
+        widget.onLoopPointReached();
+        setState(() {
+          sliderValue = _loopStart / _sampleRate;
+        });
       }
     }
   }
@@ -62,8 +75,9 @@ class AudioTimelineState extends State<AudioTimeline> {
     brstm.readSync();
     setState(() {
       _fileDuration = brstm.getDuration()!;
-      // _loopStart = brstm.getLoopStart()!;
-      // _loopEnd = brstm.getLoopEnd()!;
+      _loopStart = brstm.getLoopStart()!;
+      _loopEnd = brstm.getLoopEnd()!;
+      _sampleRate = brstm.getSampleRate()!;
     });
   }
 
@@ -77,7 +91,10 @@ class AudioTimelineState extends State<AudioTimeline> {
     _size = widget.size;
     sliderValue = widget.currentPosition;
     _fileDuration = widget.duration;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _loopStart = widget.loopPointStart;
+    _loopEnd = widget.loopPointEnd;
+    _sampleRate = widget.sampleRate;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       _timerFunc();
       setState(() {});
     });
@@ -123,6 +140,7 @@ class AudioTimelineState extends State<AudioTimeline> {
             onChangeStart: (value) async => {widget.onChangeStart(value)},
             onChanged: (value) {
               //_sliderValue = value;
+
               widget.onSeek(value);
               setState(() {
                 sliderValue = value;

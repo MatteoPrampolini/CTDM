@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 
 class LoopPointTimeline extends StatefulWidget {
   final int startLoop;
-  final int totalSamples;
   final int endLoop;
   final int sampleRate;
   final double size;
   final ValueChanged<double> onLoopPointChange;
+  final ValueChanged<double> onLoopPointChangeEnd;
 
   const LoopPointTimeline({
     required this.startLoop,
-    required this.totalSamples,
     required this.endLoop,
     required this.sampleRate,
     required this.onLoopPointChange,
+    required this.onLoopPointChangeEnd,
     required this.size,
     Key? key,
   }) : super(key: key);
@@ -27,7 +27,6 @@ class LoopPointTimeline extends StatefulWidget {
 class LoopPointTimelineState extends State<LoopPointTimeline> {
   int _startLoop = 0;
   int _endLoop = 1;
-  int _totalSamples = 2;
   int _sampleRate = 0;
   late double _size;
   @override
@@ -35,7 +34,6 @@ class LoopPointTimelineState extends State<LoopPointTimeline> {
     super.initState();
     _startLoop = widget.startLoop;
     _endLoop = widget.endLoop;
-    _totalSamples = widget.totalSamples;
     _sampleRate = widget.sampleRate;
     _size = widget.size;
     setState(() {});
@@ -45,7 +43,6 @@ class LoopPointTimelineState extends State<LoopPointTimeline> {
     brstm.open();
     brstm.readSync();
     setState(() {
-      _totalSamples = brstm.getTotalSamples()!;
       _startLoop = brstm.getLoopStart()!;
       _endLoop = brstm.getLoopEnd()!;
       _sampleRate = brstm.getSampleRate()!;
@@ -80,22 +77,25 @@ class LoopPointTimelineState extends State<LoopPointTimeline> {
               ],
             ),
           ),
-          RangeSlider(
-            activeColor: Colors.amberAccent,
-            inactiveColor: Colors.white38,
+          Slider(
+            inactiveColor: Colors.amberAccent,
+            activeColor: Colors.white38,
+            thumbColor: Colors.amberAccent,
             min: 0.0,
-            max: _totalSamples.toDouble(),
-            values: RangeValues(_startLoop.toDouble(), _endLoop.toDouble()),
-            onChanged: (values) {
+            max: _endLoop.toDouble(),
+            value: _startLoop.toDouble(),
+            onChanged: (value) {
               setState(() {
-                _startLoop = values.start.toInt();
-                _endLoop = values.end.toInt();
+                _startLoop = value.toInt();
+
+                widget.onLoopPointChange(value);
               });
             },
-            // onChangeEnd: (value) {
-            //   // Chiamato quando l'utente rilascia lo slider
-            //   widget.onSeek(value); // Aggiorna la posizione della canzone
-            // },
+            onChangeEnd: (values) {
+              // Chiamato quando l'utente rilascia lo slider
+              widget.onLoopPointChangeEnd(
+                  values); // Aggiorna la posizione della canzone
+            },
           ),
         ],
       ),
