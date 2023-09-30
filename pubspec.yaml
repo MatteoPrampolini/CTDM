@@ -34,7 +34,7 @@ dependencies:
   brstm_player:
    git: 
     url: https://github.com/marco-04/brstm_player
-    ref: proposal
+    ref: '0.1.0-dev'
 
 
   # The following adds the Cupertino Icons font to your application.

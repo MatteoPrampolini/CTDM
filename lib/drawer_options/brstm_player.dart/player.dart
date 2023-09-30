@@ -120,7 +120,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
 
     if (_isPlaying) {
       //if it should play
-      if (!mpv.isPlaying) {
+      if (!mpv.getPlayerState()) {
         await mpv.loadFile(file.getFilePath()!);
         await Future.delayed(const Duration(milliseconds: 300));
       }
