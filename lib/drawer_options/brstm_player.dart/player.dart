@@ -23,13 +23,17 @@ class BrstmPlayerState extends State<BrstmPlayer> {
   int _loopEnd = 0;
   int _sampleRate = 0;
   bool _isPlaying = false;
-  bool _editLoopointVisibility = false;
+  bool _showTextFieldCursor = false;
+  // bool _editLoopointVisibility = false;
   GlobalKey<AudioTimelineState> audioTimelineKey = GlobalKey();
   GlobalKey<PlayButtonState> playButtonKey = GlobalKey();
   GlobalKey<LoopPointTimelineState> loopPointTimelineKey = GlobalKey();
   double _size = 300;
   MPVPlayer mpv = MPVPlayer();
-  double zoomMolt = 1;
+  double zoomMolt = 2.5;
+  final TextEditingController _loopStartController = TextEditingController();
+  bool _loopIsValid = false;
+
   @override
   void dispose() {
     mpv.quit();
@@ -54,6 +58,10 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     loopPointTimelineKey.currentState?.setState(() {
       loopPointTimelineKey.currentState?.filechanged(brstm);
     });
+    _loopStart = file.getLoopStart()!;
+    _loopEnd = file.getLoopEnd()!;
+    _loopStartController.text = _loopStart.toString();
+    setState(() {});
   }
 
   @override
@@ -89,7 +97,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     _sampleRate = file.getSampleRate()!;
     audioTimelineKey.currentState?.filechanged(file);
     loopPointTimelineKey.currentState?.filechanged(file);
-
+    _loopStartController.text = _loopStart.toString();
     setState(() {});
   }
 
@@ -99,7 +107,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
 
     if (!mpv.getRunningState()) {
       await mpv.start(hangIndefinitely: true);
-      //await Future.delayed(const Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 300));
       // await mpv.loadFile(file.getFilePath()!);
       // _isFileLoaded = true;
       // if (audioTimelineKey.currentState!.sliderValue > 0) {
@@ -114,13 +122,14 @@ class BrstmPlayerState extends State<BrstmPlayer> {
       //if it should play
       if (!mpv.isPlaying) {
         await mpv.loadFile(file.getFilePath()!);
+        await Future.delayed(const Duration(milliseconds: 300));
       }
 
       if (audioTimelineKey.currentState!.sliderValue > 0) {
         await mpv.pause();
         //await Future.delayed(const Duration(milliseconds: 300));
         await mpv.seek(audioTimelineKey.currentState!.sliderValue);
-        await Future.delayed(const Duration(milliseconds: 300));
+        //await Future.delayed(const Duration(milliseconds: 300));
       }
       //await mpv.play();
       //await Future.delayed(const Duration(milliseconds: 300));
@@ -149,184 +158,274 @@ class BrstmPlayerState extends State<BrstmPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    _loopIsValid =
+        validateInputStartLoopPoint(_loopStartController.text, _loopEnd);
     _size = (MediaQuery.of(context).size.width * 0.20);
-    return Stack(
-      children: [
-        Align(
-          alignment: Alignment.bottomLeft,
-          child: Padding(
-            padding: EdgeInsets.only(
-                left: 40.0 + (_editLoopointVisibility ? 0 : 25), top: 30),
-            child: Column(
-              children: [
-                ElevatedButton(
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                            Colors.amberAccent)), // Change the color here,
-                    onPressed: () => {
-                          setState(() {
-                            _editLoopointVisibility = !_editLoopointVisibility;
-                          })
-                        },
-                    child: const Text(
-                      "Edit Loop Points",
-                      style: TextStyle(color: Colors.black87),
-                    )),
-                Visibility(
-                    visible: _editLoopointVisibility,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: SizedBox(
-                        width: 200,
-                        height: 160,
-                        //  color: Colors.amber,
-                        child: Column(
-                          children: [
-                            const Text("zoom"),
-                            Stack(
-                              children: [
-                                const Positioned(
-                                  left: 20,
-                                  right: 20,
-                                  top: 20,
-                                  bottom: 0,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "x1",
-                                        style: TextStyle(color: Colors.white70),
-                                      ), // Aggiungi il testo per il valore minimo
-                                      Text(
-                                        "x2",
-                                      ), // Aggiungi il testo per il valore massimo in minuti
-                                    ],
-                                  ),
-                                ),
-                                Slider(
-                                  value: zoomMolt,
-                                  onChanged: (value) => {
-                                    setState(
-                                      () => zoomMolt = value,
-                                    ),
-                                  },
-                                  onChangeEnd: (value) => {
-                                    audioTimelineKey.currentState?.setState(() {
-                                      audioTimelineKey.currentState
-                                          ?.updateSize(value * _size);
-                                    }),
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 20, left: 20.0, right: 20),
+        child: Stack(
+          //alignment: Alignment.bottomCenter,
+          children: [
+            // Align(
+            //   alignment: Alignment.bottomLeft,
+            //   child: Padding(
+            //     padding: EdgeInsets.only(
+            //         left: 40.0 + (_editLoopointVisibility ? 0 : 25), top: 30),
+            //     child: Column(
+            //       children: [
+            //         ElevatedButton(
+            //             style: ButtonStyle(
+            //                 backgroundColor: MaterialStateProperty.all<Color>(
+            //                     Colors.amberAccent)), // Change the color here,
+            //             onPressed: () => {
+            //                   setState(() {
+            //                     _editLoopointVisibility = !_editLoopointVisibility;
+            //                   })
+            //                 },
+            //             child: const Text(
+            //               "Edit loop point",
+            //               style: TextStyle(color: Colors.black87),
+            //             )),
+            //         Visibility(
+            //             visible: _editLoopointVisibility,
+            //             child: Padding(
+            //               padding: const EdgeInsets.only(top: 20.0),
+            //               child: SizedBox(
+            //                 width: 200,
+            //                 height: 160,
+            //                 //  color: Colors.amber,
+            //                 child: Column(
+            //                   children: [
+            //                     const Text("zoom"),
+            //                     // Stack(
+            //                     //   children: [
+            //                     //     const Positioned(
+            //                     //       left: 20,
+            //                     //       right: 20,
+            //                     //       top: 20,
+            //                     //       bottom: 0,
+            //                     //       child: Row(
+            //                     //         mainAxisAlignment:
+            //                     //             MainAxisAlignment.spaceBetween,
+            //                     //         children: [
+            //                     //           Text(
+            //                     //             "x1",
+            //                     //             style: TextStyle(color: Colors.white70),
+            //                     //           ), // Aggiungi il testo per il valore minimo
+            //                     //           Text(
+            //                     //             "x2",
+            //                     //           ), // Aggiungi il testo per il valore massimo in minuti
+            //                     //         ],
+            //                     //       ),
+            //                     //     ),
+            //                     //     Slider(
+            //                     //       value: zoomMolt,
+            //                     //       onChanged: (value) => {
+            //                     //         setState(
+            //                     //           () => zoomMolt = value,
+            //                     //         ),
+            //                     //       },
+            //                     //       onChangeEnd: (value) => {
+            //                     //         audioTimelineKey.currentState?.setState(() {
+            //                     //           audioTimelineKey.currentState
+            //                     //               ?.updateSize(value * _size);
+            //                     //         }),
+            //                     //         loopPointTimelineKey.currentState
+            //                     //             ?.setState(() {
+            //                     //           loopPointTimelineKey.currentState
+            //                     //               ?.updateSize(value * _size);
+            //                     //         })
+            //                     //       },
+            //                     //       min: 1,
+            //                     //       max: 2,
+            //                     //     )
+            //                     //   ],
+            //                     // ),
+            //                     Text("Loop at: $_loopStart"),
+            //                     Padding(
+            //                       padding: const EdgeInsets.only(top: 25.0),
+            //                       child: ElevatedButton(
+            //                           style: const ButtonStyle(
+            //                               backgroundColor: MaterialStatePropertyAll(
+            //                                   Colors.amberAccent)),
+            //                           onPressed: () => {
+            //                                 file.setLoopPointSampleStart(
+            //                                     _loopStart.toInt()),
+            //                                 reset(BRSTM(file.getFilePath()!))
+            //                               },
+            //                           child: const Text(
+            //                             "Save",
+            //                             style: TextStyle(color: Colors.black87),
+            //                           )),
+            //                     ),
+            //                   ],
+            //                 ),
+            //               ),
+            //             ))
+            //       ],
+            //     ),
+            //   ),
+            // ),
+            // Padding(
+            //   padding: const EdgeInsets.only(bottom: 80, left: 40, right: 40),
+            //   child: Text(path.basename(widget.file.getFilePath()!)),
+            // ),
+
+            Text(
+              path.basename(widget.file.getFilePath()!),
+              style: const TextStyle(color: Colors.white70),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: (MediaQuery.of(context).size.width * 0.7) * zoomMolt,
+                    child: const Text(""),
+                  ),
+                  LoopPointTimeline(
+                      size: _size * zoomMolt,
+                      key: loopPointTimelineKey,
+                      startLoop: _loopStart,
+                      endLoop: _loopEnd,
+                      sampleRate: _sampleRate,
+                      onLoopPointChangeEnd: (n) {
+                        _loopStartController.text = n.toInt().toString();
+                        _loopIsValid = true;
+                        //file.setLoopPointSampleStart(n.start.toInt());
+                      },
+                      onLoopPointChange: (n) => {
+                            _loopStart = n.toInt(),
+                            setState(() => {}),
+                          }),
+                  AudioTimeline(
+                      size: _size * zoomMolt,
+                      key: audioTimelineKey,
+                      currentPosition: 0,
+                      duration: file.getDuration()!,
+                      loopPointStart: file.getLoopStart()!,
+                      loopPointEnd: file.getLoopEnd()!,
+                      sampleRate: file.getSampleRate()!,
+                      onLoopPointReached: onLoopPointReached,
+                      onChangeStart: (db) async => {
+                            if (playButtonKey.currentState!.isPlaying)
+                              {togglePlay()},
+                          },
+                      onSeek: (value) async {
+                        audioTimelineKey.currentState?.sliderValue = value;
+                      },
+                      onChangeEnd: (value) async => {},
+                      onLoopPointChange: (value) {}),
+                  PlayButton(togglePlay, key: playButtonKey),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 100,
+                            height: 50,
+                            child: TextField(
+                              autofocus: false,
+                              showCursor: _showTextFieldCursor,
+                              onTap: () => {
+                                _showTextFieldCursor = true,
+                                setState(
+                                  () => {},
+                                )
+                              },
+                              onChanged: (value) => {
+                                _loopIsValid = validateInputStartLoopPoint(
+                                    value, _loopEnd),
+                              },
+                              onEditingComplete: () => {
+                                if (_loopIsValid)
+                                  {
+                                    _loopStart =
+                                        int.parse(_loopStartController.text),
+                                    mpv.setLoopPoint(_loopStart / _sampleRate),
                                     loopPointTimelineKey.currentState
                                         ?.setState(() {
                                       loopPointTimelineKey.currentState
-                                          ?.updateSize(value * _size);
+                                          ?.updateLoopPoint(_loopStart);
+                                    }),
+                                    audioTimelineKey.currentState?.setState(() {
+                                      audioTimelineKey.currentState
+                                          ?.updateLoopPoint(_loopStart);
                                     })
                                   },
-                                  min: 1,
-                                  max: 2,
-                                )
-                              ],
+                              },
+                              onTapOutside: (event) => {
+                                _showTextFieldCursor = false,
+                                setState(
+                                  () => {},
+                                ),
+                                if (_loopIsValid)
+                                  {
+                                    _loopStart =
+                                        int.parse(_loopStartController.text),
+                                    mpv.setLoopPoint(_loopStart / _sampleRate),
+                                    loopPointTimelineKey.currentState
+                                        ?.setState(() {
+                                      loopPointTimelineKey.currentState
+                                          ?.updateLoopPoint(_loopStart);
+                                    }),
+                                    audioTimelineKey.currentState?.setState(() {
+                                      audioTimelineKey.currentState
+                                          ?.updateLoopPoint(_loopStart);
+                                    })
+                                  },
+                              },
+                              controller: _loopStartController,
+                              keyboardType: TextInputType.number,
+                              style: const TextStyle(
+                                  color: Colors.amberAccent, fontSize: 16),
+                              decoration: InputDecoration(
+                                focusedBorder: const UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.amber)),
+                                hintText: 'Loop sample',
+                                hintStyle: const TextStyle(color: Colors.grey),
+                                errorStyle:
+                                    const TextStyle(color: Colors.amberAccent),
+                                errorText: _loopIsValid ? null : "Invalid",
+                              ),
                             ),
-                            Text("Start sample: $_loopStart"),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 25.0),
-                              child: ElevatedButton(
-                                  style: const ButtonStyle(
-                                      backgroundColor: MaterialStatePropertyAll(
-                                          Colors.amberAccent)),
-                                  onPressed: () => {
-                                        file.setLoopPointSampleStart(
-                                            _loopStart.toInt()),
-                                        reset(BRSTM(file.getFilePath()!))
-                                      },
-                                  child: const Text(
-                                    "Save",
-                                    style: TextStyle(color: Colors.black87),
-                                  )),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ))
-              ],
+                          ),
+                          const Text(
+                            '/',
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 20),
+                          ),
+                          Text(
+                            _loopEnd.toString(),
+                            style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 16), // Colore giallo
+                          ),
+                          Padding(
+                              padding: const EdgeInsets.only(left: 16.0),
+                              child: IconButton(
+                                iconSize: 30,
+                                icon: const Icon(Icons.published_with_changes),
+                                tooltip: "Override file",
+                                color: Colors.amberAccent,
+                                onPressed: () => {
+                                  file.setLoopPointSampleStart(
+                                      _loopStart.toInt()),
+                                  _showResultModal(context, file.getFilePath()!)
+                                },
+                              ) // )),
+                              ),
+                        ]),
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 80, left: 40, right: 40),
-          child: Text(path.basename(widget.file.getFilePath()!)),
-        ),
-        Padding(
-          padding: EdgeInsets.only(left: 25 * zoomMolt * zoomMolt),
-          child: Column(
-            children: [
-              SizedBox(
-                width: (MediaQuery.of(context).size.width * 0.7) * zoomMolt,
-                child: const Padding(
-                    padding: EdgeInsets.only(bottom: 80, left: 40, right: 40),
-                    child: Text("")),
-              ),
-              Visibility(
-                maintainSize: true,
-                maintainState: true,
-                maintainAnimation: true,
-                visible: _editLoopointVisibility,
-                child: LoopPointTimeline(
-                    size: _size,
-                    key: loopPointTimelineKey,
-                    startLoop: _loopStart,
-                    endLoop: _loopEnd,
-                    sampleRate: _sampleRate,
-                    onLoopPointChangeEnd: (n) {
-                      //file.setLoopPointSampleStart(n.start.toInt());
-                    },
-                    onLoopPointChange: (n) => {
-                          _loopStart = n.toInt(),
-                          setState(() => {}),
-                        }),
-              ),
-              AudioTimeline(
-                  size: _size * zoomMolt,
-                  key: audioTimelineKey,
-                  currentPosition: 0,
-                  duration: file.getDuration()!,
-                  loopPointStart: file.getLoopStart()!,
-                  loopPointEnd: file.getLoopEnd()!,
-                  sampleRate: file.getSampleRate()!,
-                  onLoopPointReached: onLoopPointReached,
-                  onChangeStart: (db) async => {
-                        if (playButtonKey.currentState!.isPlaying)
-                          {togglePlay()},
-                        // if (audioTimelineKey.currentState!.isPlaying)
-                        //   {
-                        //     audioTimelineKey.currentState?.setState(() {
-                        //       audioTimelineKey.currentState?.isPlaying = false;
-                        //     })
-                        //   },
-                        // await mpv.pause()
-                      },
-                  onSeek: (value) async {
-                    audioTimelineKey.currentState?.sliderValue = value;
-                  },
-                  onChangeEnd: (value) async => {
-                        // if(mpv.isPlaying){
-                        //   await togglePlay()
-                        // }
-                        // print(audioTimelineKey.currentState!.sliderValue),
-                        // if (value <= file.getDuration()!)
-                        //   {
-                        //     await mpv
-                        //         .seek(audioTimelineKey.currentState!.sliderValue),
-                        //     if (audioTimelineKey.currentState!.isPlaying)
-                        //       {await togglePlay()}
-                        //   }
-                      },
-                  onLoopPointChange: (value) {}),
-              PlayButton(togglePlay, key: playButtonKey),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -354,4 +453,54 @@ class PlayButtonState extends State<PlayButton> {
       ),
     );
   }
+}
+
+String formatDuration(int seconds) {
+  int minutes = seconds ~/ 60;
+  int remainingSeconds = seconds % 60;
+
+  String minutesStr = minutes.toString().padLeft(2, '0');
+  String secondsStr = remainingSeconds.toString().padLeft(2, '0');
+
+  return '$minutesStr:$secondsStr';
+}
+
+bool validateInputStartLoopPoint(String value, int loopEnd) {
+  // Aggiungi qui la tua logica di validazione
+  // Ritorna true se l'input è valido, altrimenti false
+  try {
+    int parsedValue = int.parse(value);
+    // Puoi aggiungere ulteriori regole di validazione qui se necessario
+    if (parsedValue < 0 || parsedValue >= loopEnd) {
+      return false;
+    }
+    return true; // Ad esempio, accetta solo valori non negativi
+  } catch (e) {
+    return false; // Se non è possibile convertire in un numero intero, considera l'input non valido
+  }
+}
+
+void _showResultModal(BuildContext context, String filePath) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text(
+          "File saved",
+          style: TextStyle(color: Colors.amberAccent),
+        ),
+        content: FittedBox(
+            fit: BoxFit.fitWidth,
+            child: Text(path.basename(filePath), maxLines: 2)),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Close"),
+          ),
+        ],
+      );
+    },
+  );
 }

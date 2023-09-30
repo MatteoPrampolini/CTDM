@@ -55,6 +55,7 @@ class AudioTimelineState extends State<AudioTimeline> {
       _timer.cancel();
       return;
     }
+
     if (isPlaying) {
       if (sliderValue * _sampleRate < _loopEnd) {
         sliderValue += 1.0;
@@ -83,6 +84,10 @@ class AudioTimelineState extends State<AudioTimeline> {
 
   void updateSize(double value) {
     _size = value;
+  }
+
+  void updateLoopPoint(int loopPoint) {
+    _loopStart = loopPoint;
   }
 
   @override

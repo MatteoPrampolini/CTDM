@@ -49,6 +49,10 @@ class LoopPointTimelineState extends State<LoopPointTimeline> {
     });
   }
 
+  void updateLoopPoint(int loopPoint) {
+    _startLoop = loopPoint;
+  }
+
   void updateSize(double value) {
     _size = value;
   }

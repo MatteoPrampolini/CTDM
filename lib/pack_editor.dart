@@ -245,9 +245,14 @@ class _PackEditorState extends State<PackEditor> {
                                     leading: Checkbox(
                                       splashRadius: 0,
                                       value: checks[index],
-                                      activeColor: Colors.amberAccent,
-                                      fillColor: MaterialStateProperty.all(
-                                          Colors.amberAccent),
+                                      //activeColor: Colors.amberAccent,
+
+                                      fillColor: checks[index]
+                                          ? MaterialStateProperty.all(
+                                              Colors.amberAccent)
+                                          : MaterialStateProperty.all(
+                                              Colors.transparent),
+
                                       side: const BorderSide(
                                           color: Colors.white38, width: 2),
                                       onChanged: null,

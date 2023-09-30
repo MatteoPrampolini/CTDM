@@ -148,7 +148,11 @@ class _SelectGeckoState extends State<SelectGecko> {
                                         .contains(MaterialState.disabled)) {
                                       return Colors.black54;
                                     }
-                                    return Colors.redAccent;
+                                    if (states
+                                        .contains(MaterialState.selected)) {
+                                      return Colors.redAccent;
+                                    }
+                                    return Colors.redAccent.withOpacity(0.2);
                                   },
                                 ),
                                 side: const BorderSide(color: Colors.black87),

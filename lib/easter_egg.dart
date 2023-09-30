@@ -41,7 +41,9 @@ class _EasterEggState extends State<EasterEgg> {
                 widthFactor: 0.3,
                 child: CheckboxListTile(
                     title: const Text("Debug Mode"),
-                    fillColor: MaterialStateProperty.all<Color>(Colors.red),
+                    fillColor: debugOn
+                        ? MaterialStateProperty.all(Colors.red)
+                        : MaterialStateProperty.all(Colors.transparent),
                     value: debugOn,
                     onChanged: (value) async => {
                           debugOn = value!,
