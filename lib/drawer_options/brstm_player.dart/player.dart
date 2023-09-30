@@ -23,6 +23,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
   int _loopEnd = 0;
   int _sampleRate = 0;
   bool _isPlaying = false;
+  bool _isSeeking = false;
   bool _showTextFieldCursor = false;
   // bool _editLoopointVisibility = false;
   GlobalKey<AudioTimelineState> audioTimelineKey = GlobalKey();
@@ -310,12 +311,21 @@ class BrstmPlayerState extends State<BrstmPlayer> {
                       onLoopPointReached: onLoopPointReached,
                       onChangeStart: (db) async => {
                             if (playButtonKey.currentState!.isPlaying)
-                              {togglePlay()},
+                              {
+                                togglePlay(),
+                                _isSeeking = true,
+                              },
                           },
                       onSeek: (value) async {
                         audioTimelineKey.currentState?.sliderValue = value;
                       },
-                      onChangeEnd: (value) async => {},
+                      onChangeEnd: (value) async => {
+                            if (_isSeeking)
+                              {
+                                togglePlay(value: true),
+                                _isSeeking = false,
+                              }
+                          },
                       onLoopPointChange: (value) {}),
                   PlayButton(togglePlay, key: playButtonKey),
                   Padding(

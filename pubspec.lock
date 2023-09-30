@@ -5,10 +5,10 @@ packages:
     dependency: "direct main"
     description:
       name: archive
-      sha256: "20071638cbe4e5964a427cfa0e86dce55d060bc7d82d56f3554095d7239a8765"
+      sha256: "06a96f1249f38a00435b3b0c9a3246d934d7dbc8183fc7c9e56989860edb99d4"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.2"
+    version: "3.4.4"
   args:
     dependency: transitive
     description:
@@ -37,11 +37,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: proposal
-      resolved-ref: "851be7308e476c8957c1ccc5a73ad0a58a99921f"
+      ref: "0.1.0-dev"
+      resolved-ref: c691681b6cc858814fa825fbfadb40f00d66314c
       url: "https://github.com/marco-04/brstm_player"
     source: git
-    version: "1.0.0"
+    version: "0.1.0"
   characters:
     dependency: transitive
     description:
