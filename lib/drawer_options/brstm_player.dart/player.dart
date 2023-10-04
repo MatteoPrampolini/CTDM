@@ -44,7 +44,6 @@ class BrstmPlayerState extends State<BrstmPlayer> {
 
   reset(BRSTM brstm) async {
     await mpv.quit();
-
     playButtonKey.currentState?.isPlaying = false;
     audioTimelineKey.currentState?.isPlaying = false;
     playButtonKey.currentState?.setState(() {});

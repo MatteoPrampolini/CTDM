@@ -1,9 +1,12 @@
 import 'dart:io';
 
 import 'package:ctdm/drawer_options/brstm_player.dart/double_brstm_player.dart';
+import 'package:ctdm/utils/music_utils.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'package:path/path.dart' as path;
 
@@ -21,13 +24,34 @@ class _MusicEditorState extends State<MusicEditor> {
   int selectedFolder = 0;
   late String myMusicFolder;
   GlobalKey<DoubleBrstmPlayerState> doublePlayerKey = GlobalKey();
-
+  FilePickerResult? musicFileResult;
   bool addFileVisibile = false;
+  bool _isConverting = false;
+  //File? file;
   @override
   void initState() {
     super.initState();
     myMusicFolder =
         path.join(path.dirname(path.dirname(widget.packPath)), 'myMusic');
+  }
+
+  Future<void> createBrstmFromAudioSource(File? audiofile) async {
+    if (audiofile == null) {
+      return;
+    }
+    setState(() {
+      _isConverting = true;
+    });
+
+    String myMusicPath =
+        path.join(path.dirname(path.dirname(widget.packPath)), 'myMusic');
+    await audioFileToBrstmPair(
+      audiofile,
+      path.join(myMusicPath, path.basenameWithoutExtension(audiofile.path)),
+    );
+    setState(() {
+      _isConverting = false;
+    });
   }
 
   @override
@@ -108,52 +132,115 @@ class _MusicEditorState extends State<MusicEditor> {
           Visibility(
             visible: addFileVisibile,
             child: Center(
-              child: DropTarget(
-                  child: SizedBox.expand(
-                      child: Padding(
-                padding: EdgeInsets.only(
-                    left: MediaQuery.of(context).size.width / 5 + 5,
-                    top: 5,
-                    bottom: 5,
-                    right: 5),
-                child: DottedBorder(
-                  color: Colors.redAccent,
-                  strokeWidth: 1,
-                  dashPattern: const [10, 10, 10, 10],
-                  borderPadding: const EdgeInsets.all(8),
-                  child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.black38,
+              child: _isConverting
+                  ? Padding(
+                      padding: EdgeInsets.only(
+                        left: MediaQuery.of(context).size.width / 5,
                       ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      child: FractionallySizedBox(
+                        widthFactor: 0.5,
+                        heightFactor: 0.3,
+                        child: Stack(
+                          alignment: Alignment.topCenter,
                           children: [
-                            const Text(
-                              "Drop file Here",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 48,
-                                  color: Colors.redAccent,
-                                  decoration: TextDecoration.underline),
-                            ),
-                            const Icon(Icons.audio_file_outlined,
-                                color: Colors.redAccent, size: 48),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 40.0),
-                              child: Text("or"),
-                            ),
-                            ElevatedButton(
-                                onPressed: () {},
-                                child: const Text(
-                                  "Browse files",
-                                  style: TextStyle(fontSize: 24),
-                                ))
+                            LoadingAnimationWidget.fourRotatingDots(
+                                color: Colors.redAccent, size: 150),
+                            const Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Text(
+                                  "Converting to .brstm\nPlease wait...",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.white54, fontSize: 20),
+                                )),
                           ],
                         ),
-                      )),
-                ),
-              ))),
+                      ),
+                    )
+                  : DropTarget(
+                      enable: true,
+                      onDragDone: (details) async => {
+                            if (details.files.isNotEmpty)
+                              {
+                                if (details.files[0].name
+                                    .contains(RegExp(r'\.(mp3|wav)$')))
+                                  {
+                                    await createBrstmFromAudioSource(
+                                        File(details.files[0].path))
+                                  }
+                                else
+                                  {
+                                    _showErrorDialog(context,
+                                        "Invalid Extension. Only MP3/WAV allowed.")
+                                  }
+                              }
+                          },
+                      child: SizedBox.expand(
+                          child: Padding(
+                        padding: EdgeInsets.only(
+                            left: MediaQuery.of(context).size.width / 5 + 5,
+                            top: 5,
+                            bottom: 5,
+                            right: 5),
+                        child: DottedBorder(
+                          color: Colors.redAccent,
+                          strokeWidth: 1,
+                          dashPattern: const [10, 10, 10, 10],
+                          borderPadding: const EdgeInsets.all(8),
+                          child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.black38,
+                              ),
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      "Drop file Here",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontSize: 48,
+                                          color: Colors.redAccent,
+                                          decoration: TextDecoration.underline),
+                                    ),
+                                    const Icon(Icons.audio_file_outlined,
+                                        color: Colors.redAccent, size: 48),
+                                    const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 40.0),
+                                      child: Text("or"),
+                                    ),
+                                    ElevatedButton(
+                                        onPressed: () async => {
+                                              musicFileResult = await FilePicker
+                                                  .platform
+                                                  .pickFiles(
+                                                      allowMultiple: false,
+                                                      allowedExtensions: [
+                                                        'mp3',
+                                                        'wav',
+                                                      ],
+                                                      type: FileType.custom,
+                                                      initialDirectory:
+                                                          path.join(
+                                                              widget.packPath,
+                                                              '..',
+                                                              '..',
+                                                              'myMusic')),
+                                              if (musicFileResult != null)
+                                                {
+                                                  await createBrstmFromAudioSource(
+                                                      File(musicFileResult!
+                                                          .files.first.path!))
+                                                }
+                                            },
+                                        child: const Text("Browse files",
+                                            style: TextStyle(fontSize: 24)))
+                                  ],
+                                ),
+                              )),
+                        ),
+                      ))),
             ),
           ),
           Visibility(
@@ -179,4 +266,28 @@ class _MusicEditorState extends State<MusicEditor> {
               ))))
         ]));
   }
+}
+
+void _showErrorDialog(BuildContext context, String result) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text(
+          "ERROR",
+          style: TextStyle(color: Colors.redAccent),
+        ),
+        content:
+            FittedBox(fit: BoxFit.fitWidth, child: Text(result, maxLines: 2)),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Close"),
+          ),
+        ],
+      );
+    },
+  );
 }

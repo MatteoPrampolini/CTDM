@@ -23,6 +23,50 @@ bool isFfmpegInstalled() {
   }
 }
 
+Future<void> audioFileToBrstmPair(File input, String outputFolder) async {
+  if (!Platform.isWindows && !Platform.isLinux) {
+    logString(LogType.ERROR, "Cannot convert file. Use windows or linux.");
+    return;
+  }
+  if (!await Directory(outputFolder).exists()) {
+    await Directory(outputFolder).create();
+  }
+  String normalizeFilePath =
+      path.join(outputFolder, "NORMALIZE_${path.basename(input.path)}");
+  File normalizeFile = await normalize(input, File(normalizeFilePath));
+  String tmpFilePath =
+      "${path.join(outputFolder, path.basenameWithoutExtension(input.path))}.wav";
+
+  String tmpFilePathFast =
+      "${path.join(outputFolder, path.basenameWithoutExtension(input.path))}_f.wav";
+
+  double maxVolume = await getMaxVolumePeak(File(normalizeFile.path));
+  File normalFile = await audioToWavAdpcm(
+      normalizeFile.path, tmpFilePath, maxVolume); //create wav
+
+  File fastFile = await createFastCopy(normalFile.path, tmpFilePathFast);
+  //create fast wav
+  await wavToBrstm(normalFile.path, outputFolder,
+      path.basenameWithoutExtension(normalFile.path));
+
+  await wavToBrstm(fastFile.path, outputFolder,
+      path.basenameWithoutExtension(fastFile.path));
+  print(normalFile.path);
+
+  if (await normalFile.exists()) {
+    await normalFile.delete();
+  }
+  if (await File(normalizeFilePath).exists()) {
+    await File(normalizeFilePath).delete();
+  }
+  if (await File(tmpFilePath).exists()) {
+    await File(tmpFilePath).delete();
+  }
+  if (await File(tmpFilePathFast).exists()) {
+    await File(tmpFilePathFast).delete();
+  }
+}
+
 ///Takes an audio file (mp3,wav) and converts it in 2 brstm files.
 ///
 ///id is the hex id of the track associated with this music
@@ -108,6 +152,48 @@ Future<File> createFastCopy(String tmpFilePath, String tmpFilePathFast) async {
       ],
       runInShell: true);
   return File(tmpFilePathFast);
+}
+
+Future<void> wavToBrstm(
+    String inputPath, String outputFolder, String outputBasename,
+    {int loopPoint = 0}) async {
+  outputBasename = path.basenameWithoutExtension(outputBasename);
+  final String executablesFolder = File(path.join(
+          path.dirname(Platform.resolvedExecutable),
+          "data",
+          "flutter_assets",
+          "assets",
+          "executables"))
+      .path;
+  if (Platform.isWindows) {
+    await Process.run(
+        'set',
+        [
+          '__COMPAT_LAYER=Win8RTM',
+          '&',
+          path.join(executablesFolder, 'brstm_converter-amd64-windows.exe'),
+          inputPath,
+          '-o',
+          path.join(outputFolder, "$outputBasename.brstm"),
+          '-l',
+          loopPoint.toString(),
+        ],
+        runInShell: true);
+  } else if (Platform.isLinux) {
+    await Process.run(
+        path.join(executablesFolder, 'brstm_converter-amd64-linux'),
+        [
+          inputPath,
+          '-o',
+          path.join(outputFolder, "$outputBasename.brstm"),
+          '-l',
+          loopPoint.toString(),
+        ],
+        runInShell: true);
+    return;
+  } else {
+    throw (Exception("wavToBrstm() cannot be called with this os."));
+  }
 }
 
 Future<void> callBrstmConverter(

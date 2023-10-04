@@ -495,6 +495,7 @@ class _PatchWindowState extends State<PatchWindow> {
         '--lpar', //added
         path.join(packPath, 'lpar.txt'), //added
       ];
+
       if (isoVersion == "PAL") {
         wlectArgs.addAll([
           '--track-dir',
@@ -1303,7 +1304,6 @@ class AfterPatchOptions extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                
               },
               child: const Text("Close"),
             ),
@@ -1313,4 +1313,3 @@ class AfterPatchOptions extends StatelessWidget {
     );
   }
 }
-

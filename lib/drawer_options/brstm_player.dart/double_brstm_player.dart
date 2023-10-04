@@ -15,7 +15,7 @@ class DoubleBrstmPlayer extends StatefulWidget {
 }
 
 class DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
-  late List<File> fileList;
+  List<File> fileList = [];
   GlobalKey<BrstmPlayerState> brstmPlayerKey1 = GlobalKey();
   GlobalKey<BrstmPlayerState> brstmPlayerKey2 = GlobalKey();
 
@@ -33,24 +33,41 @@ class DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
 
   selectedFileChange(String subFolderPath) async {
     updateFileList(subFolderPath);
-    brstmPlayerKey1.currentState?.reset(BRSTM(fileList[0].path));
-    brstmPlayerKey2.currentState?.reset(BRSTM(fileList[1].path));
+
+    if (fileList.isNotEmpty) {
+      brstmPlayerKey1.currentState?.reset(BRSTM(fileList[0].path));
+    }
+    if (fileList.length > 1) {
+      brstmPlayerKey2.currentState?.reset(BRSTM(fileList[1].path));
+    }
     // brstmPlayerKey1.currentState?.reloadFile();
     // brstmPlayerKey2.currentState?.reloadFile();
     setState(() {});
   }
 
   void updateFileList(subFolderPath) {
-    fileList = [
-      Directory(subFolderPath)
+    fileList = [];
+    File? normal;
+    File? fast;
+
+    try {
+      normal = Directory(subFolderPath)
           .listSync()
           .whereType<File>()
-          .firstWhere((element) => !isFastBrstm(element.path)),
-      Directory(subFolderPath)
+          .firstWhere((element) => !isFastBrstm(element.path));
+      fileList.add(normal);
+    } on StateError catch (_) {
+      normal = null;
+    }
+    try {
+      fast = Directory(subFolderPath)
           .listSync()
           .whereType<File>()
-          .firstWhere((element) => isFastBrstm(element.path))
-    ];
+          .firstWhere((element) => isFastBrstm(element.path));
+      fileList.add(fast);
+    } on StateError catch (_) {
+      fast = null;
+    }
   }
 
   @override
@@ -58,9 +75,13 @@ class DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        BrstmPlayer(BRSTM(fileList[0].path), key: brstmPlayerKey1),
+        fileList.isNotEmpty
+            ? BrstmPlayer(BRSTM(fileList[0].path), key: brstmPlayerKey1)
+            : const Expanded(child: Center(child: Text("normal file missing"))),
         const Divider(),
-        BrstmPlayer(BRSTM(fileList[1].path), key: brstmPlayerKey2),
+        fileList.length > 1
+            ? BrstmPlayer(BRSTM(fileList[1].path), key: brstmPlayerKey2)
+            : const Expanded(child: Center(child: Text("fast file missing"))),
       ],
     );
   }

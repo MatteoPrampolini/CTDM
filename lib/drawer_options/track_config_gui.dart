@@ -35,6 +35,7 @@ Track parseTrackLine(String trackLine) {
         tmp.slotId = int.parse(RegExp('[0-9]+').stringMatch(param)!);
         break;
       case 2:
+        //TODO NEW https://wiki.tockdom.com/wiki/LE-CODE/Distribution_Tutorial/LE-DEF#flags
         switch (param.trim()) {
           case "0x00":
             tmp.type = TrackType.base;
@@ -389,6 +390,7 @@ N N$nintendoTracksString | """
   String trackToString(Track track) {
     String typeLetter = "";
     String code = "";
+    //TODO NEW https://wiki.tockdom.com/wiki/LE-CODE/Distribution_Tutorial/LE-DEF#flags
     switch (track.type) {
       case TrackType.base:
         typeLetter = "T";
