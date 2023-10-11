@@ -161,15 +161,6 @@ Future<void> _main() async {
     logString(LogType.ERROR, "Wiimms' wit toolset not found");
     prefs.setBool('wit', false);
   }
-  try {
-    final _ = await Process.start('ffmpeg', [], runInShell: false);
-
-    prefs.setBool('ffmpeg', true);
-  } on Exception catch (_) {
-    //print("Wiimms' wit toolset not found");
-    logString(LogType.ERROR, "Wiimms' wit toolset not found");
-    prefs.setBool('ffmpeg', false);
-  }
 
   // defaultSettingsValues.remove('dolphin');
   defaultSettingsValues.forEach((key, value) async {
@@ -226,7 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late SharedPreferences prefs;
   late bool szsFound = false;
   late bool witFound = false;
-  late bool ffmpegFound = false;
+
   late String workspace = "";
   @override
   void initState() {
@@ -243,7 +234,6 @@ class _MyHomePageState extends State<MyHomePage> {
         workspace = '';
       }
       witFound = prefs.getBool('wit')!;
-      ffmpegFound = prefs.getBool('ffmpeg')!;
     });
   }
 
@@ -296,46 +286,13 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (workspace != "" && szsFound && witFound && ffmpegFound)
+            if (workspace != "" && szsFound && witFound)
               const Expanded(
                 child: PackSelect(),
               ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (!ffmpegFound)
-                  Column(
-                    children: [
-                      Text(
-                        "FFMPEG not installed.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.fontSize,
-                            color: Colors.white54),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          const url = 'https://ffmpeg.org/download.html';
-                          final uri = Uri.parse(url);
-                          launchUrl(uri);
-                        },
-                        child: Text(
-                          "download",
-                          style: TextStyle(
-                            color: Colors.red.shade700,
-                            decoration: TextDecoration.underline,
-                            fontSize: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.fontSize,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 if (!szsFound)
                   Column(
                     children: [
@@ -426,7 +383,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ],
                     ),
                   ),
-                if (workspace == "" && szsFound && witFound && ffmpegFound)
+                if (workspace == "" && szsFound && witFound)
                   Column(
                     children: [
                       TextButton(

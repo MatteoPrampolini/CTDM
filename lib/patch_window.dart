@@ -935,6 +935,8 @@ class _PatchWindowState extends State<PatchWindow> {
       tracksIdHex.add(id); //get id of track and add it
 
       String filepath = line.substring(4);
+
+      //deprecated
       if (!filepath.endsWith("brstm") && Platform.isMacOS) {
         logString(LogType.ERROR, "cannot convert audio file on MacOS");
         return;
@@ -961,6 +963,7 @@ class _PatchWindowState extends State<PatchWindow> {
 
         await fastFile.copy(path.join(musicDir.path, '${id}_f.brstm'));
       } else {
+        //deprecated
         await fileToBrstm(
             path.join(workspace, "myMusic", filepath),
             path.join(packPath, "Music", "tmp"),

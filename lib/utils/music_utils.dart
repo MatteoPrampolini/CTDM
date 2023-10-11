@@ -17,9 +17,21 @@ bool isFfmpegInstalled() {
         Process.runSync('ffmpeg', ['-version'], runInShell: false);
     return res.exitCode == 0;
   } on Exception catch (_) {
-    logString(LogType.ERROR, "ffmpeg not found. please install it.");
+    logString(LogType.ERROR,
+        "ffmpeg not found. please install it and add it to PATH https://ffmpeg.org/download.html");
     return false;
-    //rethrow;
+  }
+}
+
+bool isMpvInstalled() {
+  try {
+    ProcessResult res =
+        Process.runSync('mpv', ['--version'], runInShell: false);
+    return res.exitCode == 0;
+  } on Exception catch (_) {
+    logString(LogType.ERROR,
+        "mpv.io not found. please install it and add it to PATH https://mpv.io/installation/.");
+    return false;
   }
 }
 
@@ -51,7 +63,6 @@ Future<void> audioFileToBrstmPair(File input, String outputFolder) async {
 
   await wavToBrstm(fastFile.path, outputFolder,
       path.basenameWithoutExtension(fastFile.path));
-  print(normalFile.path);
 
   if (await normalFile.exists()) {
     await normalFile.delete();

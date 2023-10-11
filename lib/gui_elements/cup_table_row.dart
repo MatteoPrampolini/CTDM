@@ -351,7 +351,7 @@ class _CupTableRowState extends State<CupTableRow> {
                               onPressed: () async {
                                 musicRes = await FilePicker.platform.pickFiles(
                                     allowMultiple: false,
-                                    allowedExtensions: ['mp3', 'wav', 'brstm'],
+                                    allowedExtensions: ['brstm'],
                                     type: FileType.custom,
                                     initialDirectory: path.join(widget.packPath,
                                         '..', '..', 'myMusic'));

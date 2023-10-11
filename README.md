@@ -13,6 +13,7 @@ A modding tool for Mario Kart Wii. Multi-ISO modpack maker for [Riivolution](htt
  - [Custom Mario Kart Wiiki](https://wiki.tockdom.com/)
  - [OpenRevolution](https://github.com/ic-scm/openrevolution)
  - [FFmpeg](https://ffmpeg.org/)
+ - [mpv.io](https://mpv.io/)
 
 ## Installation
 
