@@ -239,7 +239,9 @@ List<String> getTracksFilenamesFromConfig(String packPath) {
   dirtyTrackFilenames = contents.split('\n');
 
   for (var dirty in dirtyTrackFilenames) {
-    if (';'.allMatches(dirty).length == 5 && !dirty.contains((r'0x02;'))) {
+    if (';'.allMatches(dirty).length == 5 &&
+        !dirty.contains((r'0x02;')) &&
+        !dirty.contains((r'0x03;'))) {
       //is track
       trackFilenames.add(dirty.split(';')[3].replaceAll(r'"', '').trimLeft());
     }

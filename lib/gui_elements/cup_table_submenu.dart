@@ -27,12 +27,14 @@ class CupTableSubMenu extends StatefulWidget {
 class _CupTableSubMenuState extends State<CupTableSubMenu> {
   late TextEditingController trackNameTextField;
   late bool expanded = false;
+  bool isNew = false;
   @override
   void initState() {
     widget.color = Colors.limeAccent;
     super.initState();
     trackNameTextField = TextEditingController();
     trackNameTextField.text = widget.tracks[0].name;
+    isNew = widget.tracks[0].isNew;
   }
 
   @override
@@ -69,7 +71,7 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
                         child: Row(
                           children: [
                             Expanded(
-                              flex: 7,
+                              flex: 6,
                               child: TextField(
                                 controller: trackNameTextField,
                                 onChanged: (value) => {
@@ -99,7 +101,24 @@ class _CupTableSubMenuState extends State<CupTableSubMenu> {
                                     icon: const Icon(Icons.delete_forever,
                                         color: Colors.redAccent)),
                               ),
-                            )
+                            ),
+                            Expanded(
+                                flex: 1,
+                                child: IconButton(
+                                    onPressed: () => {
+                                          isNew = !isNew,
+                                          widget.tracks[0].isNew = isNew,
+                                          RowChangedValue(
+                                                  widget.tracks[0],
+                                                  widget.cupIndex,
+                                                  widget.rowIndex)
+                                              .dispatch(context),
+                                          setState(() {})
+                                        },
+                                    icon: Icon(Icons.grade,
+                                        color: isNew
+                                            ? Colors.redAccent
+                                            : Colors.black54)))
                           ],
                         ),
                       ),

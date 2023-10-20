@@ -12,9 +12,10 @@ class Track {
   late String path;
   late TrackType type;
   late String? musicFolder;
+  late bool isNew;
 
   Track(this.name, this.slotId, this.musicId, this.path, this.type,
-      [this.musicFolder]);
+      [this.musicFolder, this.isNew = false]);
   @override
   String toString() {
     //return "Track($name)";

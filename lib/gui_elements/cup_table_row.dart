@@ -30,6 +30,7 @@ class _CupTableRowState extends State<CupTableRow> {
   late TextEditingController musicslotTextField;
   String? errorTextTrackSlot;
   String? errorTextMusicslot;
+  bool isNew = false;
   // ignore: prefer_final_fields
   //late List<bool> _selectedMusicOption;
   @override
@@ -47,6 +48,7 @@ class _CupTableRowState extends State<CupTableRow> {
     trackNameTextField.text = widget.track.name;
     musicslotTextField.text = widget.track.musicId.toString();
     trackslotTextField.text = widget.track.slotId.toString();
+    isNew = widget.track.isNew;
     // _selectedMusicOption = musicFolder != "select music"
     //     ? <bool>[true, false]
     //     : <bool>[false, true];
@@ -131,7 +133,7 @@ class _CupTableRowState extends State<CupTableRow> {
                   child: Row(
                     children: [
                       Expanded(
-                        flex: 7,
+                        flex: 6,
                         child: TextField(
                           controller: trackNameTextField,
                           onChanged: (value) => {
@@ -150,9 +152,6 @@ class _CupTableRowState extends State<CupTableRow> {
                           visible: widget.canDeleteTracks == true,
                           child: IconButton(
                               onPressed: () => {
-                                    //print("sono row: ${widget.rowIndex}"),
-                                    //setState(() => {canDelete = !canDelete}),
-                                    //print("row at:${widget.rowIndex}"),
                                     RowDeletePressed(
                                             widget.cupIndex, widget.rowIndex)
                                         .dispatch(context)
@@ -160,7 +159,22 @@ class _CupTableRowState extends State<CupTableRow> {
                               icon: const Icon(Icons.delete_forever,
                                   color: Colors.redAccent)),
                         ),
-                      )
+                      ),
+                      Expanded(
+                          flex: 1,
+                          child: IconButton(
+                              onPressed: () => {
+                                    isNew = !isNew,
+                                    widget.track.isNew = isNew,
+                                    RowChangedValue(widget.track,
+                                            widget.cupIndex, widget.rowIndex)
+                                        .dispatch(context),
+                                    setState(() {})
+                                  },
+                              icon: Icon(Icons.grade,
+                                  color: isNew
+                                      ? Colors.redAccent
+                                      : Colors.white54)))
                     ],
                   ),
                 ),

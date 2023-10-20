@@ -40,11 +40,23 @@ Track parseTrackLine(String trackLine) {
           case "0x00":
             tmp.type = TrackType.base;
             break;
+          case "0x01":
+            tmp.type = TrackType.base;
+            tmp.isNew = true;
+            break;
           case "0x02":
             tmp.type = TrackType.menu;
             break;
+          case "0x03":
+            tmp.type = TrackType.menu;
+            tmp.isNew = true;
+            break;
           case "0x04":
             tmp.type = TrackType.hidden;
+            break;
+          case "0x05":
+            tmp.type = TrackType.hidden;
+            tmp.isNew = true;
             break;
         }
         break;
@@ -394,17 +406,29 @@ N N$nintendoTracksString | """
     switch (track.type) {
       case TrackType.base:
         typeLetter = "T";
-        code = "0x00";
+        if (track.isNew) {
+          code = "0x01";
+        } else {
+          code = "0x00";
+        }
 
         break;
       case TrackType.menu:
         typeLetter = "T";
-        code = "0x02";
+        if (track.isNew) {
+          code = "0x03";
+        } else {
+          code = "0x02";
+        }
 
         break;
       case TrackType.hidden:
         typeLetter = "H";
-        code = "0x04";
+        if (track.isNew) {
+          code = "0x05";
+        } else {
+          code = "0x04";
+        }
 
         break;
     }
@@ -654,8 +678,6 @@ N N$nintendoTracksString | """
                                     width: 100,
                                     child: ElevatedButton(
                                       onPressed: () {
-                                        // Chiamare la funzione sortAlpha() quando il pulsante viene premuto
-                                        //sortAlpha();
                                         _debugReplace();
                                       },
                                       style: ElevatedButton.styleFrom(
