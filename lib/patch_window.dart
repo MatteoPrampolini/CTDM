@@ -506,7 +506,12 @@ class _PatchWindowState extends State<PatchWindow> {
       }
 
       //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
-      await Process.run('wlect', wlectArgs, runInShell: true);
+      ProcessResult p = await Process.run('wlect', wlectArgs, runInShell: true);
+
+      if (p.exitCode != 0 || p.stderr.toString().contains('! wlect')) {
+        logString(LogType.ERROR, "PATCH ERROR:\n${p.stderr}");
+        throw Exception("Bad config.txt");
+      }
     }
 
     //move main.dol and patch it with gecko codes

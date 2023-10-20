@@ -648,6 +648,7 @@ N N$nintendoTracksString | """
                                     ]),
                               ),
                               Visibility(
+                                visible: debugMode,
                                 child: SizedBox(
                                     height: 30,
                                     width: 100,
