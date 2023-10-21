@@ -29,7 +29,7 @@ final Map<String, String> vsMap = {
   "old_mario_gc": "GCN Mario Circuit",
   "old_mario_sfc": "SNES Mario Circuit 3",
   "old_garden_ds": "DS Peach Gardens",
-  "old_donkey_gc": "NGC DK Mountain",
+  "old_donkey_gc": "GCN DK Mountain",
   "old_koopa_64": "N64 Bowser Castle",
 };
 Map<String, String> battleMap = {

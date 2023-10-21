@@ -24,11 +24,14 @@ Future<String> zipPack(List<String> parameters) async {
     if (await targetDir.exists()) {
       final fileList = await _getFileListInDirectory(targetDir);
       for (final file in fileList) {
-        final relativePath = path.join(
-            targetDirName, path.relative(file.path, from: targetDir.path));
+        final relativePath = path.join(path.basename(packPath), targetDirName,
+            path.relative(file.path, from: targetDir.path));
+
         final fileContent = await file.readAsBytes();
+
         final archiveFile =
             ArchiveFile(relativePath, fileContent.length, fileContent);
+
         archive.addFile(archiveFile);
       }
     }
