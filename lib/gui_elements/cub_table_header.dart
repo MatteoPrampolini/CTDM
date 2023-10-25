@@ -45,17 +45,20 @@ class _CupTableHeaderState extends State<CupTableHeader> {
                         "Track Name",
                         style: TextStyle(color: Colors.black87),
                       ),
-                      IconButton(
-                          onPressed: () => {
-                                canDelete = !canDelete,
-                                DeleteModeUpdated(canDelete, widget.cupIndex)
-                                    .dispatch(context),
-                                setState(() => {})
-                              },
-                          icon: Icon(
-                            Icons.delete,
-                            color: canDelete ? Colors.amber : Colors.black87,
-                          ))
+                      Visibility(
+                        visible: widget.cupIndex > 0,
+                        child: IconButton(
+                            onPressed: () => {
+                                  canDelete = !canDelete,
+                                  DeleteModeUpdated(canDelete, widget.cupIndex)
+                                      .dispatch(context),
+                                  setState(() => {})
+                                },
+                            icon: Icon(
+                              Icons.delete,
+                              color: canDelete ? Colors.amber : Colors.black87,
+                            )),
+                      )
                     ],
                   ),
                 ),
@@ -69,7 +72,6 @@ class _CupTableHeaderState extends State<CupTableHeader> {
                   BoxDecoration(border: Border.all(color: Colors.black)),
               child: const Center(
                 child: Text("track slot",
-                    
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.black87)),
               ),
@@ -127,7 +129,9 @@ class _CupTableHeaderState extends State<CupTableHeader> {
                           .existsSync()
                       ? Image.file(File(path.join(
                           widget.packPath, 'Icons', '${widget.iconIndex}.png')))
-                      : Text("${widget.iconIndex}.png"))),
+                      : widget.iconIndex > 0
+                          ? Text("${widget.iconIndex}.png")
+                          : const Text(""))),
         ],
       ),
     );

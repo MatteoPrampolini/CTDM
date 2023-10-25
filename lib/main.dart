@@ -120,7 +120,7 @@ Future<void> _main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  await prefs.setString('version', 'v0.9.4');
+  await prefs.setString('version', 'v0.9.5');
   try {
     ProcessResult p =
         await Process.run('wlect', ['--version'], runInShell: true);

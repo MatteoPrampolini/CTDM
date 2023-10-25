@@ -160,21 +160,24 @@ class _CupTableRowState extends State<CupTableRow> {
                                   color: Colors.redAccent)),
                         ),
                       ),
-                      Expanded(
-                          flex: 1,
-                          child: IconButton(
-                              onPressed: () => {
-                                    isNew = !isNew,
-                                    widget.track.isNew = isNew,
-                                    RowChangedValue(widget.track,
-                                            widget.cupIndex, widget.rowIndex)
-                                        .dispatch(context),
-                                    setState(() {})
-                                  },
-                              icon: Icon(Icons.grade,
-                                  color: isNew
-                                      ? Colors.redAccent
-                                      : Colors.white54)))
+                      Visibility(
+                        visible: !widget.track.slotId.startsWith('A'),
+                        child: Expanded(
+                            flex: 1,
+                            child: IconButton(
+                                onPressed: () => {
+                                      isNew = !isNew,
+                                      widget.track.isNew = isNew,
+                                      RowChangedValue(widget.track,
+                                              widget.cupIndex, widget.rowIndex)
+                                          .dispatch(context),
+                                      setState(() {})
+                                    },
+                                icon: Icon(Icons.grade,
+                                    color: isNew
+                                        ? Colors.redAccent
+                                        : Colors.white54))),
+                      )
                     ],
                   ),
                 ),
@@ -190,9 +193,12 @@ class _CupTableRowState extends State<CupTableRow> {
                   child: TextField(
                 controller: trackslotTextField,
                 onChanged: (value) {
-                  if (int.tryParse(value) != null &&
-                      RegExp(r'^[1-8][1-4]$').hasMatch(value)) {
-                    widget.track.slotId = int.parse(value);
+                  print(value);
+                  RegExp regex = widget.cupIndex > 0
+                      ? RegExp(r'^[1-8][1-4]$')
+                      : RegExp(r'^A[1-2]?[1-5]?$');
+                  if (regex.hasMatch(value)) {
+                    widget.track.slotId = value;
                     RowChangedValue(
                             widget.track, widget.cupIndex, widget.rowIndex)
                         .dispatch(context);
@@ -209,9 +215,7 @@ class _CupTableRowState extends State<CupTableRow> {
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(2),
-                  FilteringTextInputFormatter.allow(RegExp(r'[1-8]')),
+                  LengthLimitingTextInputFormatter(3),
                 ],
                 decoration: InputDecoration(
                   errorText: errorTextTrackSlot,
@@ -245,6 +249,11 @@ class _CupTableRowState extends State<CupTableRow> {
                                       widget.rowIndex)
                                   .dispatch(context)
                             }
+                        }
+                      else
+                        {
+                          if (widget.cupIndex < 0)
+                            {widget.track.path = "original file"}
                         },
                       setState(() {}),
                     },

@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../gui_elements/types.dart';
 
 const String debugTrack = 'Short Way Beta 2 (old_koopa_gba)';
-const int debugSlot = 73;
+const String debugSlot = '73';
 List<Track> splitCupListsFromText(String str) {
   List<Track> trackList = [];
   for (String line in str.split("\n")) {
@@ -18,7 +18,7 @@ List<Track> splitCupListsFromText(String str) {
 }
 
 Track parseTrackLine(String trackLine) {
-  Track tmp = Track('', 0, '0', '', TrackType.base);
+  Track tmp = Track('', '0', '0', '', TrackType.base);
   int i = 0;
   for (String param in trackLine.split(r';')) {
     if (param.trim() == "") continue;
@@ -32,7 +32,7 @@ Track parseTrackLine(String trackLine) {
             ''); //int.parse(RegExp('[0-9]+').stringMatch(param)!);
         break;
       case 1:
-        tmp.slotId = int.parse(RegExp('[0-9]+').stringMatch(param)!);
+        tmp.slotId = RegExp('[0-9]+').stringMatch(param)!;
         break;
       case 2:
         //TODO NEW https://wiki.tockdom.com/wiki/LE-CODE/Distribution_Tutorial/LE-DEF#flags
@@ -76,38 +76,39 @@ Track parseTrackLine(String trackLine) {
 List<Cup> getNintendoCups() {
   List<Cup> nintendo = [];
   List<Track> trackList = [
-    Track('Luigi Circuit', 11, '11', 'original file', TrackType.base),
-    Track('Moo Moo Meadows', 12, '12', 'original file', TrackType.base),
-    Track('Mushroom Gorge', 13, '13', 'original file', TrackType.base),
-    Track("Toad's Factory", 14, '14', 'original file', TrackType.base),
-    Track('Mario Circuit', 21, '21', 'original file', TrackType.base),
-    Track('Coconut Mall', 22, '22', 'original file', TrackType.base),
-    Track('DK Summit', 23, '23', 'original file', TrackType.base),
-    Track("Wario's Gold Mine", 24, '24', 'original file', TrackType.base),
-    Track('Daisy Circuit', 31, '31', 'original file', TrackType.base),
-    Track('Koopa Cape', 32, '32', 'original file', TrackType.base),
-    Track('Maple Treeway', 33, '33', 'original file', TrackType.base),
-    Track('Grumble Volcano', 34, '34', 'original file', TrackType.base),
-    Track('Dry Dry Ruins', 41, '41', 'original file', TrackType.base),
-    Track('Moonview Highway', 42, '42', 'original file', TrackType.base),
-    Track("Bowser's Castle", 43, '43', 'original file', TrackType.base),
-    Track('Rainbow Road', 44, '44', 'original file', TrackType.base),
-    Track('GCN Peach Beach', 51, '51', 'original file', TrackType.base),
-    Track('DS Yoshi Falls', 52, '52', 'original file', TrackType.base),
-    Track('SNES Ghost Valley 2', 53, '53', 'original file', TrackType.base),
-    Track('N64 Mario Raceway', 54, '54', 'original file', TrackType.base),
-    Track('N64 Sherbert Land', 61, '61', 'original file', TrackType.base),
-    Track('GBA Shy Guy Beach', 62, '62', 'original file', TrackType.base),
-    Track('DS Delfino Square', 63, '63', 'original file', TrackType.base),
-    Track('GCN Waluigi Stadium', 64, '64', 'original file', TrackType.base),
-    Track('DS Desert Hills', 71, '71', 'original file', TrackType.base),
-    Track('GBA Bowser Castle 3', 72, '72', 'original file', TrackType.base),
-    Track("N64 DK's Jungle Parkway", 73, '73', 'original file', TrackType.base),
-    Track('GCN Mario Circuit', 74, '74', 'original file', TrackType.base),
-    Track('SNES Mario Circuit 3', 81, '81', 'original file', TrackType.base),
-    Track('DS Peach Gardens', 82, '82', 'original file', TrackType.base),
-    Track('GCN DK Mountain', 83, '83', 'original file', TrackType.base),
-    Track("N64 Bowser's Castle", 84, '84', 'original file', TrackType.base),
+    Track('Luigi Circuit', '11', '11', 'original file', TrackType.base),
+    Track('Moo Moo Meadows', '12', '12', 'original file', TrackType.base),
+    Track('Mushroom Gorge', '13', '13', 'original file', TrackType.base),
+    Track("Toad's Factory", '14', '14', 'original file', TrackType.base),
+    Track('Mario Circuit', '21', '21', 'original file', TrackType.base),
+    Track('Coconut Mall', '22', '22', 'original file', TrackType.base),
+    Track('DK Summit', '23', '23', 'original file', TrackType.base),
+    Track("Wario's Gold Mine", '24', '24', 'original file', TrackType.base),
+    Track('Daisy Circuit', '31', '31', 'original file', TrackType.base),
+    Track('Koopa Cape', '32', '32', 'original file', TrackType.base),
+    Track('Maple Treeway', '33', '33', 'original file', TrackType.base),
+    Track('Grumble Volcano', '34', '34', 'original file', TrackType.base),
+    Track('Dry Dry Ruins', '41', '41', 'original file', TrackType.base),
+    Track('Moonview Highway', '42', '42', 'original file', TrackType.base),
+    Track("Bowser's Castle", '43', '43', 'original file', TrackType.base),
+    Track('Rainbow Road', '44', '44', 'original file', TrackType.base),
+    Track('GCN Peach Beach', '51', '51', 'original file', TrackType.base),
+    Track('DS Yoshi Falls', '52', '52', 'original file', TrackType.base),
+    Track('SNES Ghost Valley 2', '53', '53', 'original file', TrackType.base),
+    Track('N64 Mario Raceway', '54', '54', 'original file', TrackType.base),
+    Track('N64 Sherbert Land', '61', '61', 'original file', TrackType.base),
+    Track('GBA Shy Guy Beach', '62', '62', 'original file', TrackType.base),
+    Track('DS Delfino Square', '63', '63', 'original file', TrackType.base),
+    Track('GCN Waluigi Stadium', '64', '64', 'original file', TrackType.base),
+    Track('DS Desert Hills', '71', '71', 'original file', TrackType.base),
+    Track('GBA Bowser Castle 3', '72', '72', 'original file', TrackType.base),
+    Track(
+        "N64 DK's Jungle Parkway", '73', '73', 'original file', TrackType.base),
+    Track('GCN Mario Circuit', '74', '74', 'original file', TrackType.base),
+    Track('SNES Mario Circuit 3', '81', '81', 'original file', TrackType.base),
+    Track('DS Peach Gardens', '82', '82', 'original file', TrackType.base),
+    Track('GCN DK Mountain', '83', '83', 'original file', TrackType.base),
+    Track("N64 Bowser's Castle", '84', '84', 'original file', TrackType.base),
   ];
 
   nintendo.add(Cup('Mushroom Cup', trackList.getRange(0, 4).toList()));
@@ -121,6 +122,27 @@ List<Cup> getNintendoCups() {
       .add(Cup('Lightning Cup', trackList.getRange(4 * 7, (4 * 8)).toList()));
 
   return nintendo;
+}
+
+List<Cup> getArenaCups() {
+  List<Cup> arena = [];
+  List<Track> trackList = [
+    Track('Block Plaza', 'A11', 'A11', 'original file', TrackType.base),
+    Track('Delfino Pier', 'A12', 'A12', 'original file', TrackType.base),
+    Track('Funky Stadium', 'A13', 'A13', 'original file', TrackType.base),
+    Track('Chain Chomp Wheel', 'A14', 'A14', 'original file', TrackType.base),
+    Track('Thwomp Desert', 'A15', 'A15', 'original file', TrackType.base),
+    Track(
+        'SNES Battle Course 4', 'A21', 'A21', 'original file', TrackType.base),
+    Track('GBA Battle Course 3', 'A22', 'A22', 'original file', TrackType.base),
+    Track('N64 Skyscraper', 'A23', 'A23', 'original file', TrackType.base),
+    Track('GCN Cookie Land', 'A24', 'A24', 'original file', TrackType.base),
+    Track('DS Twilight House', 'A25', 'A25', 'original file', TrackType.base),
+  ];
+  arena.add(Cup('Wii Stages', trackList.getRange(0, 5).toList(growable: true)));
+  arena.add(
+      Cup('Retro Stages', trackList.getRange(5, 10).toList(growable: true)));
+  return arena;
 }
 
 class TrackConfigGui extends StatefulWidget {
@@ -137,7 +159,9 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   bool keepNintendo = false;
   bool isEditMode = false;
   bool wiimsCup = false;
+  bool editArena = false;
   final List<Cup> nintendoCups = getNintendoCups();
+  List<Cup> arenaCups = getArenaCups();
   bool debugMode = false;
   @override
   void initState() {
@@ -211,10 +235,19 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   void parseConfig(String configPath) async {
     //List<List<Track>> cups = [];
     List<Cup> cups = [];
-    File configFile = File(configPath);
-    String contents = configFile.readAsStringSync();
     keepNintendo = false;
     wiimsCup = false;
+    editArena = false;
+    File configFile = File(configPath);
+    String contents = configFile.readAsStringSync();
+    String arenaTxt = "";
+    if (contents.contains('[SETUP-ARENA]')) {
+      editArena = true;
+      arenaTxt = contents.split('[SETUP-ARENA]').last;
+      contents = contents.split('[SETUP-ARENA]').first;
+      parseArenaTxt(arenaTxt);
+    }
+
     if (contents.contains(r'N$SWAP')) {
       keepNintendo = true;
     }
@@ -230,6 +263,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         .split("\n")
         .where((element) => element.startsWith('C'))
         .toList();
+    print(cupList);
 
     cupList.removeAt(0);
 
@@ -245,6 +279,40 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       i++;
     }
     this.cups = cups;
+  }
+
+  void parseArenaTxt(String contents) {
+    if (editArena == true && contents == "") {
+      arenaCups = getArenaCups();
+    } else {
+      print(arenaCups.length);
+
+      arenaCups[0].tracks.clear();
+      arenaCups[1].tracks.clear();
+      List<String> lines = contents.trim().split('\n');
+
+      int cupIndex = 0;
+      for (String line in lines) {
+        if (line.trim().startsWith('A1')) {
+          cupIndex = 0;
+        } else {
+          cupIndex = 1;
+        }
+        String slotsContent = line.split('#').first.trim();
+        String namesContents = line.split('#')[1].trim();
+
+        arenaCups[cupIndex].tracks.add(Track(
+            namesContents.split(';').first.trim(),
+            slotsContent.split(' ')[1],
+            slotsContent.split(' ')[2],
+            namesContents.split(';')[1].trim(),
+            TrackType.base));
+        String musicFolder = namesContents.split(';').last;
+
+        arenaCups[cupIndex].tracks.last.musicFolder =
+            musicFolder == 'null' ? null : musicFolder;
+      }
+    }
   }
 
   void deleteRow(int cupIndex, int rowIndex) {
@@ -271,6 +339,12 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   }
 
   bool rowChangedValue(RowChangedValue n) {
+    if (n.cupIndex < 0) {
+      //arena stuff
+      print("${n.cupIndex} ${n.rowIndex} ${n.track}");
+      return true;
+    }
+
     cups[n.cupIndex - 1].tracks[n.rowIndex - 1] = n.track;
     return true;
   }
@@ -283,10 +357,12 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         if (n.type == TrackType.base) {
           cups[n.cupIndex - 1]
               .tracks
-              .add(Track('', 11, '11', "-----ADD TRACK-----", n.type));
+              .add(Track('', '11', '11', "-----ADD TRACK-----", n.type));
         }
         if (n.type == TrackType.menu) {
-          cups[n.cupIndex - 1].tracks.add(Track('', 11, '11', "temp", n.type));
+          cups[n.cupIndex - 1]
+              .tracks
+              .add(Track('', '11', '11', "temp", n.type));
         }
         //if i have to insert a basetrack inside a specific submenu
       } else {
@@ -294,7 +370,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         int rightPlace = n.submenuIndex!;
         //print(n.submenuIndex);
         cups[n.cupIndex - 1].tracks.insert(
-            rightPlace, Track('', 11, '11', "-----ADD TRACK-----", n.type));
+            rightPlace, Track('', '11', '11', "-----ADD TRACK-----", n.type));
       }
     });
     //print(cups[n.cupIndex - 1]);
@@ -331,6 +407,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   }
 
   void updateMusicConfig(File configTxt, File musicTxt, bool keepNintendo) {
+    //TODO Add support for battle arena custom music.
     if (!musicTxt.existsSync()) {
       musicTxt.createSync();
     }
@@ -394,6 +471,20 @@ N N$nintendoTracksString | """
         content = content + trackToString(track);
       }
       content = "$content\n";
+    }
+    if (editArena) {
+      //add arena part
+      content += "\n[SETUP-ARENA]\n";
+      int d = 1;
+      for (var cup in arenaCups) {
+        int u = 1;
+        for (var arena in cup.tracks) {
+          content =
+              "$content A$d$u ${arena.slotId} ${arena.musicId} #${arena.name};${arena.path};${arena.musicFolder}\n";
+          u++;
+        }
+        d++;
+      }
     }
     configTxt.writeAsStringSync(content, mode: FileMode.write);
     //print(content);
@@ -578,24 +669,10 @@ N N$nintendoTracksString | """
                             children: [
                               Padding(
                                 padding:
-                                    const EdgeInsets.only(top: 8, right: 100),
+                                    const EdgeInsets.only(top: 8, right: 50),
                                 child: Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      // SizedBox(
-                                      //   height: 50,
-                                      //   width: 200,
-                                      //   child: CheckboxListTile(
-                                      //     value: isEditMode,
-                                      //     activeColor: Colors.red,
-                                      //     title: const Text("Edit Mode"),
-                                      //     onChanged: (value) => {
-                                      //       keepNintendo = value!,
-                                      //       setState(() {})
-                                      //     },
-                                      //   ),
-                                      // ),
-
                                       SizedBox(
                                           height: 30,
                                           width: 115,
@@ -633,7 +710,7 @@ N N$nintendoTracksString | """
                                         margin: const EdgeInsets.only(
                                             left: 20,
                                             right:
-                                                80), // Margine a sinistra di 40 pixel
+                                                20), // Margine a sinistra di 40 pixel
                                         width:
                                             2, // Larghezza della linea verticale
                                         height:
@@ -669,6 +746,19 @@ N N$nintendoTracksString | """
                                           },
                                         ),
                                       ),
+                                      SizedBox(
+                                        height: 50,
+                                        width: 200,
+                                        child: CheckboxListTile(
+                                          value: editArena,
+                                          activeColor: Colors.red,
+                                          title: const Text("Change Arena"),
+                                          onChanged: (value) => {
+                                            editArena = value!,
+                                            setState(() {})
+                                          },
+                                        ),
+                                      ),
                                     ]),
                               ),
                               Visibility(
@@ -695,6 +785,20 @@ N N$nintendoTracksString | """
                                     )),
                               ),
                               const Divider(),
+                              Visibility(
+                                  visible: editArena,
+                                  child: Column(
+                                    children: [
+                                      for (int i = 0; i < arenaCups.length; i++)
+                                        CupTable(
+                                            i + 1 - 2,
+                                            arenaCups[i].cupName,
+                                            arenaCups[i].tracks,
+                                            widget.packPath,
+                                            i + 1 - 2,
+                                            isDisabled: false),
+                                    ],
+                                  )),
                               keepNintendo
                                   ? IgnorePointer(
                                       ignoring: true,
@@ -717,25 +821,25 @@ N N$nintendoTracksString | """
                                                   [
                                                     Track(
                                                         'All Tracks',
-                                                        0,
+                                                        '0',
                                                         '0',
                                                         'Random',
                                                         TrackType.base),
                                                     Track(
                                                         'Original Tracks',
-                                                        0,
+                                                        '0',
                                                         '0',
                                                         'Random',
                                                         TrackType.base),
                                                     Track(
                                                         "Custom Tracks",
-                                                        0,
+                                                        '0',
                                                         '0',
                                                         'Random',
                                                         TrackType.base),
                                                     Track(
                                                         'New Tracks',
-                                                        0,
+                                                        '0',
                                                         '0',
                                                         'Random',
                                                         TrackType.base)

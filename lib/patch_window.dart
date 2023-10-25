@@ -357,12 +357,10 @@ class _PatchWindowState extends State<PatchWindow> {
     final String originalDiscPath = getOriginalDiscPath(packPath);
     final String workspace = path.dirname(path.dirname(packPath));
 
-    //DEBUG ONLY
-    // patchStatus = PatchingStatus.completed;
-    // setState(() {});
-    // return;
-    //END DEBUG ONLY
     //if some track files from config.txt are missing-> abort.
+    //TODO 1)create arenaList= getArenaList() function, which gets all the arena from config.txt
+    //2, add arenaList to trackList.
+    //3 manually copy the arena tracks in Race/Course with the right id.
     List<String> trackList =
         getTracksFilenamesFromConfig(packPath).toSet().toList();
     setState(() {
