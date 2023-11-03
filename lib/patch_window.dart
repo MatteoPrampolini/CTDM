@@ -246,6 +246,19 @@ List<String> getTracksFilenamesFromConfig(String packPath) {
       trackFilenames.add(dirty.split(';')[3].replaceAll(r'"', '').trimLeft());
     }
   }
+
+  if (contents.contains('[SETUP-ARENA]')) {
+    String arenaTxt = contents.split('[SETUP-ARENA]').last;
+
+    List<Cup> arenaCups = parseArenaTxt(arenaTxt);
+    for (Cup cup in arenaCups) {
+      for (Track arena in cup.tracks) {
+        if (arena.path != 'original file') {
+          trackFilenames.add(arena.path);
+        }
+      }
+    }
+  }
   //print(trackFilenames);
   return trackFilenames;
 }
@@ -358,7 +371,7 @@ class _PatchWindowState extends State<PatchWindow> {
     final String workspace = path.dirname(path.dirname(packPath));
 
     //if some track files from config.txt are missing-> abort.
-    //TODO 1)create arenaList= getArenaList() function, which gets all the arena from config.txt
+
     //2, add arenaList to trackList.
     //3 manually copy the arena tracks in Race/Course with the right id.
     List<String> trackList =
@@ -376,6 +389,14 @@ class _PatchWindowState extends State<PatchWindow> {
     }
 
     //create folders structure
+    String configTxtContents =
+        File(path.join(packPath, 'config.txt')).readAsStringSync();
+    List<Cup> arenaCups = [];
+    if (configTxtContents.contains('[SETUP-ARENA]')) {
+      arenaCups = parseArenaTxt(configTxtContents.split('[SETUP-ARENA]').last);
+    } else {
+      arenaCups = getArenaCups();
+    }
     createFolders(packPath);
 
     List<bool> customUI = loadUIconfig(packPath);
@@ -513,7 +534,21 @@ class _PatchWindowState extends State<PatchWindow> {
         throw Exception("Bad config.txt");
       }
     }
-
+    //ovveride arena tracks
+    int i = 0;
+    for (Cup cup in arenaCups) {
+      int j = 0;
+      for (Track arena in cup.tracks) {
+        if (arena.path != 'original file') {
+          await File(path.join(
+                  path.join(workspace, 'myTracks'), "${arena.path}.szs"))
+              .copy(path.join(packPath, 'Race', 'Course',
+                  "${getIdFromArenaCupTrack(i, j)}.szs"));
+        }
+        j++;
+      }
+      i++;
+    }
     //move main.dol and patch it with gecko codes
     //create gecko codes (.gct files)
     setState(() {

@@ -35,7 +35,6 @@ Track parseTrackLine(String trackLine) {
         tmp.slotId = RegExp('[0-9]+').stringMatch(param)!;
         break;
       case 2:
-        //TODO NEW https://wiki.tockdom.com/wiki/LE-CODE/Distribution_Tutorial/LE-DEF#flags
         switch (param.trim()) {
           case "0x00":
             tmp.type = TrackType.base;
@@ -145,6 +144,36 @@ List<Cup> getArenaCups() {
   return arena;
 }
 
+List<Cup> parseArenaTxt(String contents) {
+  List<Cup> arenaCupsTmp = getArenaCups();
+  arenaCupsTmp[0].tracks.clear();
+  arenaCupsTmp[1].tracks.clear();
+  List<String> lines = contents.trim().split('\n');
+
+  int cupIndex = 0;
+  for (String line in lines) {
+    if (line.trim().startsWith('A1')) {
+      cupIndex = 0;
+    } else {
+      cupIndex = 1;
+    }
+    String slotsContent = line.split('#').first.trim();
+    String namesContents = line.split('#')[1];
+
+    arenaCupsTmp[cupIndex].tracks.add(Track(
+        namesContents.split(';').first.trim(),
+        slotsContent.split(' ')[1],
+        slotsContent.split(' ')[2],
+        namesContents.split(';')[1],
+        TrackType.base));
+    String musicFolder = namesContents.split(';').last;
+
+    arenaCupsTmp[cupIndex].tracks.last.musicFolder =
+        musicFolder == 'null' ? null : musicFolder;
+  }
+  return arenaCupsTmp;
+}
+
 class TrackConfigGui extends StatefulWidget {
   final String packPath;
   const TrackConfigGui(this.packPath, {super.key});
@@ -182,8 +211,19 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     File musicTxt = File(path.join(packPath, 'music.txt'));
     if (!musicTxt.existsSync()) return;
 
-    for (String line in musicTxt.readAsLinesSync()) {
+    List<String> musicLines = musicTxt.readAsLinesSync();
+
+    for (String line in musicLines) {
       String hex = line.substring(0, 3);
+      int dec = int.parse(hex, radix: 16);
+      if (dec >= 32 && dec < 42) {
+        int cupIndex = dec > 36 ? 1 : 0;
+
+        arenaCups[cupIndex].tracks[(dec - 32) % 5].musicFolder =
+            line.substring(4);
+        continue;
+      }
+
       int i = keepNintendo ? 32 : 0;
       for (Cup cup in cups) {
         // if (i == 32) {
@@ -198,7 +238,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
             i = 68;
           }
 
-          if (int.parse(hex, radix: 16) == i) {
+          if (dec == i) {
             track.musicFolder = line.substring(4);
           }
 
@@ -245,7 +285,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       editArena = true;
       arenaTxt = contents.split('[SETUP-ARENA]').last;
       contents = contents.split('[SETUP-ARENA]').first;
-      parseArenaTxt(arenaTxt);
+      arenaCups = parseArenaTxt(arenaTxt);
     }
 
     if (contents.contains(r'N$SWAP')) {
@@ -263,7 +303,6 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         .split("\n")
         .where((element) => element.startsWith('C'))
         .toList();
-    print(cupList);
 
     cupList.removeAt(0);
 
@@ -279,40 +318,6 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       i++;
     }
     this.cups = cups;
-  }
-
-  void parseArenaTxt(String contents) {
-    if (editArena == true && contents == "") {
-      arenaCups = getArenaCups();
-    } else {
-      print(arenaCups.length);
-
-      arenaCups[0].tracks.clear();
-      arenaCups[1].tracks.clear();
-      List<String> lines = contents.trim().split('\n');
-
-      int cupIndex = 0;
-      for (String line in lines) {
-        if (line.trim().startsWith('A1')) {
-          cupIndex = 0;
-        } else {
-          cupIndex = 1;
-        }
-        String slotsContent = line.split('#').first.trim();
-        String namesContents = line.split('#')[1].trim();
-
-        arenaCups[cupIndex].tracks.add(Track(
-            namesContents.split(';').first.trim(),
-            slotsContent.split(' ')[1],
-            slotsContent.split(' ')[2],
-            namesContents.split(';')[1].trim(),
-            TrackType.base));
-        String musicFolder = namesContents.split(';').last;
-
-        arenaCups[cupIndex].tracks.last.musicFolder =
-            musicFolder == 'null' ? null : musicFolder;
-      }
-    }
   }
 
   void deleteRow(int cupIndex, int rowIndex) {
@@ -341,7 +346,8 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   bool rowChangedValue(RowChangedValue n) {
     if (n.cupIndex < 0) {
       //arena stuff
-      print("${n.cupIndex} ${n.rowIndex} ${n.track}");
+
+      arenaCups[n.cupIndex + 2].tracks[n.rowIndex - 1] = n.track;
       return true;
     }
 
@@ -403,11 +409,11 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     //createConfigFile(widget.packPath);
 
     updateConfigContent(cups, configTxt, keepNintendo, wiimsCup);
-    updateMusicConfig(configTxt, musicTxt, keepNintendo);
+    updateMusicConfig(configTxt, musicTxt, keepNintendo, editArena);
   }
 
-  void updateMusicConfig(File configTxt, File musicTxt, bool keepNintendo) {
-    //TODO Add support for battle arena custom music.
+  void updateMusicConfig(
+      File configTxt, File musicTxt, bool keepNintendo, bool editArena) {
     if (!musicTxt.existsSync()) {
       musicTxt.createSync();
     }
@@ -433,6 +439,19 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         }
 
         i++;
+      }
+    }
+    if (editArena) {
+      i = 32;
+      for (var cup in arenaCups) {
+        for (Track arena in cup.tracks) {
+          if (arena.musicFolder != null &&
+              arena.musicFolder != 'original file') {
+            content +=
+                "${i.toRadixString(16).padLeft(3, '0')};${arena.musicFolder!}\n";
+          }
+          i++;
+        }
       }
     }
     musicTxt.writeAsStringSync(content, mode: FileMode.write);
@@ -493,7 +512,6 @@ N N$nintendoTracksString | """
   String trackToString(Track track) {
     String typeLetter = "";
     String code = "";
-    //TODO NEW https://wiki.tockdom.com/wiki/LE-CODE/Distribution_Tutorial/LE-DEF#flags
     switch (track.type) {
       case TrackType.base:
         typeLetter = "T";
@@ -791,11 +809,11 @@ N N$nintendoTracksString | """
                                     children: [
                                       for (int i = 0; i < arenaCups.length; i++)
                                         CupTable(
-                                            i + 1 - 2,
+                                            i - 2,
                                             arenaCups[i].cupName,
                                             arenaCups[i].tracks,
                                             widget.packPath,
-                                            i + 1 - 2,
+                                            i - 2,
                                             isDisabled: false),
                                     ],
                                   )),

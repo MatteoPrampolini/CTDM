@@ -44,3 +44,42 @@ Map<String, String> battleMap = {
   "old_CookieLand_gc": "GCN Cookie Land",
   "old_House_ds": "DS Twilight House",
 };
+
+String getIdFromArenaCupTrack(int cup, int index) {
+  //see: https://wiki.tockdom.com/wiki/Slot
+  int uniqueIndex = cup * 5 + index;
+  String returnValue = "";
+  switch (uniqueIndex) {
+    case 0:
+      returnValue = "021";
+      break;
+    case 1:
+      returnValue = "020";
+      break;
+    case 2:
+      returnValue = "023";
+      break;
+    case 3:
+      returnValue = "022";
+      break;
+    case 4:
+      returnValue = "024";
+      break;
+    case 5:
+      returnValue = "027";
+      break;
+    case 6:
+      returnValue = "028";
+      break;
+    case 7:
+      returnValue = "029";
+      break;
+    case 8:
+      returnValue = "25";
+      break;
+    case 9:
+      returnValue = "26";
+      break;
+  }
+  return returnValue;
+}
