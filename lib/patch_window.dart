@@ -1241,8 +1241,6 @@ class _PatchWindowState extends State<PatchWindow> {
 //replace Vanilla Names with Custom names in Common.bmg from config.txt
 String replaceCustomArenaNames(
     String trackBmgTxtContents, List<Cup> arenaCups) {
-  print(trackBmgTxtContents);
-
   int i = 0;
 
   for (Cup cup in arenaCups) {

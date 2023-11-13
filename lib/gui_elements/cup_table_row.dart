@@ -193,7 +193,6 @@ class _CupTableRowState extends State<CupTableRow> {
                   child: TextField(
                 controller: trackslotTextField,
                 onChanged: (value) {
-                  print(value);
                   RegExp regex = widget.cupIndex > 0
                       ? RegExp(r'^[1-8][1-4]$')
                       : RegExp(r'^A[1-2]?[1-5]?$');

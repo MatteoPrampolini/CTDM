@@ -28,6 +28,7 @@ class _MusicEditorState extends State<MusicEditor> {
   FilePickerResult? musicFileResult;
   bool addFileVisibile = false;
   bool _isConverting = false;
+  double volume = 100;
   //File? file;
   @override
   void initState() {
@@ -148,19 +149,50 @@ class _MusicEditorState extends State<MusicEditor> {
                 ],
               ))
             : Stack(children: [
-                // Padding(
-                //   padding: const EdgeInsets.only(top: 20.0),
-                //   child: Align(
-                //     alignment: Alignment.topCenter,
-                //     child: Text("myMusic",
-                //         textAlign: TextAlign.center,
-                //         style: TextStyle(
-                //             fontSize: Theme.of(context)
-                //                 .textTheme
-                //                 .headlineMedium
-                //                 ?.fontSize)),
-                //   ),
-                // ),
+                Positioned(
+                  right: 20,
+                  top: 20,
+                  width: 40,
+                  height: 240,
+                  child: RotatedBox(
+                    quarterTurns: 3,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const RotatedBox(
+                            quarterTurns: 1,
+                            child: Icon(
+                              Icons.volume_off,
+                              color: Colors.white70,
+                            )),
+                        Slider(
+                            min: 0,
+                            max: 100,
+                            value: volume,
+                            onChangeEnd: (value) {
+                              doublePlayerKey.currentState
+                                  ?.setVolume(volume.toInt());
+                              setState(() {
+                                volume = value;
+                              });
+                            },
+                            onChanged: (newValue) {
+                              setState(
+                                () {
+                                  volume = newValue;
+                                },
+                              );
+                            }),
+                        const RotatedBox(
+                            quarterTurns: 1,
+                            child: Icon(
+                              Icons.volume_up,
+                              color: Colors.white70,
+                            )),
+                      ],
+                    ),
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.only(top: 10.0),
                   child: Container(
@@ -193,7 +225,8 @@ class _MusicEditorState extends State<MusicEditor> {
                             addFileVisibile = false,
                             selectedFolder = i,
                             doublePlayerKey.currentState?.selectedFileChange(
-                                folderList[selectedFolder].path),
+                                folderList[selectedFolder].path,
+                                volume: volume.toInt()),
                             setState(() => {})
                           },
                         ),

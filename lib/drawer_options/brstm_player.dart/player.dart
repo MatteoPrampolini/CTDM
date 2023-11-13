@@ -34,7 +34,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
   double zoomMolt = 2.5;
   final TextEditingController _loopStartController = TextEditingController();
   bool _loopIsValid = false;
-
+  int volume = 100;
   @override
   void dispose() {
     mpv.quit();
@@ -108,6 +108,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
     if (!mpv.getRunningState()) {
       await mpv.start(hangIndefinitely: true);
       await Future.delayed(const Duration(milliseconds: 300));
+      await mpv.volume(volume);
       // await mpv.loadFile(file.getFilePath()!);
       // _isFileLoaded = true;
       // if (audioTimelineKey.currentState!.sliderValue > 0) {

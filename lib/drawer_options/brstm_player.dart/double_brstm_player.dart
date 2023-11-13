@@ -21,7 +21,7 @@ class DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
 
   @override
   void initState() {
-    selectedFileChange(widget.folderPath);
+    selectedFileChange(widget.folderPath, volume: 100);
     updateFileList(widget.folderPath);
     super.initState();
   }
@@ -31,7 +31,15 @@ class DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
     super.dispose();
   }
 
-  selectedFileChange(String subFolderPath) async {
+  Future<void> setVolume(int volume) async {
+    brstmPlayerKey1.currentState?.volume = volume;
+    brstmPlayerKey2.currentState?.volume = volume;
+
+    await brstmPlayerKey1.currentState?.mpv.volume(volume);
+    await brstmPlayerKey2.currentState?.mpv.volume(volume);
+  }
+
+  selectedFileChange(String subFolderPath, {int? volume}) async {
     updateFileList(subFolderPath);
 
     if (fileList.isNotEmpty) {
@@ -42,6 +50,9 @@ class DoubleBrstmPlayerState extends State<DoubleBrstmPlayer> {
     }
     // brstmPlayerKey1.currentState?.reloadFile();
     // brstmPlayerKey2.currentState?.reloadFile();
+    if (volume != null) {
+      setVolume(volume);
+    }
     setState(() {});
   }
 
