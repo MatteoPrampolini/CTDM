@@ -176,9 +176,6 @@ void createFolders(String packPath) {
 
 String replaceCommonBmgTextWithVanillaNames(
     String contents, bool keepNintendo) {
-  //contents = contents.split(RegExp(r'6800.= '))[1];
-  //List<String> lines = contents.split('\n');
-  //print(tracksDirty);
   if (keepNintendo) {
     List<Cup> nintendoCups = getNintendoCups();
     int id = 6800;
@@ -706,6 +703,10 @@ class _PatchWindowState extends State<PatchWindow> {
     String trackBmgTxtContents = await trackBmgTxt.readAsString();
     trackBmgTxtContents =
         replaceCommonBmgTextWithVanillaNames(trackBmgTxtContents, keepNintendo);
+
+    trackBmgTxtContents =
+        replaceCustomArenaNames(trackBmgTxtContents, arenaCups);
+
     File customCharTxtFile = File(path.join(packPath, 'characters.txt'));
     String customFileTxtContents = await customCharTxtFile.exists()
         ? await customCharTxtFile.readAsString()
@@ -1237,6 +1238,28 @@ class _PatchWindowState extends State<PatchWindow> {
   }
 }
 
+//replace Vanilla Names with Custom names in Common.bmg from config.txt
+String replaceCustomArenaNames(
+    String trackBmgTxtContents, List<Cup> arenaCups) {
+  print(trackBmgTxtContents);
+
+  int i = 0;
+
+  for (Cup cup in arenaCups) {
+    int j = 0;
+    for (Track track in cup.tracks) {
+      String arenaId = getIdFromArenaCupTrack(i, j);
+
+      trackBmgTxtContents =
+          replaceTrackName(trackBmgTxtContents, "7$arenaId", track.name);
+      j++;
+    }
+    i++;
+  }
+
+  return trackBmgTxtContents;
+}
+
 Future<File> extractSzsAndDecode(
     String packPath, Directory parentDir, String basename) async {
   String dirPath = path.join(parentDir.path, "$basename.d");
@@ -1355,4 +1378,21 @@ class AfterPatchOptions extends StatelessWidget {
       },
     );
   }
+}
+
+String replaceTrackName(
+    String trackBmgTxtContents, String arenaId, String trackName) {
+  List<String> lines = trackBmgTxtContents.split('\n');
+
+  RegExp r = RegExp(r'^\s*' + arenaId + r'.*=');
+  for (int i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith(r)) {
+      lines[i] = ' $arenaId = $trackName';
+
+      break;
+    }
+  }
+
+  String modifiedContents = lines.join('\n');
+  return modifiedContents;
 }
