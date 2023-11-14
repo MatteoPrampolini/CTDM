@@ -17,6 +17,65 @@ List<Track> splitCupListsFromText(String str) {
   return trackList;
 }
 
+List<Track> sortTracks(List<Track> allTracks) {
+  List<Track> sortedTracks = [];
+
+  for (Track track in allTracks) {
+    if (track.type == TrackType.hidden) {
+      continue;
+    }
+
+    if (track.type == TrackType.menu) {
+      int insertIndex = sortedTracks.indexWhere((sortedTrack) =>
+          sortedTrack.type != TrackType.hidden &&
+          track.name.toLowerCase().compareTo(sortedTrack.name.toLowerCase()) <
+              0);
+      if (insertIndex == -1) {
+        sortedTracks.add(track);
+      } else {
+        sortedTracks.insert(insertIndex, track);
+      }
+
+      List<Track> hiddenTracksToAdd = [];
+      for (int i = allTracks.indexOf(track) + 1; i < allTracks.length; i++) {
+        Track nextTrack = allTracks[i];
+        if (nextTrack.type == TrackType.hidden) {
+          hiddenTracksToAdd.add(nextTrack);
+        } else {
+          break;
+        }
+      }
+      sortedTracks.insertAll(
+          sortedTracks.indexOf(track) + 1, hiddenTracksToAdd);
+    } else {
+      int insertIndex = sortedTracks.indexWhere((sortedTrack) =>
+          sortedTrack.type != TrackType.hidden &&
+          track.name.toLowerCase().compareTo(sortedTrack.name.toLowerCase()) <
+              0);
+      if (insertIndex == -1) {
+        sortedTracks.add(track);
+      } else {
+        sortedTracks.insert(insertIndex, track);
+      }
+    }
+  }
+
+  return sortedTracks;
+}
+
+Track pathToTrack(String filename) {
+  return Track(path.basenameWithoutExtension(filename), '11', '11',
+      path.basenameWithoutExtension(filename), TrackType.base);
+}
+
+List<Track> folderToTrackList(Directory dir) {
+  List<Track> allTracks = [];
+  for (File file in dir.listSync().whereType<File>()) {
+    allTracks.add(pathToTrack(file.path));
+  }
+  return sortTracks(allTracks);
+}
+
 Track parseTrackLine(String trackLine) {
   Track tmp = Track('', '0', '0', '', TrackType.base);
   int i = 0;
@@ -288,7 +347,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
       arenaCups = parseArenaTxt(arenaTxt);
     }
 
-    if (contents.contains(r'N$SWAP')) {
+    if (contents.contains(r'N$SWAP') || contents.contains(r'N$SHOW')) {
       keepNintendo = true;
     }
     if (contents.contains(r'%WIIMM-CUP = 1')) {
@@ -322,6 +381,21 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
   void deleteRow(int cupIndex, int rowIndex) {
     cups[cupIndex - 1].tracks.removeAt(rowIndex - 1);
+    setState(() {});
+  }
+
+  void bulkImport() {
+    List<Track> allTracks = folderToTrackList(Directory(
+        path.join(path.dirname(path.dirname(widget.packPath)), 'myTracks')));
+
+    cups.clear();
+    print(allTracks.length);
+    int i = 0;
+    for (i; i < (allTracks.length - 4) ~/ 4; i++) {
+      cups.add(Cup('Cup #${i + 1}', allTracks.sublist(4 * i, 4 * i + 4)));
+    }
+    i++;
+    cups.add(Cup('Cup #${i + 1}', allTracks.sublist(4 * i)));
     setState(() {});
   }
 
@@ -574,52 +648,6 @@ N N$nintendoTracksString | """
     cups.removeWhere((element) => element.tracks.isEmpty);
   }
 
-  List<Track> sortTracks(List<Track> allTracks) {
-    List<Track> sortedTracks = [];
-
-    for (Track track in allTracks) {
-      if (track.type == TrackType.hidden) {
-        continue;
-      }
-
-      if (track.type == TrackType.menu) {
-        int insertIndex = sortedTracks.indexWhere((sortedTrack) =>
-            sortedTrack.type != TrackType.hidden &&
-            track.name.toLowerCase().compareTo(sortedTrack.name.toLowerCase()) <
-                0);
-        if (insertIndex == -1) {
-          sortedTracks.add(track);
-        } else {
-          sortedTracks.insert(insertIndex, track);
-        }
-
-        List<Track> hiddenTracksToAdd = [];
-        for (int i = allTracks.indexOf(track) + 1; i < allTracks.length; i++) {
-          Track nextTrack = allTracks[i];
-          if (nextTrack.type == TrackType.hidden) {
-            hiddenTracksToAdd.add(nextTrack);
-          } else {
-            break;
-          }
-        }
-        sortedTracks.insertAll(
-            sortedTracks.indexOf(track) + 1, hiddenTracksToAdd);
-      } else {
-        int insertIndex = sortedTracks.indexWhere((sortedTrack) =>
-            sortedTrack.type != TrackType.hidden &&
-            track.name.toLowerCase().compareTo(sortedTrack.name.toLowerCase()) <
-                0);
-        if (insertIndex == -1) {
-          sortedTracks.add(track);
-        } else {
-          sortedTracks.insert(insertIndex, track);
-        }
-      }
-    }
-
-    return sortedTracks;
-  }
-
   void _debugReplace() {
     for (var i = 0; i < cups.length; i++) {
       for (var j = 0; j < cups[i].tracks.length; j++) {
@@ -669,6 +697,20 @@ N N$nintendoTracksString | """
         ),
         body: Stack(
           children: [
+            Visibility(
+                visible: cups.isEmpty,
+                child: Center(
+                    child: ElevatedButton(
+                        style: const ButtonStyle(
+                            fixedSize: MaterialStatePropertyAll(Size(200, 100)),
+                            backgroundColor:
+                                MaterialStatePropertyAll(Colors.amber)),
+                        onPressed: () => {bulkImport()},
+                        child: const Text(
+                          "Import all myTracks",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 20, color: Colors.black87),
+                        )))),
             SingleChildScrollView(
               controller: AdjustableScrollController(80),
               child: NotificationListener<RowChangedValue>(
