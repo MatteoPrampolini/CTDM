@@ -57,20 +57,20 @@ class _LparConfigState extends State<LparConfig> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: Text("Graphics not implemented yet, WIP",
-                  style: TextStyle(
-                      fontSize:
-                          Theme.of(context).textTheme.headlineMedium?.fontSize,
-                      color: Colors.white54),
-                  textAlign: TextAlign.center),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(top: 20.0),
+            //   child: Text("Graphics not implemented yet, WIP",
+            //       style: TextStyle(
+            //           fontSize:
+            //               Theme.of(context).textTheme.headlineMedium?.fontSize,
+            //           color: Colors.white54),
+            //       textAlign: TextAlign.center),
+            // ),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Please edit lpar.txt manually, sorry."),
+                  const Text("Please edit lpar.txt manually."),
                   Padding(
                     padding: const EdgeInsets.only(top: 12.0),
                     child: ElevatedButton(

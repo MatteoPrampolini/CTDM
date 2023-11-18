@@ -389,7 +389,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         path.join(path.dirname(path.dirname(widget.packPath)), 'myTracks')));
 
     cups.clear();
-    print(allTracks.length);
+
     int i = 0;
     for (i; i < (allTracks.length) ~/ 4; i++) {
       if (4 * i + 4 > allTracks.length) {

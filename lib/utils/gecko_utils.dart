@@ -15,8 +15,10 @@ class Gecko {
   String desc;
   String baseName;
   bool mandatory;
+  bool canBeToggled;
   Gecko(this.name, this.pal, this.usa, this.kor, this.jap, this.author,
-      this.desc, this.baseName, this.mandatory);
+      this.desc, this.baseName, this.mandatory,
+      {this.canBeToggled = false});
 
   @override
   String toString() {
@@ -105,7 +107,8 @@ void updateGtcFiles(String packPath, File geckoTxt) {
 
   List<String> cheatsFiles = geckoTxt.readAsLinesSync();
   for (String filepath in cheatsFiles) {
-    File tmp = File(path.join(packPath, "..", "..", "myCodes", filepath));
+    File tmp = File(path.join(
+        packPath, "..", "..", "myCodes", filepath.replaceAll(";toggle", "")));
     if (tmp.existsSync()) {
       myGeckoFiles.add(tmp);
     } else {
@@ -149,7 +152,7 @@ Gecko fileToGeckoCode(File jsonFile) {
       json['JAP'],
       json['author'],
       json['desc'],
-      path.basename(jsonFile.path),
+      path.basename(jsonFile.path.replaceAll(";toggle", "")),
       json['name'] == "Automatic BRSAR Patching" ||
           json['name'] == "Track Music Expander");
 }
@@ -230,10 +233,14 @@ List<Gecko> parseGeckoTxt(String packPath, File geckoTxt) {
 
   List<String> cheatsFiles = geckoTxt.readAsLinesSync();
   for (String filepath in cheatsFiles) {
-    File tmp = File(path.join(packPath, "..", "..", "myCodes", filepath));
+    File tmp = File(path.join(
+        packPath, "..", "..", "myCodes", filepath.replaceAll(";toggle", "")));
     if (tmp.existsSync()) {
       //print(tmp);
       list.add(fileToGeckoCode(tmp));
+      if (filepath.contains(";toggle")) {
+        list.last.canBeToggled = true;
+      }
     }
   }
   return list;
@@ -243,8 +250,13 @@ writeGeckoTxt(List<Gecko> cheats, File geckoTxt) {
   if (!geckoTxt.existsSync()) createGeckoTxt(path.dirname(geckoTxt.path));
 
   String contents = "";
+
   for (Gecko cheat in cheats) {
-    contents += "${cheat.baseName}\n";
+    if (!cheat.canBeToggled) {
+      contents += "${cheat.baseName}\n";
+    } else {
+      contents += "${cheat.baseName};toggle\n";
+    }
   }
   geckoTxt.writeAsStringSync(contents, mode: FileMode.write);
 }

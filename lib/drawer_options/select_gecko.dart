@@ -5,16 +5,10 @@ import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
-List<bool> generateSelectedOptions(
+List<bool> readSelectedOptionsForPack(
     List<Gecko> geckoListAll, List<Gecko> geckoListSelected) {
   List<bool> selectedOptions = List.filled(geckoListAll.length, false);
 
-  // for (var gecko in geckoListSelected) {
-  //   int index = geckoListAll.indexOf(gecko);
-  //   if (index != -1) {
-  //     selectedOptions[index] = true;
-  //   }
-  // }
   int index = 0;
   for (var gecko in geckoListAll) {
     if (geckoListSelected.contains(gecko)) {
@@ -23,6 +17,19 @@ List<bool> generateSelectedOptions(
     index++;
   }
   return selectedOptions;
+}
+
+List<bool> getToggableList(List<Gecko> geckoListAll, List<Gecko> geckoList) {
+  List<bool> togglable = List.filled(geckoListAll.length, false);
+
+  int index = 0;
+  for (var gecko in geckoList) {
+    if (gecko.canBeToggled && geckoList.contains(gecko)) {
+      togglable[index] = true;
+    }
+    index++;
+  }
+  return togglable;
 }
 
 List<Gecko> updateGeckoListSelected(
@@ -50,7 +57,7 @@ class _SelectGeckoState extends State<SelectGecko> {
   late List<Gecko> geckoListAll = getCodes();
   // ignore: prefer_final_fields
   late List<bool> _selectedOptions;
-
+  late List<bool> _optionalList;
   @override
   void initState() {
     super.initState();
@@ -69,21 +76,38 @@ class _SelectGeckoState extends State<SelectGecko> {
 
   @override
   Widget build(BuildContext context) {
-    //print(geckoList);
+    int i = 0;
     geckoListAll = getCodes();
+
+    _selectedOptions = List.filled(geckoListAll.length, false);
+    _optionalList = List.filled(geckoListAll.length, false);
+
     late List<String> cheatsNameFromConfig =
         File(path.join(widget.packPath, 'gecko.txt')).readAsLinesSync();
+
+    for (int i = 0; i < cheatsNameFromConfig.length; i++) {
+      cheatsNameFromConfig[i] =
+          cheatsNameFromConfig[i].replaceAll(";toggle", "");
+    }
+
     List<String> missingGecko = cheatsNameFromConfig
         .where((element) =>
-            geckoListAll.map((e) => e.baseName).contains(element) == false)
+            geckoListAll
+                .map((e) => e.baseName)
+                .contains(element.replaceAll(";toggle", "")) ==
+            false)
         .toList();
 
-    _selectedOptions = generateSelectedOptions(
-        geckoListAll,
-        parseGeckoTxt(
-            widget.packPath, File(path.join(widget.packPath, 'gecko.txt'))));
+    List<Gecko> geckoSelectedFromTxt = parseGeckoTxt(
+        widget.packPath, File(path.join(widget.packPath, 'gecko.txt')));
+
     _selectedOptions[0] = true;
     _selectedOptions[1] = true;
+    _selectedOptions =
+        readSelectedOptionsForPack(geckoListAll, geckoSelectedFromTxt);
+
+    _optionalList = getToggableList(geckoListAll, geckoSelectedFromTxt);
+
     return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -111,7 +135,8 @@ class _SelectGeckoState extends State<SelectGecko> {
             child: Padding(
               padding: const EdgeInsets.only(top: 100.0),
               child: SizedBox(
-                width: 600,
+                width: 800,
+                height: 600,
                 child: Column(
                   children: [
                     Container(
@@ -123,7 +148,17 @@ class _SelectGeckoState extends State<SelectGecko> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                               Text("Name"),
-                              Text("Enabled"),
+                              SizedBox(
+                                width: 300,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text("Enabled"),
+                                    Text("Togglable"),
+                                  ],
+                                ),
+                              ),
                             ]))),
                     Expanded(
                       child: ListView.builder(
@@ -132,49 +167,133 @@ class _SelectGeckoState extends State<SelectGecko> {
                         itemCount: _selectedOptions.length,
                         itemBuilder: (BuildContext context, int index) {
                           return Container(
+                            height: 50,
                             decoration: BoxDecoration(
                               border: Border.all(),
                               color: Colors.amberAccent,
                             ),
-                            child: ListTile(
-                              title: Text(
-                                geckoListAll[index].name,
-                                style: const TextStyle(color: Colors.black87),
-                              ),
-                              trailing: Checkbox(
-                                fillColor: MaterialStateColor.resolveWith(
-                                  (Set<MaterialState> states) {
-                                    if (states
-                                        .contains(MaterialState.disabled)) {
-                                      return Colors.black54;
-                                    }
-                                    if (states
-                                        .contains(MaterialState.selected)) {
-                                      return Colors.redAccent;
-                                    }
-                                    return Colors.redAccent.withOpacity(0.2);
-                                  },
-                                ),
-                                side: const BorderSide(color: Colors.black87),
-                                value: _selectedOptions[index],
-                                onChanged: index < 2
-                                    ? null
-                                    : (value) => {
-                                          if (index > 1)
-                                            {
-                                              _selectedOptions[index] = value!,
-                                              writeGeckoTxt(
-                                                  updateGeckoListSelected(
-                                                      geckoListAll,
-                                                      _selectedOptions),
-                                                  File(path.join(
-                                                      widget.packPath,
-                                                      'gecko.txt'))),
-                                              setState(() {})
-                                            }
-                                        },
-                              ),
-                            ),
+                            child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(
+                                      geckoListAll[index].name,
+                                      style: const TextStyle(
+                                          color: Colors.black87, fontSize: 18),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 300,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Checkbox(
+                                          fillColor:
+                                              MaterialStateColor.resolveWith(
+                                            (Set<MaterialState> states) {
+                                              if (states.contains(
+                                                  MaterialState.disabled)) {
+                                                return Colors.black54;
+                                              }
+                                              if (states.contains(
+                                                  MaterialState.selected)) {
+                                                return Colors.redAccent;
+                                              }
+                                              return Colors.redAccent
+                                                  .withOpacity(0.2);
+                                            },
+                                          ),
+                                          side: const BorderSide(
+                                              color: Colors.black87),
+                                          value: _selectedOptions[index],
+                                          onChanged: index < 2
+                                              ? null
+                                              : (value) => {
+                                                    if (index > 1)
+                                                      {
+                                                        _selectedOptions[
+                                                            index] = value!,
+                                                        for (i = 0;
+                                                            i <
+                                                                geckoListAll
+                                                                    .length;
+                                                            i++)
+                                                          {
+                                                            geckoListAll[i]
+                                                                    .canBeToggled =
+                                                                _optionalList[i]
+                                                          },
+                                                        writeGeckoTxt(
+                                                            updateGeckoListSelected(
+                                                                geckoListAll,
+                                                                _selectedOptions),
+                                                            File(path.join(
+                                                                widget.packPath,
+                                                                'gecko.txt'))),
+                                                        setState(() {})
+                                                      }
+                                                  },
+                                        ),
+                                        Checkbox(
+                                          fillColor:
+                                              MaterialStateColor.resolveWith(
+                                            (Set<MaterialState> states) {
+                                              if (states.contains(
+                                                  MaterialState.disabled)) {
+                                                return Colors.black54;
+                                              }
+                                              if (states.contains(
+                                                  MaterialState.selected)) {
+                                                return Colors.redAccent;
+                                              }
+                                              return Colors.redAccent
+                                                  .withOpacity(0.2);
+                                            },
+                                          ),
+                                          side: const BorderSide(
+                                              color: Colors.black87),
+                                          value: _optionalList[index],
+                                          onChanged: index < 2
+                                              ? null
+                                              : (value) => {
+                                                    if (index > 1)
+                                                      {
+                                                        _optionalList[index] =
+                                                            value!,
+                                                        for (i = 0;
+                                                            i <
+                                                                geckoListAll
+                                                                    .length;
+                                                            i++)
+                                                          {
+                                                            geckoListAll[i]
+                                                                    .canBeToggled =
+                                                                _optionalList[i]
+                                                          },
+                                                        geckoSelectedFromTxt =
+                                                            updateGeckoListSelected(
+                                                                geckoListAll,
+                                                                _selectedOptions),
+                                                        writeGeckoTxt(
+                                                            updateGeckoListSelected(
+                                                                geckoListAll,
+                                                                _selectedOptions),
+                                                            File(path.join(
+                                                                widget.packPath,
+                                                                'gecko.txt'))),
+                                                        setState(() {})
+                                                      }
+                                                  },
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ]),
                           );
                         },
                       ),

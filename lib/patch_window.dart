@@ -541,6 +541,10 @@ class _PatchWindowState extends State<PatchWindow> {
                   path.join(workspace, 'myTracks'), "${arena.path}.szs"))
               .copy(path.join(packPath, 'Race', 'Course',
                   "${getIdFromArenaCupTrack(i, j)}.szs"));
+          await File(path.join(
+                  path.join(workspace, 'myTracks'), "${arena.path}.szs"))
+              .copy(path.join(packPath, 'Race', 'Course',
+                  "${getIdFromArenaCupTrack(i, j)}_d.szs"));
         }
         j++;
       }
