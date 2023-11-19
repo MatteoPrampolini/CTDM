@@ -5,8 +5,8 @@
 	</id>
 	<options>
 		<section name="PACKNAME">
-		  <option name="Enable">
-			  <choice name="PACKNAME"><patch id="PACKID"/></choice>
+		  <option name="PACKNAME">
+			  <choice name="Enable"><patch id="PACKID"/></choice>
 		  </option>
 		</section>
 	  </options>

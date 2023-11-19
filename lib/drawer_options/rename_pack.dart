@@ -7,6 +7,61 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import 'dart:convert';
 
+String addPatch(String name, String contents) {
+  Map<String, dynamic> jsonContent = json.decode(contents);
+
+  List<dynamic> patches = jsonContent['riivolution']['patches'];
+
+  int patchIndex = -1;
+  for (int i = 0; i < patches.length; i++) {
+    if (patches[i].containsKey('options')) {
+      patchIndex = i;
+      break;
+    }
+  }
+
+  List<dynamic> options =
+      patchIndex != -1 ? patches[patchIndex]['options'] : [];
+
+  options.add({
+    "choice": 1,
+    "option-name": "Enable",
+    "section-name": name,
+  });
+
+  if (patchIndex != -1) {
+    patches[patchIndex]['options'] = options;
+  } else {
+    Map<String, dynamic> newPatch = {
+      "options": options,
+      "root": "C:\\Users\\matte\\Documents\\CT_test\\CTDM_workspace/Packs/",
+      "xml":
+          "C:\\Users\\matte\\Documents\\CT_test\\CTDM_workspace\\Packs\\multipatch/multipatch.xml",
+    };
+    patches.add(newPatch);
+  }
+
+  jsonContent['riivolution']['patches'] = patches;
+
+  return json.encode(jsonContent);
+}
+
+String clearPatches(String contents) {
+  Map<String, dynamic> jsonContent = json.decode(contents);
+
+  List<dynamic> patches = jsonContent['riivolution']['patches'];
+
+  for (var patch in patches) {
+    if (patch.containsKey('options') && patch['options'].length > 1) {
+      patch['options'] = [patch['options'].first];
+    }
+  }
+
+  jsonContent['riivolution']['patches'] = patches;
+
+  return json.encode(jsonContent);
+}
+
 void replaceJsonValues(
     Map<dynamic, dynamic> jsonMap, Map<String, dynamic> replacements) {
   jsonMap.forEach((key, value) {

@@ -54,6 +54,7 @@ dependencies:
   desktop_drop: ^0.4.3
   dotted_border: ^2.0.0+3
   flutter_xlider: ^3.5.0
+  xml: ^6.3.0
 
 dev_dependencies:
   flutter_lints: ^2.0.1

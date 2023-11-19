@@ -116,7 +116,7 @@ void updateGtcFiles(String packPath, File geckoTxt) {
           "gecko.txt contains cheat: $filepath, but json file was not found in myCodes folder.");
     }
   }
-
+  List<Gecko> geckoFromTxt = parseGeckoTxt(packPath, geckoTxt);
   //write header
   for (GameVersion version in fileMap.keys) {
     File current = File(path.join(packPath, 'codes', fileMap[version]));
@@ -125,12 +125,25 @@ void updateGtcFiles(String packPath, File geckoTxt) {
     current.writeAsBytesSync(header);
   }
   //write cheats
-  for (File myGeckoFile in myGeckoFiles) {
-    Gecko gecko = fileToGeckoCode(myGeckoFile);
+  int i = 2;
+  for (Gecko gecko in geckoFromTxt) {
     for (GameVersion version in fileMap.keys) {
       File current = File(path.join(packPath, 'codes', fileMap[version]));
+      if (gecko.canBeToggled) {
+        //toggle begin
+        current.writeAsBytesSync(
+            hexToUint8List(
+                "280015${i.toRadixString(16).padLeft(2, '0')}00000001"),
+            mode: FileMode.append);
+        i = i + 2;
+      }
       current.writeAsBytesSync(geckoToHex(gecko, version),
           mode: FileMode.append);
+      if (gecko.canBeToggled) {
+        //toggle end
+        current.writeAsBytesSync(hexToUint8List("E000000080008000"),
+            mode: FileMode.append);
+      }
     }
   }
   //write eof
@@ -224,6 +237,21 @@ File createGeckoTxt(String packPath) {
   return geckoTxt;
 }
 
+writeGeckoTxt(List<Gecko> cheats, File geckoTxt) {
+  if (!geckoTxt.existsSync()) createGeckoTxt(path.dirname(geckoTxt.path));
+
+  String contents = "";
+
+  for (Gecko cheat in cheats) {
+    if (!cheat.canBeToggled) {
+      contents += "${cheat.baseName}\n";
+    } else {
+      contents += "${cheat.baseName};toggle\n";
+    }
+  }
+  geckoTxt.writeAsStringSync(contents, mode: FileMode.write);
+}
+
 List<Gecko> parseGeckoTxt(String packPath, File geckoTxt) {
   if (!geckoTxt.existsSync()) {
     createGeckoTxt(packPath);
@@ -244,19 +272,4 @@ List<Gecko> parseGeckoTxt(String packPath, File geckoTxt) {
     }
   }
   return list;
-}
-
-writeGeckoTxt(List<Gecko> cheats, File geckoTxt) {
-  if (!geckoTxt.existsSync()) createGeckoTxt(path.dirname(geckoTxt.path));
-
-  String contents = "";
-
-  for (Gecko cheat in cheats) {
-    if (!cheat.canBeToggled) {
-      contents += "${cheat.baseName}\n";
-    } else {
-      contents += "${cheat.baseName};toggle\n";
-    }
-  }
-  geckoTxt.writeAsStringSync(contents, mode: FileMode.write);
 }

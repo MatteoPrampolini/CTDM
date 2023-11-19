@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:xml/xml.dart';
 import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/drawer_options/multiplayer.dart';
+import 'package:ctdm/drawer_options/rename_pack.dart';
 import 'package:ctdm/drawer_options/track_config_gui.dart';
 import 'package:ctdm/gui_elements/types.dart';
 import 'package:ctdm/utils/bmg_utils.dart';
@@ -31,8 +34,14 @@ class PatchWindow extends StatefulWidget {
 
 enum PatchingStatus { aborted, running, completed }
 
-void completeXmlFile(String packPath, bool isOnline, String regionId,
-    List<bool> customUI, List<File> sceneFiles, List<String> allKartsList) {
+void completeXmlFile(
+    String packPath,
+    bool isOnline,
+    String regionId,
+    List<bool> customUI,
+    List<File> sceneFiles,
+    List<String> allKartsList,
+    List<Gecko> geckoList) {
   String packName = path.basename(packPath);
   File xmlFile = File(path.join(packPath, "$packName.xml"));
   String contents = xmlFile.readAsStringSync();
@@ -42,11 +51,66 @@ void completeXmlFile(String packPath, bool isOnline, String regionId,
 
   String customChar = xmlReplaceCharactersModelScenes(packPath, allKartsList);
 
+  //String  = "";
+
+  contents = clearOptions(contents);
+
+  for (Gecko gecko in geckoList) {
+    if (gecko.canBeToggled) {
+      contents =
+          appendOption(createOptionString(gecko.name, gecko.name), contents);
+    }
+  }
+
+  //TODO OPTIONS ARE DONE, BUT <PATCH> NOT IMPLEMENTED.
   contents = contents.replaceFirst(
       RegExp(r'<!--CUSTOM CHARACTERS-->.*<!--FINAL END-->', dotAll: true),
       "$customChar\n\t\t$onlinePart\n\t\t<!--FINAL END-->\t\t");
 
-  xmlFile.writeAsStringSync(contents, mode: FileMode.write);
+  //XmlDocument document = XmlDocument.parse(contents);
+  //xmlFile.writeAsStringSync(document.toXmlString(pretty: true, indent: '\t'));
+
+  xmlFile.writeAsStringSync(contents);
+}
+
+String clearOptions(String xmlContents) {
+  int sectionStartIndex = xmlContents.indexOf('<section');
+  int sectionEndIndex = xmlContents.indexOf('</section>', sectionStartIndex);
+
+  if (sectionStartIndex != -1 && sectionEndIndex != -1) {
+    String sectionContent =
+        xmlContents.substring(sectionStartIndex, sectionEndIndex + 11);
+
+    int firstOptionStartIndex = sectionContent.indexOf('<option', 1);
+
+    if (firstOptionStartIndex != -1) {
+      sectionContent =
+          sectionContent.substring(0, firstOptionStartIndex) + '</section>';
+    }
+
+    xmlContents = xmlContents.replaceRange(
+        sectionStartIndex, sectionEndIndex + 11, sectionContent);
+  }
+
+  return xmlContents;
+}
+
+String appendOption(String option, String xmlContents) {
+  int sectionIndex = xmlContents.indexOf('</section>');
+
+  if (sectionIndex != -1) {
+    return xmlContents.replaceRange(sectionIndex, sectionIndex, option);
+  } else {
+    return xmlContents;
+  }
+}
+
+String createOptionString(String name, String id) {
+  return '''
+    <option name="Enable">
+      <choice name="$name"><patch id="$id"/></choice>
+    </option>
+  ''';
 }
 
 /// Returns a list of lists, one containing the track names and the other containing their respective paths, for tracks that use common files.
@@ -934,6 +998,9 @@ class _PatchWindowState extends State<PatchWindow> {
     }
     await Directory(path.join(packPath, 'Race', 'Course', 'tmp'))
         .delete(recursive: true);
+
+    List<Gecko> geckoList =
+        parseGeckoTxt(packPath, File(path.join(packPath, 'gecko.txt')));
     setState(() {
       progressText = "editing xml file";
       completeXmlFile(
@@ -945,9 +1012,20 @@ class _PatchWindowState extends State<PatchWindow> {
               .listSync()
               .whereType<File>()
               .toList(),
-          allKartsList);
+          allKartsList,
+          geckoList);
     });
+    File jsonFile = File(
+        path.join(packPath, "${path.basenameWithoutExtension(packPath)}.json"));
+    String packJsonContents = await jsonFile.readAsString();
 
+    packJsonContents = clearPatches(packJsonContents);
+
+    for (Gecko gecko in geckoList.where((element) => element.canBeToggled)) {
+      packJsonContents = addPatch(gecko.name, packJsonContents);
+    }
+    await jsonFile.writeAsString(const JsonEncoder.withIndent(' ')
+        .convert(json.decode(packJsonContents)));
     await File(path.join(packPath, 'Icons', 'merged.png')).delete();
 
     setState(() {

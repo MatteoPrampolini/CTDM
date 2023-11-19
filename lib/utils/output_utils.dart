@@ -95,8 +95,9 @@ Future<String> runOnDolphin(List<String> parameters) async {
     return "An error occurred. Check your CTDM settings.";
   }
   var (packName, packId) = getPackNameAndId(packPath);
-  replaceParamsInJson(File(path.join(packPath, "$packName.json")), packName,
-      packId, game, dolphinPath);
+  //TODO FIX: CHANGE NAME/ID ONLY ONCE
+  // replaceParamsInJson(File(path.join(packPath, "$packName.json")), packName,
+  //     packId, game, dolphinPath);
   Process.run(dolphinPath, ['-e', presetPath], runInShell: false);
   // print(p.stderr);
   // print(p.stdout);

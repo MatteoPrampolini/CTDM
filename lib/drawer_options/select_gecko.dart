@@ -19,15 +19,21 @@ List<bool> readSelectedOptionsForPack(
   return selectedOptions;
 }
 
-List<bool> getToggableList(List<Gecko> geckoListAll, List<Gecko> geckoList) {
+List<bool> getToggableList(String packPath, List<Gecko> geckoListAll) {
+  List<Gecko> geckoList =
+      parseGeckoTxt(packPath, File(path.join(packPath, 'gecko.txt')));
+
   List<bool> togglable = List.filled(geckoListAll.length, false);
 
-  int index = 0;
-  for (var gecko in geckoList) {
-    if (gecko.canBeToggled && geckoList.contains(gecko)) {
-      togglable[index] = true;
+  for (int i = 0; i < geckoListAll.length; i++) {
+    for (Gecko gecko in geckoList) {
+      if (geckoListAll.elementAt(i) == gecko) {
+        if (gecko.canBeToggled) {
+          togglable[i] = true;
+          break;
+        }
+      }
     }
-    index++;
   }
   return togglable;
 }
@@ -84,7 +90,6 @@ class _SelectGeckoState extends State<SelectGecko> {
 
     late List<String> cheatsNameFromConfig =
         File(path.join(widget.packPath, 'gecko.txt')).readAsLinesSync();
-
     for (int i = 0; i < cheatsNameFromConfig.length; i++) {
       cheatsNameFromConfig[i] =
           cheatsNameFromConfig[i].replaceAll(";toggle", "");
@@ -106,7 +111,7 @@ class _SelectGeckoState extends State<SelectGecko> {
     _selectedOptions =
         readSelectedOptionsForPack(geckoListAll, geckoSelectedFromTxt);
 
-    _optionalList = getToggableList(geckoListAll, geckoSelectedFromTxt);
+    _optionalList = getToggableList(widget.packPath, geckoListAll);
 
     return Scaffold(
         appBar: AppBar(
