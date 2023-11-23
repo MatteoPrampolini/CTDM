@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:ctdm/drawer_options/rename_pack.dart';
 import 'package:ctdm/utils/log_utils.dart';
+import 'package:ctdm/utils/xml_json_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:archive/archive.dart';
 
@@ -95,9 +95,9 @@ Future<String> runOnDolphin(List<String> parameters) async {
     return "An error occurred. Check your CTDM settings.";
   }
   var (packName, packId) = getPackNameAndId(packPath);
-  //TODO FIX: CHANGE NAME/ID ONLY ONCE
-  // replaceParamsInJson(File(path.join(packPath, "$packName.json")), packName,
-  //     packId, game, dolphinPath);
+
+  replaceParamsInJson(File(path.join(packPath, "$packName.json")), packName,
+      packId, game, dolphinPath);
   Process.run(dolphinPath, ['-e', presetPath], runInShell: false);
   // print(p.stderr);
   // print(p.stdout);

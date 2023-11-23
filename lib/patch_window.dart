@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:xml/xml.dart';
+import 'package:ctdm/utils/xml_json_utils.dart';
 import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
 import 'package:ctdm/drawer_options/multiplayer.dart';
-import 'package:ctdm/drawer_options/rename_pack.dart';
 import 'package:ctdm/drawer_options/track_config_gui.dart';
 import 'package:ctdm/gui_elements/types.dart';
 import 'package:ctdm/utils/bmg_utils.dart';
@@ -33,85 +32,6 @@ class PatchWindow extends StatefulWidget {
 }
 
 enum PatchingStatus { aborted, running, completed }
-
-void completeXmlFile(
-    String packPath,
-    bool isOnline,
-    String regionId,
-    List<bool> customUI,
-    List<File> sceneFiles,
-    List<String> allKartsList,
-    List<Gecko> geckoList) {
-  String packName = path.basename(packPath);
-  File xmlFile = File(path.join(packPath, "$packName.xml"));
-  String contents = xmlFile.readAsStringSync();
-
-  String onlinePart =
-      isOnline ? '<memory offset="0x800017C4" value="$regionId"/>' : '';
-
-  String customChar = xmlReplaceCharactersModelScenes(packPath, allKartsList);
-
-  //String  = "";
-
-  contents = clearOptions(contents);
-
-  for (Gecko gecko in geckoList) {
-    if (gecko.canBeToggled) {
-      contents =
-          appendOption(createOptionString(gecko.name, gecko.name), contents);
-    }
-  }
-
-  //TODO OPTIONS ARE DONE, BUT <PATCH> NOT IMPLEMENTED.
-  contents = contents.replaceFirst(
-      RegExp(r'<!--CUSTOM CHARACTERS-->.*<!--FINAL END-->', dotAll: true),
-      "$customChar\n\t\t$onlinePart\n\t\t<!--FINAL END-->\t\t");
-
-  //XmlDocument document = XmlDocument.parse(contents);
-  //xmlFile.writeAsStringSync(document.toXmlString(pretty: true, indent: '\t'));
-
-  xmlFile.writeAsStringSync(contents);
-}
-
-String clearOptions(String xmlContents) {
-  int sectionStartIndex = xmlContents.indexOf('<section');
-  int sectionEndIndex = xmlContents.indexOf('</section>', sectionStartIndex);
-
-  if (sectionStartIndex != -1 && sectionEndIndex != -1) {
-    String sectionContent =
-        xmlContents.substring(sectionStartIndex, sectionEndIndex + 11);
-
-    int firstOptionStartIndex = sectionContent.indexOf('<option', 1);
-
-    if (firstOptionStartIndex != -1) {
-      sectionContent =
-          sectionContent.substring(0, firstOptionStartIndex) + '</section>';
-    }
-
-    xmlContents = xmlContents.replaceRange(
-        sectionStartIndex, sectionEndIndex + 11, sectionContent);
-  }
-
-  return xmlContents;
-}
-
-String appendOption(String option, String xmlContents) {
-  int sectionIndex = xmlContents.indexOf('</section>');
-
-  if (sectionIndex != -1) {
-    return xmlContents.replaceRange(sectionIndex, sectionIndex, option);
-  } else {
-    return xmlContents;
-  }
-}
-
-String createOptionString(String name, String id) {
-  return '''
-    <option name="Enable">
-      <choice name="$name"><patch id="$id"/></choice>
-    </option>
-  ''';
-}
 
 /// Returns a list of lists, one containing the track names and the other containing their respective paths, for tracks that use common files.
 List getTracksDirWithCommons(String myTrackPath, List<String> configTrack) {
@@ -1001,9 +921,12 @@ class _PatchWindowState extends State<PatchWindow> {
 
     List<Gecko> geckoList =
         parseGeckoTxt(packPath, File(path.join(packPath, 'gecko.txt')));
+    var (_, packId) = getPackNameAndId(packPath);
     setState(() {
       progressText = "editing xml file";
+
       completeXmlFile(
+          packId,
           packPath,
           isOnline,
           regionId,
@@ -1019,10 +942,10 @@ class _PatchWindowState extends State<PatchWindow> {
         path.join(packPath, "${path.basenameWithoutExtension(packPath)}.json"));
     String packJsonContents = await jsonFile.readAsString();
 
-    packJsonContents = clearPatches(packJsonContents);
+    packJsonContents = clearPatchesJson(packJsonContents);
 
     for (Gecko gecko in geckoList.where((element) => element.canBeToggled)) {
-      packJsonContents = addPatch(gecko.name, packJsonContents);
+      packJsonContents = addPatchJson(gecko.name, packId, packJsonContents);
     }
     await jsonFile.writeAsString(const JsonEncoder.withIndent(' ')
         .convert(json.decode(packJsonContents)));

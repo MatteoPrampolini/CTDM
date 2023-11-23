@@ -127,23 +127,29 @@ void updateGtcFiles(String packPath, File geckoTxt) {
   //write cheats
   int i = 2;
   for (Gecko gecko in geckoFromTxt) {
+    //for eacg gecko
     for (GameVersion version in fileMap.keys) {
-      File current = File(path.join(packPath, 'codes', fileMap[version]));
+      File current =
+          File(path.join(packPath, 'codes', fileMap[version])); //get .gct file
       if (gecko.canBeToggled) {
         //toggle begin
         current.writeAsBytesSync(
             hexToUint8List(
                 "280015${i.toRadixString(16).padLeft(2, '0')}00000001"),
             mode: FileMode.append);
-        i = i + 2;
       }
+
       current.writeAsBytesSync(geckoToHex(gecko, version),
           mode: FileMode.append);
+
       if (gecko.canBeToggled) {
         //toggle end
         current.writeAsBytesSync(hexToUint8List("E000000080008000"),
             mode: FileMode.append);
       }
+    }
+    if (gecko.canBeToggled) {
+      i = i + 2;
     }
   }
   //write eof
@@ -271,5 +277,6 @@ List<Gecko> parseGeckoTxt(String packPath, File geckoTxt) {
       }
     }
   }
+
   return list;
 }

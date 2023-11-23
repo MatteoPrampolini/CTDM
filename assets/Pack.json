@@ -7,8 +7,8 @@
           "options": [
             {
               "choice": 1,
-              "option-name": "Enable",
-              "section-name": "PACKNAME"
+              "option-name": "PACKID",
+              "section-name": "PACKID"
             }
           ],
           "root": "WORKSPACE/Packs/",

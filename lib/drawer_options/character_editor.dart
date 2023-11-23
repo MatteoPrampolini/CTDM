@@ -252,10 +252,12 @@ class _CharEditorState extends State<CharEditor> {
                           "Award",
                         ),
                         Visibility(
-                          visible: charList[selectedChar].size == Size.medium,
+                          visible: charList[selectedChar].size != Size.small,
                           child: Tooltip(
                             textAlign: TextAlign.left,
-                            message: "for Peach, Daisy and Rosalina only.",
+                            message: charList[selectedChar].size == Size.medium
+                                ? "for Peach or Daisy only."
+                                : "for Rosalina only.",
                             child: FileCheck(
                               findFilePath(charList[selectedChar].dir,
                                   path.basename('award3.brres')),

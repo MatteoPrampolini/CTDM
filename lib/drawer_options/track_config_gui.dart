@@ -704,7 +704,7 @@ N N$nintendoTracksString | """
         body: Stack(
           children: [
             Visibility(
-                visible: cups.isEmpty,
+                visible: cups.isEmpty && !keepNintendo && !editArena,
                 child: Center(
                     child: ElevatedButton(
                         style: const ButtonStyle(

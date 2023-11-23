@@ -1,207 +1,11 @@
 import 'dart:io';
 
+import 'package:ctdm/utils/xml_json_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
-import 'dart:convert';
-
-String addPatch(String name, String contents) {
-  Map<String, dynamic> jsonContent = json.decode(contents);
-
-  List<dynamic> patches = jsonContent['riivolution']['patches'];
-
-  int patchIndex = -1;
-  for (int i = 0; i < patches.length; i++) {
-    if (patches[i].containsKey('options')) {
-      patchIndex = i;
-      break;
-    }
-  }
-
-  List<dynamic> options =
-      patchIndex != -1 ? patches[patchIndex]['options'] : [];
-
-  options.add({
-    "choice": 1,
-    "option-name": "Enable",
-    "section-name": name,
-  });
-
-  if (patchIndex != -1) {
-    patches[patchIndex]['options'] = options;
-  } else {
-    Map<String, dynamic> newPatch = {
-      "options": options,
-      "root": "C:\\Users\\matte\\Documents\\CT_test\\CTDM_workspace/Packs/",
-      "xml":
-          "C:\\Users\\matte\\Documents\\CT_test\\CTDM_workspace\\Packs\\multipatch/multipatch.xml",
-    };
-    patches.add(newPatch);
-  }
-
-  jsonContent['riivolution']['patches'] = patches;
-
-  return json.encode(jsonContent);
-}
-
-String clearPatches(String contents) {
-  Map<String, dynamic> jsonContent = json.decode(contents);
-
-  List<dynamic> patches = jsonContent['riivolution']['patches'];
-
-  for (var patch in patches) {
-    if (patch.containsKey('options') && patch['options'].length > 1) {
-      patch['options'] = [patch['options'].first];
-    }
-  }
-
-  jsonContent['riivolution']['patches'] = patches;
-
-  return json.encode(jsonContent);
-}
-
-void replaceJsonValues(
-    Map<dynamic, dynamic> jsonMap, Map<String, dynamic> replacements) {
-  jsonMap.forEach((key, value) {
-    if (replacements.containsKey(key)) {
-      jsonMap[key] = replacements[key];
-    }
-    if (value is Map) {
-      replaceJsonValues(value, replacements);
-    } else if (value is List) {
-      for (var element in value) {
-        if (element is Map) {
-          replaceJsonValues(element, replacements);
-        }
-      }
-    }
-  });
-}
-
-void saveAndRenamePack(String packPath, String chosenName, String chosenId,
-    String version, String game, String dolphin) {
-  Directory dir = Directory(packPath);
-  List<FileSystemEntity> entities = dir.listSync().toList();
-  Iterable<File> xmlList = entities
-      .whereType<File>()
-      .where((element) => element.path.endsWith('.xml'));
-
-  if (xmlList.isEmpty) {
-    createXmlFile(path.join(packPath, 'Pack.xml'));
-  }
-
-  dir = Directory(packPath);
-  entities = dir.listSync().toList();
-  xmlList = entities
-      .whereType<File>()
-      .where((element) => element.path.endsWith('.xml'));
-  File xmlFile = xmlList.first;
-  replaceParamsInXml(xmlFile, chosenName, chosenId, version);
-
-  xmlFile.renameSync(path.join(packPath, "$chosenName.xml"));
-
-  dir.renameSync(path.join(path.dirname(packPath), chosenName));
-  Iterable<File> jsonList = entities
-      .whereType<File>()
-      .where((element) => element.path.endsWith('.json'));
-
-  if (jsonList.isEmpty) {
-    String jsonOgPath = path.join(path.dirname(Platform.resolvedExecutable),
-        "data", "flutter_assets", "assets", "Pack.json");
-    File(jsonOgPath)
-        .copySync(path.join(path.dirname(packPath), chosenName, 'Pack.json'));
-    //createXmlFile(path.join(packPath, 'Pack.json'));
-  }
-  dir = Directory(path.join(path.dirname(packPath), chosenName));
-  entities = dir.listSync().toList();
-  jsonList = entities
-      .whereType<File>()
-      .where((element) => element.path.endsWith('.json'));
-  File jsonFile = jsonList.first;
-  replaceParamsInJson(jsonFile, chosenName, chosenId, game, dolphin);
-  //3
-  jsonFile.renameSync(
-      path.join(path.dirname(packPath), chosenName, "$chosenName.json"));
-}
-
-void replaceParamsInJson(
-  File jsonFile,
-  String chosenName,
-  String chosenId,
-  String game,
-  String dolphin,
-) {
-  String packPath = path.dirname(jsonFile.path);
-  String workspace = path.dirname(path.dirname(packPath));
-
-  String contents = jsonFile.readAsStringSync();
-
-  Map<String, dynamic> jsonData = json.decode(contents);
-
-  Map<String, dynamic> replacements = {
-    "base-file": game,
-    "display-name": chosenName,
-    "section-name": chosenName,
-    "root": "$workspace/Packs/",
-    "xml": "$packPath/$chosenName.xml",
-  };
-
-  replaceJsonValues(jsonData, replacements);
-
-  String modifiedJsonString = json.encode(jsonData);
-  String prettifiedJsonString = const JsonEncoder.withIndent('  ')
-      .convert(json.decode(modifiedJsonString));
-
-  jsonFile.writeAsStringSync(prettifiedJsonString);
-}
-
-void createXmlFile(String xmlPath) {
-  String assetPath = path.join(path.dirname(Platform.resolvedExecutable),
-      "data", "flutter_assets", "assets");
-
-  File(path.join(assetPath, 'Pack.xml')).copySync(xmlPath);
-  // Directory assetFolder = Directory(assetPath);
-  // List<File> xmlFileList = assetFolder.listSync().whereType<File>().toList();
-  // xmlFileList.retainWhere((element) => element.path.endsWith('xml'));
-
-  // xmlFileList.first.copySync(xmlPath);
-  //final File xmlFile = File("assets/Pack.xml");
-  //xmlFile.copySync(xmlPath);
-}
-
-(String, String) getPackNameAndId(String packPath) {
-  File xmlFile = File(path.join(packPath, '${path.basename(packPath)}.xml'));
-  String contents = xmlFile.readAsStringSync();
-  String packName = contents.split(RegExp(r'<section name='))[1];
-  packName = packName
-      .replaceRange(packName.indexOf('>'), null, '')
-      .replaceAll('"', '');
-  String packId = contents.split(RegExp(r'patch id='))[1];
-
-  packId =
-      packId.replaceRange(packId.indexOf(r'/'), null, '').replaceAll('"', '');
-  return (packName, packId);
-}
-
-void replaceParamsInXml(
-    File xmlFile, String chosenName, String chosenId, String version) {
-  String contents = xmlFile.readAsStringSync();
-  // final versionRegex = RegExp(r'-[A-Z]+.bin');
-  contents = contents.replaceFirst('CTDM_VERSION', version);
-  // contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
-  String oldName = contents.split(RegExp(r'<section name='))[1];
-  oldName =
-      oldName.replaceRange(oldName.indexOf('>'), null, '').replaceAll('"', '');
-  String oldId = contents.split(RegExp(r'patch id='))[1];
-
-  oldId = oldId.replaceRange(oldId.indexOf(r'/'), null, '').replaceAll('"', '');
-  //contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
-  contents = contents.replaceAll(oldName, chosenName);
-  contents = contents.replaceAll(oldId, chosenId);
-  xmlFile.writeAsStringSync(contents, mode: FileMode.write);
-}
 
 class RenamePack extends StatefulWidget {
   final String packPath;
@@ -212,12 +16,18 @@ class RenamePack extends StatefulWidget {
 }
 
 bool checkValidTextfield(String name, String id) {
-  final validCharacters = RegExp(r'^[a-zA-Z0-9_]+$');
+  if (name == id) return false;
+  final validCharactersName = RegExp(r'^[a-zA-Z0-9_ ]+$');
+  final validCharactersId = RegExp(r'^[a-zA-Z0-9_]+$');
 
-  if (name == '' || name == 'MyPackName' || !validCharacters.hasMatch(name)) {
+  if (name == '' ||
+      name == 'MyPackName' ||
+      !validCharactersName.hasMatch(name)) {
     return false;
   }
-  if (id == '' || id == 'mypack_uniquename' || !validCharacters.hasMatch(id)) {
+  if (id == '' ||
+      id == 'mypack_uniquename' ||
+      !validCharactersId.hasMatch(id)) {
     return false;
   }
   return true;
