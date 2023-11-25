@@ -92,6 +92,9 @@ void createFolders(String packPath) {
         "empty.thp"));
     emptyVideo.copy(path.join(packPath, 'thp', 'empty.thp'));
   }
+  if (!Directory(path.join(packPath, 'myStuff')).existsSync()) {
+    Directory(path.join(packPath, 'myStuff')).createSync();
+  }
   if (Directory(path.join(packPath, 'Race')).existsSync()) {
     Directory(path.join(packPath, 'Race')).deleteSync(recursive: true);
   }
@@ -947,6 +950,7 @@ class _PatchWindowState extends State<PatchWindow> {
     for (Gecko gecko in geckoList.where((element) => element.canBeToggled)) {
       packJsonContents = addPatchJson(gecko.name, packId, packJsonContents);
     }
+    packJsonContents = addPatchJson('My Stuff', packId, packJsonContents);
     await jsonFile.writeAsString(const JsonEncoder.withIndent(' ')
         .convert(json.decode(packJsonContents)));
     await File(path.join(packPath, 'Icons', 'merged.png')).delete();

@@ -41,7 +41,8 @@ void completeXmlFile(
       i += 2;
     }
   }
-
+  contents = appendOption(createMyStuffOptionString(), contents);
+  contents = appendPatch(createMyStuffPatchString(packName), contents);
   contents = contents.replaceFirst(
       RegExp(r'<!--CUSTOM CHARACTERS-->.*<!--FINAL END-->', dotAll: true),
       "$customChar\n\t\t$onlinePart\n\t\t<!--FINAL END-->\t\t");
@@ -96,10 +97,27 @@ String createOptionString(String name, String id) {
   ''';
 }
 
+String createMyStuffOptionString() {
+  return '''
+    <option name="My Stuff">
+      <choice name="Enable"><patch id="myStuff"/></choice>
+    </option>
+  ''';
+}
+
 String createPatchString(String id, String offset) {
   return '''
     <patch id="$id">
       <memory offset="0x800015$offset" value="0001"/>
+    </patch>
+  ''';
+}
+
+String createMyStuffPatchString(String packname) {
+  return '''
+    <patch id="myStuff">
+      <folder external="/$packname/myStuff" recursive="false" />
+		  <folder external="/$packname/myStuff" disc="/" />
     </patch>
   ''';
 }
