@@ -518,7 +518,11 @@ class _PatchWindowState extends State<PatchWindow> {
 
       if (p.exitCode != 0 || p.stderr.toString().contains('! wlect')) {
         logString(LogType.ERROR, "PATCH ERROR:\n${p.stderr}");
-        throw Exception("Bad config.txt");
+        if (p.stderr.toString().contains('lpar.txt')) {
+          throw Exception("Invalid lpar.txt");
+        } else {
+          throw Exception("Invalid config.txt");
+        }
       }
     }
     //ovveride arena tracks

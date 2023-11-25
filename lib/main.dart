@@ -96,14 +96,34 @@ class NotifyErrorWidget extends StatelessWidget {
                         )),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.only(top: 20.0),
-                  child: Text(
-                    'Check the "log.log" file inside your workspace.',
-                    style: TextStyle(
-                      color: Colors.amberAccent,
-                      fontSize: 20,
-                    ),
+                Container(
+                  color: Colors.black12,
+                  width: MediaQuery.of(context).size.width,
+                  child: Column(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 20.0),
+                        child: Text(
+                          'Check the "log.log" file inside your workspace.',
+                          style: TextStyle(
+                            color: Colors.amberAccent,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: SizedBox(
+                          width: 400,
+                          child: ElevatedButton(
+                              style: const ButtonStyle(
+                                  fixedSize:
+                                      MaterialStatePropertyAll(Size(350, 40))),
+                              onPressed: () => {main()},
+                              child: const Text("Restart CTDM")),
+                        ),
+                      ),
+                    ],
                   ),
                 )
               ],
