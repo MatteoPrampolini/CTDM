@@ -355,7 +355,8 @@ void saveAndRenamePack(String packPath, String chosenName, String chosenId,
       .where((element) => element.path.endsWith('.xml'));
 
   if (xmlList.isEmpty) {
-    createXmlFile(path.join(packPath, 'Pack.xml'));
+    createXmlFile(
+        path.join(packPath, '${path.basenameWithoutExtension(packPath)}.xml'));
   }
 
   dir = Directory(packPath);
@@ -364,6 +365,7 @@ void saveAndRenamePack(String packPath, String chosenName, String chosenId,
       .whereType<File>()
       .where((element) => element.path.endsWith('.xml'));
   File xmlFile = xmlList.first;
+
   replaceParamsInXml(xmlFile, chosenName, chosenId, version);
 
   xmlFile.renameSync(path.join(packPath, "$chosenName.xml"));
