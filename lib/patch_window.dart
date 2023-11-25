@@ -95,6 +95,9 @@ void createFolders(String packPath) {
   if (!Directory(path.join(packPath, 'myStuff')).existsSync()) {
     Directory(path.join(packPath, 'myStuff')).createSync();
   }
+  if (!Directory(path.join(packPath, 'extra')).existsSync()) {
+    Directory(path.join(packPath, 'extra')).createSync();
+  }
   if (Directory(path.join(packPath, 'Race')).existsSync()) {
     Directory(path.join(packPath, 'Race')).deleteSync(recursive: true);
   }
