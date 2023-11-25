@@ -995,30 +995,40 @@ class _PatchWindowState extends State<PatchWindow> {
 
       //deprecated
       if (!filepath.endsWith("brstm") && Platform.isMacOS) {
-        logString(LogType.ERROR, "cannot convert audio file on MacOS");
         return;
       }
       if (filepath.endsWith(".brstm")) {
         //if brstm file pair
 
-        File normalFile = Directory(path
-                .join(path.join(workspace, 'myMusic', path.dirname(filepath))))
-            .listSync()
-            .whereType<File>()
-            .firstWhere((element) =>
-                !isFastBrstm(element.path) &&
-                element.path.contains(path
-                    .basename(filepath)
-                    .replaceFirst(RegExp(r'_+[a-zA-Z]?\.brstm$'), '')));
-        await normalFile.copy(path.join(musicDir.path, '$id.brstm'));
+        try {
+          File normalFile = Directory(path.join(
+                  path.join(workspace, 'myMusic', path.dirname(filepath))))
+              .listSync()
+              .whereType<File>()
+              .firstWhere((element) =>
+                  !isFastBrstm(element.path) &&
+                  element.path.contains(path
+                      .basename(filepath)
+                      .replaceFirst(RegExp(r'_+[a-zA-Z]?\.brstm$'), '')));
+          await normalFile.copy(path.join(musicDir.path, '$id.brstm'));
+        } on StateError catch (_) {
+          logString(LogType.ERROR,
+              "Normal .brstm not found in ${path.dirname(filepath)}");
+          rethrow;
+        }
+        try {
+          File fastFile = Directory(path.join(
+                  path.join(workspace, 'myMusic', path.dirname(filepath))))
+              .listSync()
+              .whereType<File>()
+              .firstWhere((element) => isFastBrstm(element.path));
 
-        File fastFile = Directory(path
-                .join(path.join(workspace, 'myMusic', path.dirname(filepath))))
-            .listSync()
-            .whereType<File>()
-            .firstWhere((element) => isFastBrstm(element.path));
-
-        await fastFile.copy(path.join(musicDir.path, '${id}_f.brstm'));
+          await fastFile.copy(path.join(musicDir.path, '${id}_f.brstm'));
+        } on StateError catch (_) {
+          logString(LogType.ERROR,
+              "Fast .brstm file not found in ${path.dirname(filepath)}");
+          rethrow;
+        }
       } else {
         //deprecated
         await fileToBrstm(

@@ -75,10 +75,10 @@ String getIdFromArenaCupTrack(int cup, int index) {
       returnValue = "029";
       break;
     case 8:
-      returnValue = "25";
+      returnValue = "025";
       break;
     case 9:
-      returnValue = "26";
+      returnValue = "026";
       break;
   }
   return returnValue;
