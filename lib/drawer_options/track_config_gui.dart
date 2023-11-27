@@ -393,14 +393,14 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     int i = 0;
     for (i; i < (allTracks.length) ~/ 4; i++) {
       if (4 * i + 4 > allTracks.length) {
-        cups.add(Cup('Cup #${i + 1}', allTracks.sublist(4 * i)));
+        cups.add(Cup('"Cup #${i + 1}"', allTracks.sublist(4 * i)));
       } else {
-        cups.add(Cup('Cup #${i + 1}', allTracks.sublist(4 * i, 4 * i + 4)));
+        cups.add(Cup('"Cup #${i + 1}"', allTracks.sublist(4 * i, 4 * i + 4)));
       }
     }
 
     if (allTracks.length > i * 4) {
-      cups.add(Cup('Cup #${i + 1}', allTracks.sublist(4 * i)));
+      cups.add(Cup('"Cup #${i + 1}"', allTracks.sublist(4 * i)));
     }
     setState(() {});
   }
