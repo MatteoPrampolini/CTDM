@@ -337,7 +337,7 @@ void replaceParamsInXml(
   String oldName, oldId;
   (oldName, oldId) = getPackNameAndId(path.dirname(xmlFile.path));
   //contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
-
+  contents = contents.replaceAll('PACKNAME', chosenName);
   contents = contents.replaceAll(oldName, chosenName);
 
   contents = contents.replaceAll(oldId, chosenId);
