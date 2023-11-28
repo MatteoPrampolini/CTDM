@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:ctdm/utils/exceptions_utils.dart';
 import 'package:ctdm/utils/xml_json_utils.dart';
 import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
@@ -302,6 +303,11 @@ Future<File> createBigImage(Directory iconDir, int nCups) async {
   iconFileList.sort((a, b) => compareAlphamagically(a, b));
   for (File icon in iconFileList) {
     imageList.add(await ImagesMergeHelper.loadImageFromFile(icon));
+    var decodedImage = await decodeImageFromList(icon.readAsBytesSync());
+    if (decodedImage.width != 128 || decodedImage.height != 128) {
+      throw CtdmException(
+          "'Icons/${path.basename(icon.path)}' isn't 128x128.'", null, '2501');
+    }
   }
 
   ui.Image image = await ImagesMergeHelper.margeImages(imageList,
@@ -1011,10 +1017,14 @@ class _PatchWindowState extends State<PatchWindow> {
                       .basename(filepath)
                       .replaceFirst(RegExp(r'_+[a-zA-Z]?\.brstm$'), '')));
           await normalFile.copy(path.join(musicDir.path, '$id.brstm'));
-        } on StateError catch (_) {
+        } on StateError catch (stateError) {
           logString(LogType.ERROR,
-              "Normal .brstm not found in ${path.dirname(filepath)}");
-          rethrow;
+              "myMusic/${path.dirname(filepath)} is missing the normal.brstm file.");
+
+          throw CtdmException(
+              "myMusic/${path.dirname(filepath)} is missing the normal .brstm file.",
+              stateError.stackTrace,
+              '5501');
         }
         try {
           File fastFile = Directory(path.join(
@@ -1024,10 +1034,13 @@ class _PatchWindowState extends State<PatchWindow> {
               .firstWhere((element) => isFastBrstm(element.path));
 
           await fastFile.copy(path.join(musicDir.path, '${id}_f.brstm'));
-        } on StateError catch (_) {
+        } on StateError catch (stateError) {
           logString(LogType.ERROR,
-              "Fast .brstm file not found in ${path.dirname(filepath)}");
-          rethrow;
+              "myMusic/${path.dirname(filepath)} is missing the fast .brstm file.");
+          throw CtdmException(
+              "myMusic/${path.dirname(filepath)} is missing the fast .brstm file.",
+              stateError.stackTrace,
+              '5502');
         }
       } else {
         //deprecated

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:ctdm/utils/exceptions_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -138,10 +139,15 @@ void updateGtcFiles(String packPath, File geckoTxt) {
                 "280015${i.toRadixString(16).padLeft(2, '0')}00000001"),
             mode: FileMode.append);
       }
-
-      current.writeAsBytesSync(geckoToHex(gecko, version),
-          mode: FileMode.append);
-
+      try {
+        current.writeAsBytesSync(geckoToHex(gecko, version),
+            mode: FileMode.append);
+      } catch (e, stacktrace) {
+        throw CtdmException(
+            "'myCodes/${gecko.baseName}' (${version.name}) is invalid.",
+            stacktrace,
+            '3001');
+      }
       if (gecko.canBeToggled) {
         //toggle end
         current.writeAsBytesSync(hexToUint8List("E000000080008000"),

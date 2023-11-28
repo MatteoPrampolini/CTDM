@@ -1,0 +1,25 @@
+{
+    "errors": {
+      "2001": {
+        "description": "Bad config.txt",
+        "type": "config error"
+      },
+      "3001": {
+        "description": "Invalid cheat file",
+        "type": "gecko error"
+      },
+      "2501": {
+        "description": "Invalid cup png",
+        "type": "cup image error"
+      },
+      "5501": {
+        "description": "BRSTM not found",
+        "type": "custom music"
+      },
+      "5502": {
+        "description": "BRSTM not found",
+        "type": "custom music"
+      }
+    }
+  }
+  

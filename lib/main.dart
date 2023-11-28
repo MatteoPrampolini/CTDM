@@ -1,3 +1,4 @@
+import 'package:ctdm/utils/exceptions_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
@@ -10,27 +11,39 @@ import 'package:file_picker/file_picker.dart';
 import 'pack_select.dart';
 import 'settings.dart';
 import 'dart:async';
+import 'package:path/path.dart' as path;
 
 void main() {
   runZonedGuarded(() => _main(), (error, stackTrace) {
+    if (error.runtimeType != CtdmException) {
+      error = CtdmException(null, stackTrace, "0000");
+    }
+
     logString(LogType.ERROR, error.toString());
     logString(LogType.ERROR, stackTrace.toString());
+
     runApp(NotifyErrorWidget(
-      error: error.toString(),
-      stacktrace: stackTrace.toString(),
-    ));
+        error: error as CtdmException,
+        stacktrace: stackTrace.toString(),
+        jsonStringPath: path.join(path.dirname(Platform.resolvedExecutable),
+            "data", "flutter_assets", "assets", "errors.json")));
   });
 }
 
 class NotifyErrorWidget extends StatelessWidget {
-  final String error;
+  final CtdmException error;
   final String stacktrace;
-
+  final String jsonStringPath;
   const NotifyErrorWidget(
-      {super.key, required this.error, required this.stacktrace});
+      {super.key,
+      required this.error,
+      required this.stacktrace,
+      required this.jsonStringPath});
 
   @override
   Widget build(BuildContext context) {
+    String jsonString = File(jsonStringPath).readAsStringSync();
+    CtdmError? ctdmError = error.getDetailedError(jsonString);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'CTDM',
@@ -48,87 +61,167 @@ class NotifyErrorWidget extends StatelessWidget {
           title: const Text('CTDM error page',
               style: TextStyle(color: Colors.black87)),
         ),
-        body: Padding(
-          padding: const EdgeInsets.only(top: 30.0),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: Column(
-              children: [
-                Text(
-                  "AN ERROR OCCURRED",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      backgroundColor: Colors.red,
-                      fontSize:
-                          Theme.of(context).textTheme.headlineMedium?.fontSize),
+        body: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 100.0, bottom: 120),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Image.asset(
+                  'assets/images/error_mario.webp',
+                  scale: 1.3,
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-                  child: SizedBox(
-                    height: 150,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 30.0),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
                       child: Text(
-                        addNewLinesEveryNCharacters(error, 60),
-                        overflow: TextOverflow.fade,
+                        "AN ERROR OCCURRED",
                         textAlign: TextAlign.center,
                         style: TextStyle(
+                            backgroundColor: Colors.red,
                             fontSize: Theme.of(context)
                                 .textTheme
                                 .headlineMedium
                                 ?.fontSize),
                       ),
                     ),
-                  ),
-                ),
-                Container(
-                  height: 250,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.redAccent)),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Text(
-                          stacktrace,
-                          style: const TextStyle(color: Colors.white54),
-                        )),
-                  ),
-                ),
-                Container(
-                  color: Colors.black12,
-                  width: MediaQuery.of(context).size.width,
-                  child: Column(
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 20.0),
-                        child: Text(
-                          'Check the "log.log" file inside your workspace.',
-                          style: TextStyle(
-                            color: Colors.amberAccent,
-                            fontSize: 20,
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30.0, left: 20),
+                      child: Text(
+                        "What happened:",
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.fontSize),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0, top: 5),
+                      child: Text(
+                        error.details != null
+                            ? error.details!
+                            : "Details unknown",
+                        style: const TextStyle(color: Colors.redAccent),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 30.0, left: 20),
+                      child: Text(
+                        "Error:",
+                        style: TextStyle(color: Colors.white70, fontSize: 18),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0, top: 5),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: Row(
+                          children: [
+                            const Text(
+                              "Name: ",
+                              style: TextStyle(
+                                color: Colors.white70,
+                              ),
+                            ),
+                            Text(
+                              ctdmError.description,
+                              style: const TextStyle(color: Colors.redAccent),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0, top: 5),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: Row(
+                          children: [
+                            const Text(
+                              "Code: ",
+                              style: TextStyle(
+                                color: Colors.white70,
+                              ),
+                            ),
+                            Text(
+                              ctdmError.errorCode,
+                              style: const TextStyle(color: Colors.redAccent),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 30.0, left: 20),
+                      child: Text(
+                        "Stacktrace:",
+                        style: TextStyle(color: Colors.white70, fontSize: 18),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.65,
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.redAccent)),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: SingleChildScrollView(
+                                //scrollDirection: Axis.horizontal,
+                                child: Text(
+                              overflow: TextOverflow.clip,
+                              stacktrace,
+                              style: const TextStyle(color: Colors.white54),
+                            )),
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: SizedBox(
-                          width: 400,
-                          child: ElevatedButton(
-                              style: const ButtonStyle(
-                                  fixedSize:
-                                      MaterialStatePropertyAll(Size(350, 40))),
-                              onPressed: () => {main()},
-                              child: const Text("Restart CTDM")),
-                        ),
+                    ),
+                    Container(
+                      color: Colors.black12,
+                      width: MediaQuery.of(context).size.width,
+                      child: Column(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(top: 20.0),
+                            child: Text(
+                              'Check the "log.log" file inside your workspace.',
+                              style: TextStyle(
+                                color: Colors.amberAccent,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: SizedBox(
+                              width: 400,
+                              child: ElevatedButton(
+                                  style: const ButtonStyle(
+                                      fixedSize: MaterialStatePropertyAll(
+                                          Size(350, 40))),
+                                  onPressed: () => {main()},
+                                  child: const Text("Restart CTDM")),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                )
-              ],
+                    )
+                  ],
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -140,7 +233,7 @@ Future<void> _main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  await prefs.setString('version', 'v0.9.6');
+  await prefs.setString('version', 'v0.9.7');
   try {
     ProcessResult p =
         await Process.run('wlect', ['--version'], runInShell: true);
