@@ -525,9 +525,9 @@ class _PatchWindowState extends State<PatchWindow> {
       if (p.exitCode != 0 || p.stderr.toString().contains('! wlect')) {
         logString(LogType.ERROR, "PATCH ERROR:\n${p.stderr}");
         if (p.stderr.toString().contains('lpar.txt')) {
-          throw Exception("Invalid lpar.txt");
+          throw CtdmException(p.stderr, null, '2101');
         } else {
-          throw Exception("Invalid config.txt");
+          throw CtdmException(p.stderr, null, '2001');
         }
       }
     }
@@ -825,8 +825,8 @@ class _PatchWindowState extends State<PatchWindow> {
             await drivers[0].copy(path.join(
                 packPath, 'Scene', 'Model', 'Driver.szs.d', driverFileName));
           } else {
-            logString(LogType.ERROR,
-                '$pathOfCustomDir does not contain driver.brres. skipping.');
+            // // logString(LogType.ERROR,
+            //     '$pathOfCustomDir does not contain driver.brres. skipping.');
           }
 
           if (awards.isNotEmpty) {
@@ -834,8 +834,8 @@ class _PatchWindowState extends State<PatchWindow> {
             await awards[0].copy(path.join(packPath, 'Demo', 'Award.szs.d',
                 "${characters3D[name]}.brres"));
           } else {
-            logString(LogType.ERROR,
-                '$pathOfCustomDir does not contain award.brres. skipping.');
+            // logString(LogType.ERROR,
+            //     '$pathOfCustomDir does not contain award.brres. skipping.');
           }
           if (characterIsExtraPain) {
             if (awards.length == 2) {
@@ -849,8 +849,8 @@ class _PatchWindowState extends State<PatchWindow> {
                 'Model', 'Kart', "${characters3D[name]}-allkart.szs"));
             allKartsList.add("${characters3D[name]}-allkart.szs");
           } else {
-            logString(LogType.ERROR,
-                '$pathOfCustomDir does not contain allkart.szs. skipping.');
+            // logString(LogType.ERROR,
+            //     '$pathOfCustomDir does not contain allkart.szs. skipping.');
           }
 
           if (allKartsBT.isNotEmpty) {
@@ -858,8 +858,8 @@ class _PatchWindowState extends State<PatchWindow> {
                 'Model', 'Kart', "${characters3D[name]}-allkart_BT.szs"));
             allKartsList.add("${characters3D[name]}-allkart_BT.szs");
           } else {
-            logString(LogType.ERROR,
-                '$pathOfCustomDir does not contain allkart_BT.szs. skipping.');
+            // logString(LogType.ERROR,
+            //     '$pathOfCustomDir does not contain allkart_BT.szs. skipping.');
           }
 
           //spostare i vari kart in /Race/Kart

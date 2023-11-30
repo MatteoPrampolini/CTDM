@@ -12,6 +12,8 @@ import 'pack_select.dart';
 import 'settings.dart';
 import 'dart:async';
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runZonedGuarded(() => _main(), (error, stackTrace) {
@@ -228,12 +230,49 @@ class NotifyErrorWidget extends StatelessWidget {
   }
 }
 
+Future<String?> checkForUpdates(String version) async {
+  // Ottieni le informazioni sulla versione corrente dell'app
+
+  String currentVersion = version;
+
+  // Costruisci l'URL per ottenere le release da GitHub
+  String owner = 'MatteoPrampolini';
+  String repository = 'CTDM';
+  String apiUrl = 'https://api.github.com/repos/$owner/$repository/releases';
+
+  try {
+    // Effettua la richiesta HTTP alle release di GitHub
+    http.Response response = await http.get(Uri.parse(apiUrl));
+
+    if (response.statusCode == 200) {
+      // Parsa la risposta JSON
+      List<dynamic> releases = json.decode(response.body);
+
+      // Trova l'ultima versione tra le release
+      String latestVersion =
+          releases.isNotEmpty ? releases[0]['tag_name'] : null;
+
+      // Confronta la versione corrente con l'ultima versione disponibile
+      if (latestVersion.compareTo(currentVersion) > 0) {
+        return latestVersion;
+      }
+    } else {
+      return null;
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}
+
 Future<void> _main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
 
   await prefs.setString('version', 'v0.9.7');
+  await prefs.setBool('download_already_check', false);
+
   try {
     ProcessResult p =
         await Process.run('wlect', ['--version'], runInShell: true);
@@ -317,6 +356,46 @@ class MyApp extends StatelessWidget {
   }
 }
 
+void showUpdateAlert(BuildContext context, String newVersion) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text("Update Available"),
+      content:
+          const Text("A new version is available. Do you want to update now?"),
+      actionsAlignment: MainAxisAlignment.spaceBetween,
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context); // Chiudi il dialog
+            // Azione da eseguire se l'utente sceglie di non aggiornare
+          },
+          child: const Text('Ignore'),
+        ),
+        TextButton(
+          onPressed: () {
+            final uri = Uri.parse(
+                'https://github.com/MatteoPrampolini/CTDM/releases/tag/$newVersion');
+            launchUrl(uri);
+            //Navigator.pop(context);
+            //urlLa // Chiudi il dialog
+            // Azione da eseguire se l'utente sceglie di aggiornare
+            // Esempio: apri un link alla pagina delle release su GitHub
+            // launch('URL DELLA PAGINA DELLE RELEASE');
+          },
+          style: TextButton.styleFrom(
+            foregroundColor:
+                Colors.amberAccent, // Cambia il colore del testo a blu
+          ),
+          child: const Text(
+            'Update',
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
@@ -340,6 +419,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> loadSettings() async {
     prefs = await SharedPreferences.getInstance();
+
     setState(() {
       szsFound = prefs.getBool('szs')!;
       workspace = prefs.getString('workspace')!;
@@ -348,6 +428,14 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       witFound = prefs.getBool('wit')!;
     });
+    String version = prefs.getString('version')!;
+    String? newVersion = await checkForUpdates(version);
+    bool alreadyAsked = prefs.getBool('download_already_check')!;
+    if (newVersion != null && !alreadyAsked) {
+      // ignore: use_build_context_synchronously
+      showUpdateAlert(context, newVersion);
+    }
+    await prefs.setBool('download_already_check', true);
   }
 
   @override

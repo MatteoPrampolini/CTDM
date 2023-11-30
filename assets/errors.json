@@ -1,11 +1,19 @@
 {
     "errors": {
       "2001": {
-        "description": "Bad config.txt",
+        "description": "Invalid config.txt",
         "type": "config error"
       },
+      "2101": {
+        "description": "Invalid lpar.txt",
+        "type": "lpar error"
+      },
       "3001": {
-        "description": "Invalid cheat file",
+        "description": "Gecko code contains an invalid character",
+        "type": "gecko error"
+      },
+      "3002": {
+        "description": "Gecko code is incompleted",
         "type": "gecko error"
       },
       "2501": {

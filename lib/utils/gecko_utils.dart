@@ -143,10 +143,17 @@ void updateGtcFiles(String packPath, File geckoTxt) {
         current.writeAsBytesSync(geckoToHex(gecko, version),
             mode: FileMode.append);
       } catch (e, stacktrace) {
-        throw CtdmException(
-            "'myCodes/${gecko.baseName}' (${version.name}) is invalid.",
-            stacktrace,
-            '3001');
+        if (e.runtimeType == FormatException) {
+          throw CtdmException(
+              "'myCodes/${gecko.baseName}' (${version.name}) is invalid.\n'${(e as FormatException).source}' is not a valid hexadecimal value.",
+              stacktrace,
+              '3001');
+        } else {
+          throw CtdmException(
+              "'myCodes/${gecko.baseName}' (${version.name}) is invalid.\nSomething is missing?",
+              stacktrace,
+              '3002');
+        }
       }
       if (gecko.canBeToggled) {
         //toggle end

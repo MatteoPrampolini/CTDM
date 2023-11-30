@@ -55,6 +55,7 @@ dependencies:
   dotted_border: ^2.0.0+3
   flutter_xlider: ^3.5.0
   xml: ^6.3.0
+  http: ^1.1.0
 
 dev_dependencies:
   flutter_lints: ^2.0.1
