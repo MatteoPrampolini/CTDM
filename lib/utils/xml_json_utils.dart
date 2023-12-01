@@ -274,7 +274,8 @@ void replaceParamsInJson(
   String game,
   String dolphin,
 ) {
-  String packPath = path.dirname(jsonFile.path);
+  String packPath =
+      path.join(path.dirname(path.dirname(jsonFile.path)), chosenName);
   String workspace = path.dirname(path.dirname(packPath));
 
   String contents = jsonFile.readAsStringSync();
@@ -314,6 +315,7 @@ void createXmlFile(String xmlPath) {
 
 (String, String) getPackNameAndId(String packPath) {
   File xmlFile = File(path.join(packPath, '${path.basename(packPath)}.xml'));
+
   String contents = xmlFile.readAsStringSync();
 
   String packId = contents.split(RegExp(r'patch id='))[1];
@@ -350,6 +352,7 @@ void saveAndRenamePack(String packPath, String chosenName, String chosenId,
     String version, String game, String dolphin) {
   Directory dir = Directory(packPath);
   List<FileSystemEntity> entities = dir.listSync().toList();
+  File xmlFile;
   Iterable<File> xmlList = entities
       .whereType<File>()
       .where((element) => element.path.endsWith('.xml'));
@@ -357,39 +360,35 @@ void saveAndRenamePack(String packPath, String chosenName, String chosenId,
   if (xmlList.isEmpty) {
     createXmlFile(
         path.join(packPath, '${path.basenameWithoutExtension(packPath)}.xml'));
+    xmlFile = File(
+        path.join(packPath, '${path.basenameWithoutExtension(packPath)}.xml'));
+  } else {
+    xmlFile = xmlList.first;
   }
-
-  dir = Directory(packPath);
-  entities = dir.listSync().toList();
-  xmlList = entities
-      .whereType<File>()
-      .where((element) => element.path.endsWith('.xml'));
-  File xmlFile = xmlList.first;
 
   replaceParamsInXml(xmlFile, chosenName, chosenId, version);
 
   xmlFile.renameSync(path.join(packPath, "$chosenName.xml"));
 
-  dir.renameSync(path.join(path.dirname(packPath), chosenName));
   Iterable<File> jsonList = entities
       .whereType<File>()
       .where((element) => element.path.endsWith('.json'));
 
+  File jsonFile;
+
   if (jsonList.isEmpty) {
     String jsonOgPath = path.join(path.dirname(Platform.resolvedExecutable),
         "data", "flutter_assets", "assets", "Pack.json");
-    File(jsonOgPath)
-        .copySync(path.join(path.dirname(packPath), chosenName, 'Pack.json'));
+    File(jsonOgPath).copySync(path.join(packPath, '$chosenName.json'));
+    jsonFile = File(path.join(packPath, '$chosenName.json'));
+
     //createXmlFile(path.join(packPath, 'Pack.json'));
+  } else {
+    jsonFile = jsonList.first;
   }
-  dir = Directory(path.join(path.dirname(packPath), chosenName));
-  entities = dir.listSync().toList();
-  jsonList = entities
-      .whereType<File>()
-      .where((element) => element.path.endsWith('.json'));
-  File jsonFile = jsonList.first;
   replaceParamsInJson(jsonFile, chosenName, chosenId, game, dolphin);
   //3
-  jsonFile.renameSync(
-      path.join(path.dirname(packPath), chosenName, "$chosenName.json"));
+  jsonFile.renameSync(path.join(packPath, "$chosenName.json"));
+
+  dir.renameSync(path.join(path.dirname(packPath), chosenName));
 }

@@ -16,6 +16,10 @@
         "description": "Gecko code is incompleted",
         "type": "gecko error"
       },
+      "3003": {
+        "description": "Gecko code .json not found in myCodes",
+        "type": "gecko error"
+      },
       "2501": {
         "description": "Invalid cup png",
         "type": "cup image error"

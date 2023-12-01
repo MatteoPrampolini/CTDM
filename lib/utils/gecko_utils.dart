@@ -115,6 +115,10 @@ void updateGtcFiles(String packPath, File geckoTxt) {
     } else {
       logString(LogType.ERROR,
           "gecko.txt contains cheat: $filepath, but json file was not found in myCodes folder.");
+      throw CtdmException(
+          "gecko.txt contains cheat: $filepath, but json file was not found in myCodes folder.",
+          null,
+          "3003");
     }
   }
   List<Gecko> geckoFromTxt = parseGeckoTxt(packPath, geckoTxt);
