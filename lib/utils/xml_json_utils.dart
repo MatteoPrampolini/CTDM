@@ -281,11 +281,11 @@ void replaceParamsInJson(
   String contents = jsonFile.readAsStringSync();
 
   Map<String, dynamic> jsonData = json.decode(contents);
-  renameFirstOptionName(chosenId, jsonData);
+  renameFirstOptionName(chosenName, jsonData);
   Map<String, dynamic> replacements = {
     "base-file": game,
     "display-name": chosenName,
-    "section-name": chosenId,
+    "section-name": chosenName,
     "root": "$workspace/Packs/",
     "xml": "$packPath/$chosenName.xml",
   };
