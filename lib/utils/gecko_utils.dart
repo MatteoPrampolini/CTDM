@@ -132,7 +132,7 @@ void updateGtcFiles(String packPath, File geckoTxt) {
   //write cheats
   int i = 2;
   for (Gecko gecko in geckoFromTxt) {
-    //for eacg gecko
+    //for each gecko
     for (GameVersion version in fileMap.keys) {
       File current =
           File(path.join(packPath, 'codes', fileMap[version])); //get .gct file

@@ -21,7 +21,7 @@ import 'package:merge_images/merge_images.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'drawer_options/custom_ui.dart';
+import 'drawer_options/custom_files.dart';
 
 class PatchWindow extends StatefulWidget {
   final String packPath;
@@ -95,6 +95,12 @@ void createFolders(String packPath) {
   }
   if (!Directory(path.join(packPath, 'myStuff')).existsSync()) {
     Directory(path.join(packPath, 'myStuff')).createSync();
+  }
+  if (!Directory(path.join(packPath, 'misc')).existsSync()) {
+    Directory(path.join(packPath, 'misc')).createSync();
+  }
+  if (!File(path.join(packPath, 'misc.txt')).existsSync()) {
+    File(path.join(packPath, 'misc.txt')).createSync();
   }
   if (!Directory(path.join(packPath, 'extra')).existsSync()) {
     Directory(path.join(packPath, 'extra')).createSync();
@@ -952,7 +958,9 @@ class _PatchWindowState extends State<PatchWindow> {
               .whereType<File>()
               .toList(),
           allKartsList,
-          geckoList);
+          geckoList,
+          readMiscTxt(
+              getListOfMisc(), File(path.join(widget.packPath, 'misc.txt'))));
     });
     File jsonFile = File(
         path.join(packPath, "${path.basenameWithoutExtension(packPath)}.json"));

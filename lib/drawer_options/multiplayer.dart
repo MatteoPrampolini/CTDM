@@ -87,7 +87,7 @@ class _MultiplayerState extends State<Multiplayer> {
                             "https://wiki.tockdom.com/w/index.php?title=Custom_Track_Regions#apply",
                         enableFeedback: true,
                         child: Text(
-                          "Insert region ID:",
+                          "Wiimmfi region ID:",
                           style: TextStyle(
                               fontSize: Theme.of(context)
                                   .textTheme

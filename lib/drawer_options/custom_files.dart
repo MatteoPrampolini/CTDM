@@ -84,16 +84,6 @@ List<bool> loadUIconfig(String packPath) {
   return a.map((string) => string.toLowerCase() == "true").toList();
 }
 
-// String getNameFromIndex(index) {
-//   if (index % 2 == 0) {
-//     //from ORIGINAL_DISC
-//     return '${Scene.values.elementAt((index / 2).floor()).name.toCapitalized()}.szs';
-//   } else {
-//     //from assets
-//     return '${Scene.values.elementAt((index / 2).floor()).name.toCapitalized()}_U.szs';
-//   }
-// }
-
 File getFileFromIndex(String packPath, int index) {
   String originalDiscPath = getOriginalDiscPath(packPath);
   String filePath = '';
@@ -114,6 +104,36 @@ File getFileFromIndex(String packPath, int index) {
   return File(filePath);
 }
 
+List<MiscItem> getListOfMisc() {
+  List<MiscItem> miscList = [];
+  miscList.add(MiscItem('Common', path.join('Race', 'Common.szs'), false));
+  miscList.add(MiscItem('Font', path.join('Scene', 'UI', 'Font.szs'), false));
+  miscList
+      .add(MiscItem('revo_kart', path.join('sound', 'revo_kart.brsar'), false));
+  return miscList;
+}
+
+List<MiscItem> readMiscTxt(List<MiscItem> miscList, File misc) {
+  List<String> lines = misc.readAsLinesSync();
+  for (String line in lines) {
+    if (miscList.any((e) => line.contains(e.name))) {
+      miscList
+          .elementAt(miscList.indexWhere((element) => element.name == line))
+          .selected = true;
+    }
+  }
+
+  return miscList;
+}
+
+void saveMiscFile(File miscTxt, List<MiscItem> miscList) {
+  String contents = "";
+  for (MiscItem miscItem in miscList.where((element) => element.selected)) {
+    contents += "$miscItem\n";
+  }
+  miscTxt.writeAsStringSync(contents, mode: FileMode.write);
+}
+
 class CustomUI extends StatefulWidget {
   final String packPath;
   const CustomUI(this.packPath, {super.key});
@@ -124,15 +144,21 @@ class CustomUI extends StatefulWidget {
 
 class _CustomUIState extends State<CustomUI> {
   late List<bool> values;
-
+  List<MiscItem> miscList = getListOfMisc();
+  late File miscTxt = File(path.join(widget.packPath, 'misc.txt'));
   @override
   void initState() {
     values = loadUIconfig(widget.packPath);
 
+    if (!miscTxt.existsSync()) {
+      saveMiscFile(miscTxt, miscList);
+    } else {
+      miscList = readMiscTxt(miscList, miscTxt);
+    }
     super.initState();
   }
 
-  Future<void> createFiles() async {
+  Future<void> createFilesUi() async {
     if (!await Directory(path.join(widget.packPath, 'myUI')).exists()) {
       await Directory(path.join(widget.packPath, 'myUI')).create();
     }
@@ -148,12 +174,30 @@ class _CustomUIState extends State<CustomUI> {
     }
   }
 
+  Future<void> createFilesMisc(List<MiscItem> miscList) async {
+    if (!await Directory(path.join(widget.packPath, 'misc')).exists()) {
+      await Directory(path.join(widget.packPath, 'misc')).create();
+    }
+
+    for (MiscItem miscItem in miscList.where((element) => element.selected)) {
+      if (await File(
+              path.join(widget.packPath, 'misc', path.basename(miscItem.path)))
+          .exists()) {
+        continue;
+      }
+      await File(path.join(
+              getOriginalDiscPath(widget.packPath), 'files', miscItem.path))
+          .copy(
+              path.join(widget.packPath, 'misc', path.basename(miscItem.path)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Custom Menus",
+          "Custom Files",
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.amber,
@@ -166,7 +210,19 @@ class _CustomUIState extends State<CustomUI> {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(children: [
-                const Text("Select which files you want to replace:"),
+                const Text(
+                  "Select which files you want to replace",
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+                const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 25.0, top: 20),
+                      child: Text(
+                        "Scenes",
+                        style: TextStyle(color: Colors.white70, fontSize: 35),
+                      ),
+                    )),
                 Padding(
                   padding: const EdgeInsetsDirectional.all(40),
                   child: GridView.builder(
@@ -230,6 +286,58 @@ class _CustomUIState extends State<CustomUI> {
                     },
                   ),
                 ),
+                const Divider(),
+                const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 25.0, top: 20),
+                      child: Text(
+                        "Miscellaneous",
+                        style: TextStyle(color: Colors.white70, fontSize: 35),
+                      ),
+                    )),
+                Padding(
+                  padding: const EdgeInsetsDirectional.all(40),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    itemCount: miscList.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      childAspectRatio: (1 / 0.4),
+                      maxCrossAxisExtent: 220,
+                    ),
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white54)),
+                        child: Column(children: [
+                          Text(
+                            miscList[index].name,
+                            style: const TextStyle(
+                                fontSize: 20, color: Colors.redAccent),
+                          ),
+                          CheckboxListTile(
+                              activeColor: Colors.red,
+                              title: FittedBox(
+                                child: Text(
+                                  path.basename(miscList[index].path),
+                                  style: const TextStyle(
+                                      fontSize: 15, color: Colors.white),
+                                ),
+                              ),
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  miscList[index].selected = value!;
+                                  saveMiscFile(miscTxt, miscList);
+                                });
+                              },
+                              value: miscList[index].selected),
+                        ]),
+                      );
+                    },
+                  ),
+                ),
+                const Divider(),
                 SizedBox(
                   width: MediaQuery.of(context).size.width / 2 + 100,
                   child: Padding(
@@ -242,7 +350,8 @@ class _CustomUIState extends State<CustomUI> {
                               "Create files",
                               textAlign: TextAlign.center,
                             ),
-                            onPressed: () async => createFiles()),
+                            onPressed: () async =>
+                                {createFilesUi(), createFilesMisc(miscList)}),
                         ElevatedButton(
                           child: const Text(
                             "Open folder",
@@ -334,4 +443,17 @@ String createXmlStringForUi(
   }
 
   return "$contents\t\t";
+}
+
+class MiscItem {
+  bool selected;
+  String path;
+  String name;
+
+  MiscItem(this.name, this.path, this.selected);
+
+  @override
+  String toString() {
+    return name;
+  }
 }

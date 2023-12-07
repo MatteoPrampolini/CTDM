@@ -17,7 +17,8 @@ Future<String> zipPack(List<String> parameters) async {
     'sys',
     'thp',
     'myStuff',
-    'extra'
+    'extra',
+    'misc'
   ];
   final archive = Archive();
 

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:ctdm/drawer_options/custom_files.dart';
 import 'package:ctdm/utils/character_utiles.dart';
 import 'package:path/path.dart' as path;
 import 'package:ctdm/utils/gecko_utils.dart';
@@ -13,7 +14,8 @@ void completeXmlFile(
     List<bool> customUI,
     List<File> sceneFiles,
     List<String> allKartsList,
-    List<Gecko> geckoList) {
+    List<Gecko> geckoList,
+    List<MiscItem> miscList) {
   String packName = path.basename(packPath);
   File xmlFile = File(path.join(packPath, "$packName.xml"));
   String contents = xmlFile.readAsStringSync();
@@ -43,14 +45,29 @@ void completeXmlFile(
   }
   contents = appendOption(createMyStuffOptionString(), contents);
   contents = appendPatch(createMyStuffPatchString(packName), contents);
+
+  miscList.removeWhere((element) => !element.selected);
+  String miscString = "";
+  if (miscList.isNotEmpty) {
+    miscString = createMiscString(miscList, packName);
+  }
   contents = contents.replaceFirst(
       RegExp(r'<!--CUSTOM CHARACTERS-->.*<!--FINAL END-->', dotAll: true),
-      "$customChar\n\t\t$onlinePart\n\t\t<!--FINAL END-->\t\t");
+      "$customChar\n\t\t$miscString$onlinePart\n\t\t<!--FINAL END-->\t\t");
 
   //XmlDocument document = XmlDocument.parse(contents);
   //xmlFile.writeAsStringSync(document.toXmlString(pretty: true, indent: '\t'));
 
   xmlFile.writeAsStringSync(contents);
+}
+
+String createMiscString(List<MiscItem> miscList, String packName) {
+  String bigString = "";
+  for (MiscItem misc in miscList) {
+    bigString +=
+        '\t\t<file disc="/${misc.path.replaceAll(r"\", "/")}" external="/$packName/misc/${path.basename(misc.path)}"/>\n';
+  }
+  return bigString.replaceFirst('\t\t', "");
 }
 
 String clearOptions(String xmlContents) {

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:ctdm/custom_drawer.dart';
 import 'package:ctdm/drawer_options/cup_icons.dart';
-import 'package:ctdm/drawer_options/custom_ui.dart';
+import 'package:ctdm/drawer_options/custom_files.dart';
 import 'package:ctdm/patch_window.dart';
 import 'package:ctdm/utils/character_utiles.dart';
 import 'package:ctdm/utils/excel.dart';
@@ -65,7 +65,7 @@ class _PackEditorState extends State<PackEditor> {
     'cup icons',
     'gecko codes',
     'custom characters',
-    'custom menus',
+    'custom files',
     'multiplayer'
   ];
   void checkEverything() async {
@@ -101,7 +101,10 @@ class _PackEditorState extends State<PackEditor> {
         0) {
       checks[5] = true;
     }
-    checks[6] = getNofCustomUiSelected(widget.packPath) > 0;
+    checks[6] = getNofCustomUiSelected(widget.packPath) > 0 ||
+        File(path.join(widget.packPath, 'misc.txt'))
+            .readAsLinesSync()
+            .isNotEmpty;
     String regionContent = readRegionFile(widget.packPath);
     if (regionContent != "") {
       checks[7] = regionContent.split(";").last == "true";

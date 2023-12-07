@@ -13,7 +13,7 @@ import 'package:ctdm/drawer_options/track_config_gui.dart';
 import 'package:flutter/material.dart';
 
 //import 'drawer_options/gecko_codes.dart';
-import 'drawer_options/custom_ui.dart';
+import 'drawer_options/custom_files.dart';
 import 'main.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -139,24 +139,17 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     builder: (context) =>
                         CustomCharacters(widget.packPath))).then(
                 (value) => setState(() => DrawerOnExit().dispatch(context)));
-            //GeckoCodes(widget.packPath)));
-            // Update the state of the app.
-            // ...
           },
         ),
         ListTile(
           enabled: widget.xmlExist,
-          title: const Text('Custom Menus'),
+          title: const Text('Custom Files'),
           onTap: () {
             Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => CustomUI(widget.packPath))).then(
                 (value) => setState(() => DrawerOnExit().dispatch(context)));
-
-            //GeckoCodes(widget.packPath)));
-            // Update the state of the app.
-            // ...
           },
         ),
         ListTile(
