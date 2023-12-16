@@ -270,7 +270,7 @@ Future<void> _main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  await prefs.setString('version', 'v0.9.8');
+  await prefs.setString('version', 'v0.9.9');
   await prefs.setBool('download_already_check', false);
 
   try {

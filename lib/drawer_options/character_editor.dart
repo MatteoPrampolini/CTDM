@@ -27,13 +27,17 @@ class _CharEditorState extends State<CharEditor> {
   void initState() {
     super.initState();
     charList = createListOfCharacter(widget.packPath);
-    selectedSizeIndex = charList[selectedChar].size.index;
-    _textEditingController.text = charList[selectedChar].name;
+    if (charList.isNotEmpty) {
+      selectedSizeIndex = charList[selectedChar].size.index;
+      _textEditingController.text = charList[selectedChar].name;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    selectedSizeIndex = charList[selectedChar].size.index;
+    if (charList.isNotEmpty) {
+      selectedSizeIndex = charList[selectedChar].size.index;
+    }
 
     return Scaffold(
         appBar: AppBar(
@@ -80,6 +84,22 @@ class _CharEditorState extends State<CharEditor> {
                       )
                     },
                   ),
+                IconButton(
+                    onPressed: () => {
+                          setState(() => {
+                                createCustomCharacter(widget.packPath),
+                                charList =
+                                    createListOfCharacter(widget.packPath),
+                                selectedSizeIndex =
+                                    charList[selectedChar].size.index,
+                                _textEditingController.text =
+                                    charList[selectedChar].name
+                              }),
+                        },
+                    icon: const Icon(
+                      Icons.add,
+                      color: Colors.amberAccent,
+                    ))
               ])),
             ),
           ),
@@ -90,267 +110,289 @@ class _CharEditorState extends State<CharEditor> {
             ),
             child: Align(
                 alignment: Alignment.topCenter,
-                child: SizedBox(
-                    width: MediaQuery.of(context).size.width / 1.5,
-                    height: 700,
-                    child: Column(
-                      children: [
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Tooltip(
-                                message: path.join(
-                                    path.basename(
-                                        charList[selectedChar].dir.path),
-                                    'icons',
-                                    'icon64.png'),
-                                child: Image.file(
-                                    scale: 1,
-                                    File(path.join(
-                                                    charList[selectedChar]
-                                                        .dir
-                                                        .path,
-                                                    'icons',
-                                                    'icon64.png'))
-                                                .existsSync() &&
-                                            File(path.join(
-                                                    charList[selectedChar]
-                                                        .dir
-                                                        .path,
-                                                    'icons',
-                                                    'icon64.png'))
-                                                .existsSync()
-                                        ? File(path.join(
-                                            charList[selectedChar].dir.path,
-                                            'icons',
-                                            'icon64.png'))
-                                        : File(
-                                            path.join(
-                                                path.dirname(Platform
-                                                    .resolvedExecutable),
-                                                "data",
-                                                "flutter_assets",
-                                                "assets",
-                                                "characters",
-                                                "images64",
-                                                "not_found.png"),
-                                          )),
-                              ),
-                              Tooltip(
-                                message: path.join(
-                                    path.basename(
-                                        charList[selectedChar].dir.path),
-                                    'icons',
-                                    'icon32.png'),
-                                child: Image.file(
-                                    scale: 0.69,
-                                    File(path.join(
-                                                    charList[selectedChar]
-                                                        .dir
-                                                        .path,
-                                                    'icons',
-                                                    'icon32.png'))
-                                                .existsSync() &&
-                                            File(path.join(
-                                                    charList[selectedChar]
-                                                        .dir
-                                                        .path,
-                                                    'icons',
-                                                    'icon32.png'))
-                                                .existsSync()
-                                        ? File(path.join(
-                                            charList[selectedChar].dir.path,
-                                            'icons',
-                                            'icon32.png'))
-                                        : File(
-                                            path.join(
-                                                path.dirname(Platform
-                                                    .resolvedExecutable),
-                                                "data",
-                                                "flutter_assets",
-                                                "assets",
-                                                "characters",
-                                                "images64",
-                                                "not_found.png"),
-                                          )),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 30.0),
-                                child: FocusScope(
-                                  child: DropdownButton<int>(
-                                    value: selectedSizeIndex,
-                                    onChanged: (int? newIndex) {
-                                      setState(() {
-                                        selectedSizeIndex = newIndex!;
-                                        charList[selectedChar].rewriteFile(
-                                            selectedSizeIndex,
-                                            charList[selectedChar].name);
-                                        FocusScope.of(context)
-                                            .requestFocus(FocusNode());
-                                      });
-                                    },
-                                    items:
-                                        dropdownItems.keys.map((String value) {
-                                      return DropdownMenuItem<int>(
-                                        value: dropdownItems[value]!,
-                                        child: Text(value),
-                                      );
-                                    }).toList(),
+                child: charList.isEmpty
+                    ? const Text("You have no custom characters")
+                    : SizedBox(
+                        width: MediaQuery.of(context).size.width / 1.5,
+                        height: 700,
+                        child: Column(
+                          children: [
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Tooltip(
+                                    message: path.join(
+                                        path.basename(
+                                            charList[selectedChar].dir.path),
+                                        'icons',
+                                        'icon64.png'),
+                                    child: Image.file(
+                                        scale: 1,
+                                        File(path.join(
+                                                        charList[selectedChar]
+                                                            .dir
+                                                            .path,
+                                                        'icons',
+                                                        'icon64.png'))
+                                                    .existsSync() &&
+                                                File(path.join(
+                                                        charList[selectedChar]
+                                                            .dir
+                                                            .path,
+                                                        'icons',
+                                                        'icon64.png'))
+                                                    .existsSync()
+                                            ? File(path.join(
+                                                charList[selectedChar].dir.path,
+                                                'icons',
+                                                'icon64.png'))
+                                            : File(
+                                                path.join(
+                                                    path.dirname(Platform
+                                                        .resolvedExecutable),
+                                                    "data",
+                                                    "flutter_assets",
+                                                    "assets",
+                                                    "characters",
+                                                    "images64",
+                                                    "not_found.png"),
+                                              )),
                                   ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.topCenter,
-                                  child: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width / 3.4,
-                                    child: TextFormField(
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                      controller: _textEditingController,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _errorText =
-                                              NoSpecialCharactersValidator
-                                                  .validate(value);
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        border: const OutlineInputBorder(),
-                                        hintText: 'Insert character name',
-                                        labelText: 'Character name',
-                                        errorText: _errorText,
-                                        errorStyle:
-                                            const TextStyle(color: Colors.red),
+                                  Tooltip(
+                                    message: path.join(
+                                        path.basename(
+                                            charList[selectedChar].dir.path),
+                                        'icons',
+                                        'icon32.png'),
+                                    child: Image.file(
+                                        scale: 0.69,
+                                        File(path.join(
+                                                        charList[selectedChar]
+                                                            .dir
+                                                            .path,
+                                                        'icons',
+                                                        'icon32.png'))
+                                                    .existsSync() &&
+                                                File(path.join(
+                                                        charList[selectedChar]
+                                                            .dir
+                                                            .path,
+                                                        'icons',
+                                                        'icon32.png'))
+                                                    .existsSync()
+                                            ? File(path.join(
+                                                charList[selectedChar].dir.path,
+                                                'icons',
+                                                'icon32.png'))
+                                            : File(
+                                                path.join(
+                                                    path.dirname(Platform
+                                                        .resolvedExecutable),
+                                                    "data",
+                                                    "flutter_assets",
+                                                    "assets",
+                                                    "characters",
+                                                    "images64",
+                                                    "not_found.png"),
+                                              )),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 30.0),
+                                    child: FocusScope(
+                                      child: DropdownButton<int>(
+                                        value: selectedSizeIndex,
+                                        onChanged: (int? newIndex) {
+                                          setState(() {
+                                            selectedSizeIndex = newIndex!;
+                                            charList[selectedChar].rewriteFile(
+                                                selectedSizeIndex,
+                                                charList[selectedChar].name);
+                                            FocusScope.of(context)
+                                                .requestFocus(FocusNode());
+                                          });
+                                        },
+                                        items: dropdownItems.keys
+                                            .map((String value) {
+                                          return DropdownMenuItem<int>(
+                                            value: dropdownItems[value]!,
+                                            child: Text(value),
+                                          );
+                                        }).toList(),
                                       ),
                                     ),
                                   ),
+                                  Expanded(
+                                    child: Align(
+                                      alignment: Alignment.topCenter,
+                                      child: SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                3.4,
+                                        child: TextFormField(
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                          controller: _textEditingController,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _errorText =
+                                                  NoSpecialCharactersValidator
+                                                      .validate(value);
+                                            });
+                                          },
+                                          decoration: InputDecoration(
+                                            border: const OutlineInputBorder(),
+                                            hintText: 'Insert character name',
+                                            labelText: 'Character name',
+                                            errorText: _errorText,
+                                            errorStyle: const TextStyle(
+                                                color: Colors.red),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ]),
+                            const Divider(),
+                            FileCheck(
+                              findFilePath(charList[selectedChar].dir,
+                                  path.basename('allkart')),
+                              "Vehicles menu selection",
+                            ),
+                            FileCheck(
+                              findFilePath(charList[selectedChar].dir,
+                                  path.basename('allkart_BT')),
+                              "Battle Mode vehicles menu selection",
+                            ),
+                            const Divider(),
+                            FileCheck(
+                              findFilePath(charList[selectedChar].dir,
+                                  path.basename('driver.brres')),
+                              "Driver",
+                            ),
+                            FileCheck(
+                              findFilePath(charList[selectedChar].dir,
+                                  path.basename('award.brres')),
+                              "Award",
+                            ),
+                            Visibility(
+                              visible:
+                                  charList[selectedChar].size != Size.small,
+                              child: Tooltip(
+                                textAlign: TextAlign.left,
+                                message:
+                                    charList[selectedChar].size == Size.medium
+                                        ? "for Peach or Daisy only."
+                                        : "for Rosalina only.",
+                                child: FileCheck(
+                                  findFilePath(charList[selectedChar].dir,
+                                      path.basename('award3.brres')),
+                                  "Award 3 ",
                                 ),
                               ),
-                            ]),
-                        const Divider(),
-                        FileCheck(
-                          findFilePath(charList[selectedChar].dir,
-                              path.basename('allkart.szs')),
-                          "Vehicles menu selection",
-                        ),
-                        FileCheck(
-                          findFilePath(charList[selectedChar].dir,
-                              path.basename('allkart_BT.szs')),
-                          "Battle Mode vehicles menu selection",
-                        ),
-                        const Divider(),
-                        FileCheck(
-                          findFilePath(charList[selectedChar].dir,
-                              path.basename('driver.brres')),
-                          "Driver",
-                        ),
-                        FileCheck(
-                          findFilePath(charList[selectedChar].dir,
-                              path.basename('award.brres')),
-                          "Award",
-                        ),
-                        Visibility(
-                          visible: charList[selectedChar].size != Size.small,
-                          child: Tooltip(
-                            textAlign: TextAlign.left,
-                            message: charList[selectedChar].size == Size.medium
-                                ? "for Peach or Daisy only."
-                                : "for Rosalina only.",
-                            child: FileCheck(
-                              findFilePath(charList[selectedChar].dir,
-                                  path.basename('award3.brres')),
-                              "Award 3 ",
                             ),
-                          ),
-                        ),
-                        const Divider(),
-                        SingleChildScrollView(
-                          physics: const BouncingScrollPhysics(),
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height / 2.5,
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount:
-                                  charList[selectedChar].fileListPath.length,
-                              itemBuilder: (context, index) {
-                                String file =
-                                    charList[selectedChar].fileListPath[index];
-                                return FileCheck(
-                                  findFilePath(
-                                      Directory(path.join(
-                                          charList[selectedChar].dir.path,
-                                          'karts')),
-                                      path.basename(file)),
-                                  findFirstKeyByValue(
-                                      vehicles, path.basename(file)),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        const Divider(),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              ElevatedButton(
-                                  onPressed: () async => {
-                                        if (!Platform.isLinux)
-                                          {
-                                            launchUrlString(
-                                                charList[selectedChar].dir.path)
-                                          },
-                                        if (Platform.isLinux)
-                                          {
-                                            await Process.start('xdg-open', [
-                                              charList[selectedChar].dir.path
-                                            ]),
-
-                                            //await
-                                          }
-                                      },
-                                  child: const Text("open folder")),
-                              SizedBox(
-                                height: 28,
-                                width: 200,
-                                child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.amberAccent),
-                                    onPressed: () => setState(() {
-                                          charList[selectedChar].rewriteFile(
-                                              selectedSizeIndex,
-                                              _textEditingController.text);
-                                          charList = createListOfCharacter(
-                                              widget.packPath);
-                                          selectedSizeIndex =
-                                              charList[selectedChar].size.index;
-                                          _textEditingController.text =
-                                              charList[selectedChar].name;
-                                        }),
-                                    child: const Text(
-                                      "Save",
-                                      style: TextStyle(
-                                          color: Colors.black87, fontSize: 20),
-                                    )),
+                            const Divider(),
+                            SingleChildScrollView(
+                              physics: const BouncingScrollPhysics(),
+                              child: SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height / 2.5,
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: charList[selectedChar]
+                                      .fileListPath
+                                      .length,
+                                  itemBuilder: (context, index) {
+                                    String file = charList[selectedChar]
+                                        .fileListPath[index];
+                                    return FileCheck(
+                                      findFilePath(
+                                          Directory(path.join(
+                                              charList[selectedChar].dir.path,
+                                              'karts')),
+                                          path.basename(file)),
+                                      findFirstKeyByValue(
+                                          vehicles, path.basename(file)),
+                                    );
+                                  },
+                                ),
                               ),
-                              ElevatedButton(
-                                  onPressed: () => setState(() {
-                                        charList = createListOfCharacter(
-                                            widget.packPath);
-                                        selectedSizeIndex =
-                                            charList[selectedChar].size.index;
-                                        _textEditingController.text =
-                                            charList[selectedChar].name;
-                                      }),
-                                  child: const Text("refresh")),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ))),
+                            ),
+                            const Divider(),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 12.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  ElevatedButton(
+                                      onPressed: () async => {
+                                            if (!Platform.isLinux)
+                                              {
+                                                launchUrlString(
+                                                    charList[selectedChar]
+                                                        .dir
+                                                        .path)
+                                              },
+                                            if (Platform.isLinux)
+                                              {
+                                                await Process.start(
+                                                    'xdg-open', [
+                                                  charList[selectedChar]
+                                                      .dir
+                                                      .path
+                                                ]),
+
+                                                //await
+                                              }
+                                          },
+                                      child: const Text("open folder")),
+                                  SizedBox(
+                                    height: 28,
+                                    width: 200,
+                                    child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                Colors.amberAccent),
+                                        onPressed: () => setState(() {
+                                              charList[selectedChar]
+                                                  .rewriteFile(
+                                                      selectedSizeIndex,
+                                                      _textEditingController
+                                                          .text);
+                                              charList = createListOfCharacter(
+                                                  widget.packPath);
+                                              selectedSizeIndex =
+                                                  charList[selectedChar]
+                                                      .size
+                                                      .index;
+                                              _textEditingController.text =
+                                                  charList[selectedChar].name;
+                                            }),
+                                        child: const Text(
+                                          "Save",
+                                          style: TextStyle(
+                                              color: Colors.black87,
+                                              fontSize: 20),
+                                        )),
+                                  ),
+                                  ElevatedButton(
+                                      onPressed: () => setState(() {
+                                            charList = createListOfCharacter(
+                                                widget.packPath);
+                                            selectedSizeIndex =
+                                                charList[selectedChar]
+                                                    .size
+                                                    .index;
+                                            _textEditingController.text =
+                                                charList[selectedChar].name;
+                                          }),
+                                      child: const Text("refresh")),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ))),
           )
         ]));
   }

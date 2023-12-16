@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:ctdm/drawer_options/custom_files.dart';
 import 'package:path/path.dart' as path;
+import 'dart:math';
 
 final Map<String, String> characters2D = {
   'Baby Mario': 'baby_mario',
@@ -420,6 +421,9 @@ List<CustomCharacter> createListOfCharacter(String packPath) {
 }
 
 File findFilePath(Directory dir, String basename) {
+  if (!dir.existsSync()) {
+    return File(path.join(dir.path, basename));
+  }
   File f;
   RegExp("${path.basename(basename.replaceAll('_4', ''))}.szs");
   if (basename.endsWith("_4")) {
@@ -531,4 +535,25 @@ String modifyValueByKey(String key, String newValue, String commonTxtContent) {
     // The key specified doesn't exist, you can handle this case here if necessary.
     return commonTxtContent;
   }
+}
+
+void createCustomCharacter(String packPath) {
+  String myCharactersDir =
+      path.join(path.dirname(path.dirname(packPath)), 'myCharacters');
+
+  String charDirPath =
+      path.join(myCharactersDir, "newCharacter_${getRandomString(6)}");
+  Directory charDir = Directory(charDirPath);
+
+  charDir.createSync();
+  for (String subdir in ['icons', 'karts', 'voices']) {
+    Directory(path.join(charDirPath, subdir)).createSync();
+  }
+}
+
+String getRandomString(int length) {
+  const chars = '1234567890';
+  Random rnd = Random();
+  return String.fromCharCodes(Iterable.generate(
+      length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
 }
