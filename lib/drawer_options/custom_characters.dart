@@ -71,12 +71,12 @@ class _CustomCharactersState extends State<CustomCharacters> {
     if (n.path == "invalidPath#################") {
       characterPaths[n.index] = "";
     }
-    if (!File(path.join(n.path, 'icons', 'icon64.png')).existsSync()) {
-      characterPaths[n.index] = "";
-    } else {
-      characterPaths[n.index] = path.basename(n.path);
-    }
-
+    // if (!File(path.join(n.path, 'icons', 'icon64.png')).existsSync()) {
+    //   characterPaths[n.index] = "";
+    // } else {
+    // //   characterPaths[n.index] = path.basename(n.path);
+    // }
+    characterPaths[n.index] = path.basename(n.path);
     String contents = "";
     for (var element in allCharacters) {
       contents +=
@@ -243,6 +243,7 @@ class CharacterRow extends StatefulWidget {
 class _CharacterRowState extends State<CharacterRow> {
   @override
   Widget build(BuildContext context) {
+    if (widget.replace.existsSync()) {}
     return SizedBox(
       height: 100,
       //decoration: BoxDecoration(border: Border.all(color: Colors.black26)),
@@ -268,12 +269,20 @@ class _CharacterRowState extends State<CharacterRow> {
             ),
             child: Image.file(
                 scale: 0.69,
-                widget.replace.existsSync() &&
-                        File(path.join(
+                widget.replace.existsSync()
+                    ? File(path.join(
                                 widget.replace.path, 'icons', 'icon64.png'))
                             .existsSync()
-                    ? File(
-                        path.join(widget.replace.path, 'icons', 'icon64.png'))
+                        ? File(path.join(
+                            widget.replace.path, 'icons', 'icon64.png'))
+                        : File(path.join(
+                            path.dirname(Platform.resolvedExecutable),
+                            "data",
+                            "flutter_assets",
+                            "assets",
+                            "characters",
+                            "images64",
+                            "invalid_icon.png"))
                     : File(
                         path.join(
                             path.dirname(Platform.resolvedExecutable),
@@ -308,9 +317,7 @@ class _CharacterRowState extends State<CharacterRow> {
           ),
 
           Visibility(
-            visible: widget.replace.existsSync() &&
-                File(path.join(widget.replace.path, 'icons', 'icon64.png'))
-                    .existsSync(),
+            visible: widget.replace.existsSync(),
             child: Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: IconButton(

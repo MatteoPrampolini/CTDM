@@ -25,7 +25,7 @@ Future<File> createLogFile() async {
 }
 
 // ignore: constant_identifier_names
-enum LogType { ERROR, INFO }
+enum LogType { ERROR, INFO, WARNING }
 
 Future<void> logString(LogType type, String text) async {
   File logFile;

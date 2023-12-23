@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:ctdm/drawer_options/custom_files.dart';
+import 'package:ctdm/utils/log_utils.dart';
 import 'package:path/path.dart' as path;
 import 'dart:math';
 
@@ -185,38 +186,47 @@ patchSzsWithImages(String packPath, Directory extractedSzs,
     File icon32 =
         File(path.join(absPathToCharFolder.path, 'icons', 'icon32.png'));
 
-    for (Directory dir64 in dir64List) {
-      String filenameTpl = getOriginalFileNameForCharacter(i, false);
+    if (await icon64.exists()) {
+      for (Directory dir64 in dir64List) {
+        String filenameTpl = getOriginalFileNameForCharacter(i, false);
 
-      await icon64.copy(path.join(dir64.path, "$filenameTpl.png"));
+        await icon64.copy(path.join(dir64.path, "$filenameTpl.png"));
 
-      await Process.run(
-          'wimgt',
-          [
-            'encode',
-            path.join(dir64.path, "$filenameTpl.png"),
-            '--dest',
-            path.join(dir64.path, filenameTpl),
-            '-o'
-          ],
-          runInShell: true);
+        await Process.run(
+            'wimgt',
+            [
+              'encode',
+              path.join(dir64.path, "$filenameTpl.png"),
+              '--dest',
+              path.join(dir64.path, filenameTpl),
+              '-o'
+            ],
+            runInShell: true);
+      }
+    } else {
+      logString(
+          LogType.WARNING, "custom character $relFolder: no icon64.png found");
     }
+    if (await icon32.exists()) {
+      for (Directory dir32 in dir32List) {
+        String filenameTpl = getOriginalFileNameForCharacter(i, true);
+        //print(path.join(dir32.path, "$filenameTpl.png"));
+        await icon32.copy(path.join(dir32.path, "$filenameTpl.png"));
 
-    for (Directory dir32 in dir32List) {
-      String filenameTpl = getOriginalFileNameForCharacter(i, true);
-      //print(path.join(dir32.path, "$filenameTpl.png"));
-      await icon32.copy(path.join(dir32.path, "$filenameTpl.png"));
-
-      await Process.run(
-          'wimgt',
-          [
-            'encode',
-            path.join(dir32.path, "$filenameTpl.png"),
-            '--dest',
-            path.join(dir32.path, filenameTpl),
-            '-o',
-          ],
-          runInShell: true);
+        await Process.run(
+            'wimgt',
+            [
+              'encode',
+              path.join(dir32.path, "$filenameTpl.png"),
+              '--dest',
+              path.join(dir32.path, filenameTpl),
+              '-o',
+            ],
+            runInShell: true);
+      }
+    } else {
+      logString(
+          LogType.WARNING, "custom character $relFolder: no icon32.png found");
     }
 
     i++;
@@ -325,7 +335,7 @@ int getNumberOfCustomCharacters(File charTxt) {
 ///
 String xmlReplaceCharactersModelScenes(
     String packPath, List<String> allKartsList) {
-  String bigString = '\n\t\t<!--CUSTOM CHARACTERS-->\n';
+  String bigString = '\n\t\t<!--CUSTOM-CHARACTERS-->\n';
   for (File f in Directory(path.join(packPath, 'Race', 'Kart'))
       .listSync()
       .whereType<File>()
@@ -339,7 +349,7 @@ String xmlReplaceCharactersModelScenes(
     bigString +=
         '\t\t<file disc="/Scene/Model/Kart/$allKartPath" external="/${path.basename(packPath)}/Scene/Model/Kart/$allKartPath"/>\n';
   }
-  bigString += "\t\t<!--END CUSTOM CHARACTERS-->\n\t\t";
+  bigString += "\t\t<!--END-CUSTOM-CHARACTERS-->\n\t\t";
   return bigString;
 }
 

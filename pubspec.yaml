@@ -173,6 +173,7 @@ flutter:
       - assets/characters/images64/tt_yoshi_64x64.tpl-0.png
       - assets/characters/images64/tt_baby_daisy_64x64.tpl-0.png
       - assets/characters/images64/not_found.png
+      - assets/characters/images64/invalid_icon.png
 
 
 

@@ -24,7 +24,6 @@ void completeXmlFile(
       isOnline ? '<memory offset="0x800017C4" value="$regionId"/>' : '';
 
   String customChar = xmlReplaceCharactersModelScenes(packPath, allKartsList);
-
   //String  = "";
 
   contents = clearOptions(contents);
@@ -52,8 +51,8 @@ void completeXmlFile(
     miscString = createMiscString(miscList, packName);
   }
   contents = contents.replaceFirst(
-      RegExp(r'<!--CUSTOM CHARACTERS-->.*<!--FINAL END-->', dotAll: true),
-      "$customChar\n\t\t$miscString$onlinePart\n\t\t<!--FINAL END-->\t\t");
+      RegExp(r'<!--CUSTOM-CHARACTERS-->.*<!--FINAL-END-->', dotAll: true),
+      "$customChar\n\t\t$miscString$onlinePart\n\t\t<!--FINAL-END-->\t\t");
 
   //XmlDocument document = XmlDocument.parse(contents);
   //xmlFile.writeAsStringSync(document.toXmlString(pretty: true, indent: '\t'));

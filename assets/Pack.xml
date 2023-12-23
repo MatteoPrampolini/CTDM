@@ -5,11 +5,13 @@
 	</id>
 	<options>
 		<section name="PACKNAME">
-		  <option name="PACKNAME">
-			  <choice name="Enable"><patch id="PACKID"/></choice>
-		  </option>
+			<option name="PACKNAME">
+				<choice name="Enable">
+					<patch id="PACKID" />
+				</choice>
+			</option>
 		</section>
-	  </options>
+	</options>
 	<patch id="PACKID">
 		<file disc="/rel/lecode-PAL.bin" external="/PACKNAME/rel/lecode-PAL.bin" create="true" />
 		<file disc="/rel/lecode-USA.bin" external="/PACKNAME/rel/lecode-USA.bin" create="true" />
@@ -18,9 +20,9 @@
 		<file disc="/rel/StaticR.rel" external="/PACKNAME/static/{$__region}/StaticR.rel" />
 		<folder external="/PACKNAME/sys/{$__region}" recursive="false" />
 		<folder external="/PACKNAME/sys/{$__region}" disc="/" />
-		<folder external="/PACKNAME/codes" disc="/codes" create="true"/>
-		<folder external="/PACKNAME/Music" disc="/sound/strm"  create="true"/>
-		<folder external="/PACKNAME/Race/Course" disc="/Race/Course" create="true"/>
+		<folder external="/PACKNAME/codes" disc="/codes" create="true" />
+		<folder external="/PACKNAME/Music" disc="/sound/strm" create="true" />
+		<folder external="/PACKNAME/Race/Course" disc="/Race/Course" create="true" />
 		<!--THP-->
 		<file disc="/thp/video.thp" external="/PACKNAME/thp/empty.thp" create="true" />
 		<file disc="/thp/course/cup_select.thp" external="/PACKNAME/thp/empty.thp" create="true" />
@@ -31,151 +33,147 @@
 		<file disc="/thp/course/special.thp" external="/PACKNAME/thp/empty.thp" create="true" />
 		<file disc="/thp/course/star.thp" external="/PACKNAME/thp/empty.thp" create="true" />
 		<file disc="/thp/course/thunder.thp" external="/PACKNAME/thp/empty.thp" create="true" />
-		<!--CHARACTER MODELS-->
-		<file external="/PACKNAME/Scene/Model/Driver.szs" disc="/Scene/Model/Driver.szs"/>
-		<file external="/PACKNAME/Demo/Award.szs" disc="/Demo/Award.szs"/>
+		<!--CHARACTER-MODELS-->
+		<file external="/PACKNAME/Scene/Model/Driver.szs" disc="/Scene/Model/Driver.szs" />
+		<file external="/PACKNAME/Demo/Award.szs" disc="/Demo/Award.szs" />
 		<!--UI/SCENES-->
-				<!--AWARD-->
-				<file disc="/Scene/UI/Award_E.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
-				<file disc="/Scene/UI/Award_F.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
-				<file disc="/Scene/UI/Award_G.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
-				<file disc="/Scene/UI/Award_I.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
-				<file disc="/Scene/UI/Award_S.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
-				<file disc="/Scene/UI/Award_M.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
-				<file disc="/Scene/UI/Award_Q.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
-				<file disc="/Scene/UI/Award_U.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
-				<file disc="/Scene/UI/Award_J.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
-				<file disc="/Scene/UI/Award_K.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
-				<file disc="/Scene/UI/Award.szs" external="/PACKNAME/Scene/UI/Award.szs" />
-				<file disc="/Scene/UI/Award_R.szs" external="/PACKNAME/Scene/UI/Award.szs" />
-				<!--CHANNEL-->
-				<file disc="/Scene/UI/Channel_E.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
-				<file disc="/Scene/UI/Channel_F.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
-				<file disc="/Scene/UI/Channel_G.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
-				<file disc="/Scene/UI/Channel_I.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
-				<file disc="/Scene/UI/Channel_S.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
-				<file disc="/Scene/UI/Channel_M.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
-				<file disc="/Scene/UI/Channel_Q.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
-				<file disc="/Scene/UI/Channel_U.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
-				<file disc="/Scene/UI/Channel_J.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
-				<file disc="/Scene/UI/Channel_K.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
-				<file disc="/Scene/UI/Channel.szs" external="/PACKNAME/Scene/UI/Channel.szs" />
-				<file disc="/Scene/UI/Channel_R.szs" external="/PACKNAME/Scene/UI/Channel.szs" />
-				<!--EVENT-->
-				<file disc="/Scene/UI/Event_E.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
-				<file disc="/Scene/UI/Event_F.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
-				<file disc="/Scene/UI/Event_G.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
-				<file disc="/Scene/UI/Event_I.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
-				<file disc="/Scene/UI/Event_S.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
-				<file disc="/Scene/UI/Event_M.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
-				<file disc="/Scene/UI/Event_Q.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
-				<file disc="/Scene/UI/Event_U.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
-				<file disc="/Scene/UI/Event_J.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
-				<file disc="/Scene/UI/Event_K.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
-				<file disc="/Scene/UI/Event.szs" external="/PACKNAME/Scene/UI/Event.szs" />
-				<file disc="/Scene/UI/Event_R.szs" external="/PACKNAME/Scene/UI/Event.szs" />
-				<!--GLOBE-->
-				<file disc="/Scene/UI/Globe_E.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
-				<file disc="/Scene/UI/Globe_F.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
-				<file disc="/Scene/UI/Globe_G.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
-				<file disc="/Scene/UI/Globe_I.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
-				<file disc="/Scene/UI/Globe_S.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
-				<file disc="/Scene/UI/Globe_M.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
-				<file disc="/Scene/UI/Globe_Q.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
-				<file disc="/Scene/UI/Globe_U.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
-				<file disc="/Scene/UI/Globe_J.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
-				<file disc="/Scene/UI/Globe_K.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
-				<file disc="/Scene/UI/Globe.szs" external="/PACKNAME/Scene/UI/Globe.szs" />
-				<file disc="/Scene/UI/Globe_R.szs" external="/PACKNAME/Scene/UI/Globe.szs" />	
-				<!--MENUMULTI-->
-				<file disc="/Scene/UI/MenuMulti_E.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
-				<file disc="/Scene/UI/MenuMulti_F.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
-				<file disc="/Scene/UI/MenuMulti_G.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
-				<file disc="/Scene/UI/MenuMulti_I.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
-				<file disc="/Scene/UI/MenuMulti_S.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
-				<file disc="/Scene/UI/MenuMulti_M.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
-				<file disc="/Scene/UI/MenuMulti_Q.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
-				<file disc="/Scene/UI/MenuMulti_U.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
-				<file disc="/Scene/UI/MenuMulti_J.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
-				<file disc="/Scene/UI/MenuMulti_K.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
-				<file disc="/Scene/UI/MenuMulti.szs" external="/PACKNAME/Scene/UI/MenuMulti.szs" />
-				<file disc="/Scene/UI/MenuMulti_R.szs" external="/PACKNAME/Scene/UI/MenuMulti.szs" />
-				<!--MENUOTHER-->
-				<file disc="/Scene/UI/MenuOther_E.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
-				<file disc="/Scene/UI/MenuOther_F.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
-				<file disc="/Scene/UI/MenuOther_G.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
-				<file disc="/Scene/UI/MenuOther_I.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
-				<file disc="/Scene/UI/MenuOther_S.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
-				<file disc="/Scene/UI/MenuOther_M.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
-				<file disc="/Scene/UI/MenuOther_Q.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
-				<file disc="/Scene/UI/MenuOther_U.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
-				<file disc="/Scene/UI/MenuOther_J.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
-				<file disc="/Scene/UI/MenuOther_K.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
-				<file disc="/Scene/UI/MenuOther.szs" external="/PACKNAME/Scene/UI/MenuOther.szs" />
-				<file disc="/Scene/UI/MenuOther_R.szs" external="/PACKNAME/Scene/UI/MenuOther.szs" />		
-				<!--MENUSINGLE-->
-				<file disc="/Scene/UI/MenuSingle_E.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
-				<file disc="/Scene/UI/MenuSingle_F.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
-				<file disc="/Scene/UI/MenuSingle_G.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
-				<file disc="/Scene/UI/MenuSingle_I.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
-				<file disc="/Scene/UI/MenuSingle_S.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
-				<file disc="/Scene/UI/MenuSingle_M.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
-				<file disc="/Scene/UI/MenuSingle_Q.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
-				<file disc="/Scene/UI/MenuSingle_U.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
-				<file disc="/Scene/UI/MenuSingle_J.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
-				<file disc="/Scene/UI/MenuSingle_K.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
-				<file disc="/Scene/UI/MenuSingle.szs" external="/PACKNAME/Scene/UI/MenuSingle.szs" />
-				<file disc="/Scene/UI/MenuSingle_R.szs" external="/PACKNAME/Scene/UI/MenuSingle.szs" />
-				<!--PRESENT-->
-				<file disc="/Scene/UI/Present_E.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
-				<file disc="/Scene/UI/Present_F.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
-				<file disc="/Scene/UI/Present_G.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
-				<file disc="/Scene/UI/Present_I.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
-				<file disc="/Scene/UI/Present_S.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
-				<file disc="/Scene/UI/Present_M.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
-				<file disc="/Scene/UI/Present_Q.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
-				<file disc="/Scene/UI/Present_U.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
-				<file disc="/Scene/UI/Present_J.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
-				<file disc="/Scene/UI/Present_K.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
-				<file disc="/Scene/UI/Present.szs" external="/PACKNAME/Scene/UI/Present.szs" />
-				<file disc="/Scene/UI/Present_R.szs" external="/PACKNAME/Scene/UI/Present.szs" />
-				<!--RACE-->
-				<file disc="/Scene/UI/Race_E.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
-				<file disc="/Scene/UI/Race_F.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
-				<file disc="/Scene/UI/Race_G.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
-				<file disc="/Scene/UI/Race_I.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
-				<file disc="/Scene/UI/Race_S.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
-				<file disc="/Scene/UI/Race_M.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
-				<file disc="/Scene/UI/Race_Q.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
-				<file disc="/Scene/UI/Race_U.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
-				<file disc="/Scene/UI/Race_J.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
-				<file disc="/Scene/UI/Race_K.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
-				<file disc="/Scene/UI/Race.szs" external="/PACKNAME/Scene/UI/Race.szs" />
-				<file disc="/Scene/UI/Race_R.szs" external="/PACKNAME/Scene/UI/Race.szs" />
-				<!--TITLE-->
-				<file disc="/Scene/UI/Title_E.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
-				<file disc="/Scene/UI/Title_F.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
-				<file disc="/Scene/UI/Title_G.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
-				<file disc="/Scene/UI/Title_I.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
-				<file disc="/Scene/UI/Title_S.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
-				<file disc="/Scene/UI/Title_M.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
-				<file disc="/Scene/UI/Title_Q.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
-				<file disc="/Scene/UI/Title_U.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
-				<file disc="/Scene/UI/Title_J.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
-				<file disc="/Scene/UI/Title_K.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
-				<file disc="/Scene/UI/Title.szs" external="/PACKNAME/Scene/UI/Title.szs" />
-				<file disc="/Scene/UI/Title_R.szs" external="/PACKNAME/Scene/UI/Title.szs" />
-		<!--END OF SCENE-->
+		<!--AWARD-->
+		<file disc="/Scene/UI/Award_E.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
+		<file disc="/Scene/UI/Award_F.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
+		<file disc="/Scene/UI/Award_G.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
+		<file disc="/Scene/UI/Award_I.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
+		<file disc="/Scene/UI/Award_S.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
+		<file disc="/Scene/UI/Award_M.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
+		<file disc="/Scene/UI/Award_Q.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
+		<file disc="/Scene/UI/Award_U.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
+		<file disc="/Scene/UI/Award_J.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
+		<file disc="/Scene/UI/Award_K.szs" external="/PACKNAME/Scene/UI/Award_U.szs" />
+		<file disc="/Scene/UI/Award.szs" external="/PACKNAME/Scene/UI/Award.szs" />
+		<file disc="/Scene/UI/Award_R.szs" external="/PACKNAME/Scene/UI/Award.szs" />
+		<!--CHANNEL-->
+		<file disc="/Scene/UI/Channel_E.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
+		<file disc="/Scene/UI/Channel_F.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
+		<file disc="/Scene/UI/Channel_G.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
+		<file disc="/Scene/UI/Channel_I.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
+		<file disc="/Scene/UI/Channel_S.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
+		<file disc="/Scene/UI/Channel_M.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
+		<file disc="/Scene/UI/Channel_Q.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
+		<file disc="/Scene/UI/Channel_U.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
+		<file disc="/Scene/UI/Channel_J.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
+		<file disc="/Scene/UI/Channel_K.szs" external="/PACKNAME/Scene/UI/Channel_U.szs" />
+		<file disc="/Scene/UI/Channel.szs" external="/PACKNAME/Scene/UI/Channel.szs" />
+		<file disc="/Scene/UI/Channel_R.szs" external="/PACKNAME/Scene/UI/Channel.szs" />
+		<!--EVENT-->
+		<file disc="/Scene/UI/Event_E.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
+		<file disc="/Scene/UI/Event_F.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
+		<file disc="/Scene/UI/Event_G.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
+		<file disc="/Scene/UI/Event_I.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
+		<file disc="/Scene/UI/Event_S.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
+		<file disc="/Scene/UI/Event_M.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
+		<file disc="/Scene/UI/Event_Q.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
+		<file disc="/Scene/UI/Event_U.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
+		<file disc="/Scene/UI/Event_J.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
+		<file disc="/Scene/UI/Event_K.szs" external="/PACKNAME/Scene/UI/Event_U.szs" />
+		<file disc="/Scene/UI/Event.szs" external="/PACKNAME/Scene/UI/Event.szs" />
+		<file disc="/Scene/UI/Event_R.szs" external="/PACKNAME/Scene/UI/Event.szs" />
+		<!--GLOBE-->
+		<file disc="/Scene/UI/Globe_E.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
+		<file disc="/Scene/UI/Globe_F.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
+		<file disc="/Scene/UI/Globe_G.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
+		<file disc="/Scene/UI/Globe_I.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
+		<file disc="/Scene/UI/Globe_S.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
+		<file disc="/Scene/UI/Globe_M.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
+		<file disc="/Scene/UI/Globe_Q.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
+		<file disc="/Scene/UI/Globe_U.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
+		<file disc="/Scene/UI/Globe_J.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
+		<file disc="/Scene/UI/Globe_K.szs" external="/PACKNAME/Scene/UI/Globe_U.szs" />
+		<file disc="/Scene/UI/Globe.szs" external="/PACKNAME/Scene/UI/Globe.szs" />
+		<file disc="/Scene/UI/Globe_R.szs" external="/PACKNAME/Scene/UI/Globe.szs" />
+		<!--MENUMULTI-->
+		<file disc="/Scene/UI/MenuMulti_E.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
+		<file disc="/Scene/UI/MenuMulti_F.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
+		<file disc="/Scene/UI/MenuMulti_G.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
+		<file disc="/Scene/UI/MenuMulti_I.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
+		<file disc="/Scene/UI/MenuMulti_S.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
+		<file disc="/Scene/UI/MenuMulti_M.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
+		<file disc="/Scene/UI/MenuMulti_Q.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
+		<file disc="/Scene/UI/MenuMulti_U.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
+		<file disc="/Scene/UI/MenuMulti_J.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
+		<file disc="/Scene/UI/MenuMulti_K.szs" external="/PACKNAME/Scene/UI/MenuMulti_U.szs" />
+		<file disc="/Scene/UI/MenuMulti.szs" external="/PACKNAME/Scene/UI/MenuMulti.szs" />
+		<file disc="/Scene/UI/MenuMulti_R.szs" external="/PACKNAME/Scene/UI/MenuMulti.szs" />
+		<!--MENUOTHER-->
+		<file disc="/Scene/UI/MenuOther_E.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
+		<file disc="/Scene/UI/MenuOther_F.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
+		<file disc="/Scene/UI/MenuOther_G.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
+		<file disc="/Scene/UI/MenuOther_I.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
+		<file disc="/Scene/UI/MenuOther_S.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
+		<file disc="/Scene/UI/MenuOther_M.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
+		<file disc="/Scene/UI/MenuOther_Q.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
+		<file disc="/Scene/UI/MenuOther_U.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
+		<file disc="/Scene/UI/MenuOther_J.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
+		<file disc="/Scene/UI/MenuOther_K.szs" external="/PACKNAME/Scene/UI/MenuOther_U.szs" />
+		<file disc="/Scene/UI/MenuOther.szs" external="/PACKNAME/Scene/UI/MenuOther.szs" />
+		<file disc="/Scene/UI/MenuOther_R.szs" external="/PACKNAME/Scene/UI/MenuOther.szs" />
+		<!--MENUSINGLE-->
+		<file disc="/Scene/UI/MenuSingle_E.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
+		<file disc="/Scene/UI/MenuSingle_F.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
+		<file disc="/Scene/UI/MenuSingle_G.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
+		<file disc="/Scene/UI/MenuSingle_I.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
+		<file disc="/Scene/UI/MenuSingle_S.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
+		<file disc="/Scene/UI/MenuSingle_M.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
+		<file disc="/Scene/UI/MenuSingle_Q.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
+		<file disc="/Scene/UI/MenuSingle_U.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
+		<file disc="/Scene/UI/MenuSingle_J.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
+		<file disc="/Scene/UI/MenuSingle_K.szs" external="/PACKNAME/Scene/UI/MenuSingle_U.szs" />
+		<file disc="/Scene/UI/MenuSingle.szs" external="/PACKNAME/Scene/UI/MenuSingle.szs" />
+		<file disc="/Scene/UI/MenuSingle_R.szs" external="/PACKNAME/Scene/UI/MenuSingle.szs" />
+		<!--PRESENT-->
+		<file disc="/Scene/UI/Present_E.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
+		<file disc="/Scene/UI/Present_F.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
+		<file disc="/Scene/UI/Present_G.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
+		<file disc="/Scene/UI/Present_I.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
+		<file disc="/Scene/UI/Present_S.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
+		<file disc="/Scene/UI/Present_M.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
+		<file disc="/Scene/UI/Present_Q.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
+		<file disc="/Scene/UI/Present_U.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
+		<file disc="/Scene/UI/Present_J.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
+		<file disc="/Scene/UI/Present_K.szs" external="/PACKNAME/Scene/UI/Present_U.szs" />
+		<file disc="/Scene/UI/Present.szs" external="/PACKNAME/Scene/UI/Present.szs" />
+		<file disc="/Scene/UI/Present_R.szs" external="/PACKNAME/Scene/UI/Present.szs" />
+		<!--RACE-->
+		<file disc="/Scene/UI/Race_E.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_F.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_G.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_I.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_S.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_M.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_Q.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_U.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_J.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race_K.szs" external="/PACKNAME/Scene/UI/Race_U.szs" />
+		<file disc="/Scene/UI/Race.szs" external="/PACKNAME/Scene/UI/Race.szs" />
+		<file disc="/Scene/UI/Race_R.szs" external="/PACKNAME/Scene/UI/Race.szs" />
+		<!--TITLE-->
+		<file disc="/Scene/UI/Title_E.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
+		<file disc="/Scene/UI/Title_F.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
+		<file disc="/Scene/UI/Title_G.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
+		<file disc="/Scene/UI/Title_I.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
+		<file disc="/Scene/UI/Title_S.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
+		<file disc="/Scene/UI/Title_M.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
+		<file disc="/Scene/UI/Title_Q.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
+		<file disc="/Scene/UI/Title_U.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
+		<file disc="/Scene/UI/Title_J.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
+		<file disc="/Scene/UI/Title_K.szs" external="/PACKNAME/Scene/UI/Title_U.szs" />
+		<file disc="/Scene/UI/Title.szs" external="/PACKNAME/Scene/UI/Title.szs" />
+		<file disc="/Scene/UI/Title_R.szs" external="/PACKNAME/Scene/UI/Title.szs" />
+		<!--END-OF-SCENE-->
 
-		<!--EVERYTHING BELOW THIS POINT WILL GET REPLACED IN THE NEXT CTDM PATCH.-->
-		<!--IF YOU NEED TO ADD MORE REPLACEMENTS, ADD THEM ABOVE-->
+		<!--EVERYTHING-BELOW-GETS-OVERWRITTEN-->
 
-		<!--BEGIN CUSTOM TRACKS-->
-		<!--NOT NEEDED?-->
-		<!--END CUSTOM TRACKS-->
-		<!--CUSTOM CHARACTERS-->
-		<!--END CUSTOM CHARACTERS-->
-		<!--FINAL END-->
+		<!--CUSTOM-CHARACTERS-->
+		<!--END-CUSTOM-CHARACTERS-->
+		<!--FINAL-END-->
 
 	</patch>
 
