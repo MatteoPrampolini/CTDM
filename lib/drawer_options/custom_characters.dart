@@ -76,7 +76,9 @@ class _CustomCharactersState extends State<CustomCharacters> {
     // } else {
     // //   characterPaths[n.index] = path.basename(n.path);
     // }
-    characterPaths[n.index] = path.basename(n.path);
+    else {
+      characterPaths[n.index] = path.basename(n.path);
+    }
     String contents = "";
     for (var element in allCharacters) {
       contents +=

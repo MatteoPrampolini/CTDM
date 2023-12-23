@@ -335,20 +335,13 @@ int getNumberOfCustomCharacters(File charTxt) {
 ///
 String xmlReplaceCharactersModelScenes(
     String packPath, List<String> allKartsList) {
+  //TODO FIX
   String bigString = '\n\t\t<!--CUSTOM-CHARACTERS-->\n';
-  for (File f in Directory(path.join(packPath, 'Race', 'Kart'))
-      .listSync()
-      .whereType<File>()
-      .toList()) {
-    String basename = path.basename(f.path);
-    //create is not needed here, but it can avoid errors if the user places wrong files inside the custChar/kart/ folder
-    bigString +=
-        '\t\t<file disc="/Race/Kart/$basename" external="/${path.basename(packPath)}/Race/Kart/$basename" create="true"/>\n';
-  }
-  for (String allKartPath in allKartsList) {
-    bigString +=
-        '\t\t<file disc="/Scene/Model/Kart/$allKartPath" external="/${path.basename(packPath)}/Scene/Model/Kart/$allKartPath"/>\n';
-  }
+  bigString +=
+      '\t\t<folder disc="/Race/Kart" external="/${path.basename(packPath)}/Race/Kart"/>\n';
+  bigString +=
+      '\t\t<folder disc="/Scene/Model/Kart" external="/${path.basename(packPath)}/Scene/Model/Kart"/>\n';
+
   bigString += "\t\t<!--END-CUSTOM-CHARACTERS-->\n\t\t";
   return bigString;
 }
@@ -381,6 +374,7 @@ class CustomCharacter {
   late File configFile;
   CustomCharacter(this.dir) {
     configFile = File(path.join(dir.path, 'ctdm_settings.txt'));
+
     dirBasename = path.basename(dir.path);
     icon64 = File(path.join(dir.path, 'icons', 'icon64.png'));
     icon32 = File(path.join(dir.path, 'icons', 'icon32.png'));

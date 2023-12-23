@@ -781,7 +781,7 @@ class _PatchWindowState extends State<PatchWindow> {
           runInShell: true);
 
       List<String> customStrings = customTxtContent
-          .where((element) => element.split(';')[1].isNotEmpty)
+          .where((element) => element.split(';')[1].trim().isNotEmpty)
           .toList();
       List<String> charNames = [];
       if (enableCustomChar) {
@@ -846,6 +846,9 @@ class _PatchWindowState extends State<PatchWindow> {
           if (characterIsExtraPain) {
             if (awards.length == 2) {
               await awards[1].copy(path.join(packPath, 'Demo', 'Award.szs.d',
+                  "${characters3D[name]}3.brres"));
+            } else {
+              await awards[0].copy(path.join(packPath, 'Demo', 'Award.szs.d',
                   "${characters3D[name]}3.brres"));
             }
           }
