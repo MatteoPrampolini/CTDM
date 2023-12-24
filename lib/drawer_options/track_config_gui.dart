@@ -418,7 +418,6 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     return true;
   }
 
-  //TODO MOVE
   bool cupShouldMove(CupAskedToBeMoved n) {
     if (n.cupIndex == 1 && n.up) {
       return true;

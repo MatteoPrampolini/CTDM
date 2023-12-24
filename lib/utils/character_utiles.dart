@@ -354,7 +354,6 @@ int getNumberOfCustomCharacters(File charTxt) {
 ///
 String xmlReplaceCharactersModelScenes(
     String packPath, List<String> allKartsList) {
-  //TODO FIX
   String bigString = '\n\t\t<!--CUSTOM-CHARACTERS-->\n';
   bigString +=
       '\t\t<folder disc="/Race/Kart" external="/${path.basename(packPath)}/Race/Kart"/>\n';

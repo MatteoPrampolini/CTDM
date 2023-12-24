@@ -300,7 +300,9 @@ class _CharacterRowState extends State<CharacterRow> {
             child: Tooltip(
               message: widget.name == "Toadette"
                   ? "Wrong Toadette replacement will crash the game.\nUse Toadette-specific custom characters."
-                  : "",
+                  : ["Peach", "Daisy", "Rosalina"].contains(widget.name)
+                      ? "${widget.name} is known to be not compatible with some models.\nUse ${widget.name}-specific custom characters."
+                      : "",
               child: IconButton(
                   iconSize: 64,
                   // padding: const EdgeInsets.only(left: 15),
