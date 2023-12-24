@@ -12,6 +12,10 @@
         "description": "Gecko code contains an invalid character",
         "type": "gecko error"
       },
+      "2501": {
+        "description": "Invalid cup png",
+        "type": "cup image error"
+      },
       "3002": {
         "description": "Gecko code is incompleted",
         "type": "gecko error"
@@ -20,10 +24,6 @@
         "description": "Gecko code .json not found in myCodes",
         "type": "gecko error"
       },
-      "2501": {
-        "description": "Invalid cup png",
-        "type": "cup image error"
-      },
       "5501": {
         "description": "BRSTM not found",
         "type": "custom music"
@@ -31,7 +31,12 @@
       "5502": {
         "description": "BRSTM not found",
         "type": "custom music"
+      },
+      "7001": {
+        "description": "Cannot copy icon to extracted folder",
+        "type": "custom characters"
       }
+
     }
   }
   

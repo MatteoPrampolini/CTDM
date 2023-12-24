@@ -786,7 +786,7 @@ class _PatchWindowState extends State<PatchWindow> {
       List<String> charNames = [];
       if (enableCustomChar) {
         setState(() {
-          progressText = "swapping vehicles files";
+          progressText = "swapping vehicles files\nIt might take some time...";
         });
 
         //extract /Scene/Model/Driver.szs

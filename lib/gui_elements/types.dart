@@ -79,6 +79,13 @@ class CupNameChangedValue extends Notification {
   CupNameChangedValue(this.cupIndex, this.cupName);
 }
 
+class CupAskedToBeMoved extends Notification {
+  final int cupIndex;
+  final String cupName;
+  final bool up;
+  CupAskedToBeMoved(this.cupIndex, this.cupName, this.up);
+}
+
 class AddTrackRequest extends Notification {
   final TrackType type;
   final int cupIndex;

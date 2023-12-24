@@ -70,128 +70,168 @@ class _CupTableState extends State<CupTable> {
   @override
   Widget build(BuildContext context) {
     i = 0;
-
-    return Padding(
-        padding:
-            const EdgeInsets.only(top: 40, bottom: 40, left: 100, right: 100),
-        child: NotificationListener<DeleteModeUpdated>(
-            onNotification: changeDeleteMode,
-            child: Column(children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0, left: 8.0),
-                  child: SizedBox(
-                      width: 250,
-                      child: TextField(
-                        controller: cupNameTextField,
-                        onChanged: (value) => {
-                          widget.cupName = value,
-                          //cupNameTextField.text = value,
-                          CupNameChangedValue(widget.cupIndex, value)
+    //added
+    cupNameTextField.text = widget.cupName != ""
+        ? widget.cupName.replaceAll(r'"', '')
+        : "Cup #${widget.cupIndex}";
+    return NotificationListener<DeleteModeUpdated>(
+        onNotification: changeDeleteMode,
+        child: Stack(
+          children: [
+            Visibility(
+              visible: widget.isDisabled != true,
+              child: Positioned(
+                top: 200,
+                left: 40,
+                child: IconButton(
+                    splashRadius: 25,
+                    onPressed: () => {
+                          CupAskedToBeMoved(
+                                  widget.cupIndex, widget.cupName, true)
                               .dispatch(context)
                         },
-                      )),
-                ),
+                    icon: const Icon(Icons.keyboard_arrow_up)),
               ),
-              widget.isDisabled == true
-                  ? ColorFiltered(
-                      colorFilter: const ColorFilter.mode(
-                          Colors.white70, BlendMode.color),
-                      child: CupTableHeader(
-                          widget.cupIndex, widget.packPath, widget.iconIndex),
-                    )
-                  : CupTableHeader(
-                      widget.cupIndex, widget.packPath, widget.iconIndex),
-              for (var track in widget.cup)
-                track.type == TrackType.base
-                    ? widget.isDisabled == true
-                        ? ColorFiltered(
-                            colorFilter: const ColorFilter.mode(
-                                Colors.white24, BlendMode.color),
-                            child: CupTableRow(track, widget.cupIndex,
-                                i = i + 1, widget.packPath, canDelete),
-                          )
-                        : CupTableRow(track, widget.cupIndex, i = i + 1,
-                            widget.packPath, canDelete)
-                    : track.type == TrackType.menu
-                        ? CupTableSubMenu(
-                            [track]
-                                .followedBy(
-                                  widget.cup.sublist(i + 1).takeWhile((track) =>
-                                      track.type != TrackType.base &&
-                                      track.type != TrackType.menu),
-                                )
-                                .toList(),
-                            widget.cupIndex,
-                            i = i + 1,
-                            widget.packPath,
-                            canDelete)
+            ),
+            Visibility(
+              visible: widget.isDisabled != true,
+              child: Positioned(
+                top: 240,
+                left: 40,
+                child: IconButton(
+                    splashRadius: 25,
+                    onPressed: () => {
+                          CupAskedToBeMoved(
+                                  widget.cupIndex, widget.cupName, false)
+                              .dispatch(context)
+                        },
+                    icon: const Icon(Icons.keyboard_arrow_down)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 40, bottom: 40, left: 100, right: 100),
+              child: Column(children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+                    child: SizedBox(
+                        width: 250,
+                        child: TextField(
+                          controller: cupNameTextField,
+                          onChanged: (value) => {
+                            widget.cupName = value,
+                            //cupNameTextField.text = value,
+                            CupNameChangedValue(widget.cupIndex, value)
+                                .dispatch(context)
+                          },
+                        )),
+                  ),
+                ),
+                widget.isDisabled == true
+                    ? ColorFiltered(
+                        colorFilter: const ColorFilter.mode(
+                            Colors.white70, BlendMode.color),
+                        child: CupTableHeader(
+                            widget.cupIndex, widget.packPath, widget.iconIndex),
+                      )
+                    : CupTableHeader(
+                        widget.cupIndex, widget.packPath, widget.iconIndex),
+                for (var track in widget.cup)
+                  track.type == TrackType.base
+                      ? widget.isDisabled == true
+                          ? ColorFiltered(
+                              colorFilter: const ColorFilter.mode(
+                                  Colors.white24, BlendMode.color),
+                              child: CupTableRow(track, widget.cupIndex,
+                                  i = i + 1, widget.packPath, canDelete),
+                            )
+                          : CupTableRow(track, widget.cupIndex, i = i + 1,
+                              widget.packPath, canDelete)
+                      : track.type == TrackType.menu
+                          ? CupTableSubMenu(
+                              [track]
+                                  .followedBy(
+                                    widget.cup.sublist(i + 1).takeWhile(
+                                        (track) =>
+                                            track.type != TrackType.base &&
+                                            track.type != TrackType.menu),
+                                  )
+                                  .toList(),
+                              widget.cupIndex,
+                              i = i + 1,
+                              widget.packPath,
+                              canDelete)
 
-                        // CupTableSubMenu(
-                        //     widget.cup
-                        //                 .getRange(
-                        //                     widget.cup.indexOf(track),
-                        //                     getLastHiddenIndexPlus1(
-                        //                         widget.cup, track))
-                        //                 .toList()
-                        //                 .isEmpty ==
-                        //             true
-                        //         ? List.of([track])
-                        //         : widget.cup
-                        //             .getRange(
-                        //                 widget.cup.indexOf(track),
-                        //                 getLastHiddenIndexPlus1(
-                        //                     widget.cup, track))
-                        //             .toList(),
-                        //     widget.cupIndex,
-                        //     increaseCounter(
-                        //         i,
-                        //         widget.cup
-                        //             .getRange(
-                        //                 widget.cup.indexOf(track),
-                        //                 widget.cup.indexOf(widget.cup
-                        //                     .sublist(widget.cup.indexOf(track))
-                        //                     .firstWhere(
-                        //                         (element) =>
-                        //                             element.type ==
-                        //                             TrackType.base,
-                        //                         orElse: () => track)))
-                        //             .toList()
-                        //             .length),
-                        //     widget.packPath,
-                        //     canDelete)
-                        : Container(
-                            child: (i = i + 1) > 0 ? null : Container(),
+                          // CupTableSubMenu(
+                          //     widget.cup
+                          //                 .getRange(
+                          //                     widget.cup.indexOf(track),
+                          //                     getLastHiddenIndexPlus1(
+                          //                         widget.cup, track))
+                          //                 .toList()
+                          //                 .isEmpty ==
+                          //             true
+                          //         ? List.of([track])
+                          //         : widget.cup
+                          //             .getRange(
+                          //                 widget.cup.indexOf(track),
+                          //                 getLastHiddenIndexPlus1(
+                          //                     widget.cup, track))
+                          //             .toList(),
+                          //     widget.cupIndex,
+                          //     increaseCounter(
+                          //         i,
+                          //         widget.cup
+                          //             .getRange(
+                          //                 widget.cup.indexOf(track),
+                          //                 widget.cup.indexOf(widget.cup
+                          //                     .sublist(widget.cup.indexOf(track))
+                          //                     .firstWhere(
+                          //                         (element) =>
+                          //                             element.type ==
+                          //                             TrackType.base,
+                          //                         orElse: () => track)))
+                          //             .toList()
+                          //             .length),
+                          //     widget.packPath,
+                          //     canDelete)
+                          : Container(
+                              child: (i = i + 1) > 0 ? null : Container(),
+                            ),
+                // : CupTableRow(track, widget.cupIndex, i = i + 1,
+                //     widget.packPath, canDelete),
+                Visibility(
+                    visible: widget.cup
+                            .where(
+                                (element) => element.type != TrackType.hidden)
+                            .length <
+                        4,
+                    child: SizedBox(
+                      width: 300,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            child: const Text("Add track"),
+                            onPressed: () =>
+                                AddTrackRequest(TrackType.base, widget.cupIndex)
+                                    .dispatch(context),
                           ),
-              // : CupTableRow(track, widget.cupIndex, i = i + 1,
-              //     widget.packPath, canDelete),
-              Visibility(
-                  visible: widget.cup
-                          .where((element) => element.type != TrackType.hidden)
-                          .length <
-                      4,
-                  child: SizedBox(
-                    width: 300,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                          child: const Text("Add track"),
-                          onPressed: () =>
-                              AddTrackRequest(TrackType.base, widget.cupIndex)
-                                  .dispatch(context),
-                        ),
-                        ElevatedButton(
-                          child: const Text("Add menu"),
-                          onPressed: () =>
-                              AddTrackRequest(TrackType.menu, widget.cupIndex)
-                                  .dispatch(context),
-                        )
-                      ],
-                    ),
-                  ))
-            ])));
+                          ElevatedButton(
+                            child: const Text("Add menu"),
+                            onPressed: () =>
+                                AddTrackRequest(TrackType.menu, widget.cupIndex)
+                                    .dispatch(context),
+                          )
+                        ],
+                      ),
+                    ))
+              ]),
+            ),
+          ],
+        ));
   }
 }
 

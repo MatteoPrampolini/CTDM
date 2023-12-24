@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:ctdm/drawer_options/custom_files.dart';
+import 'package:ctdm/utils/exceptions_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:path/path.dart' as path;
 import 'dart:math';
@@ -160,12 +161,12 @@ final Map<String, String> vehicles = {
   "Blue Falcon Co-op": "se_kart_4",
 };
 
-patchWithBrres(Directory extractedSzs, File brress, String subFolderpath) {}
 patchSzsWithImages(String packPath, Directory extractedSzs,
     List<String> charactersTxtLines, int index) async {
   //List<String> replacementsPaths = [];
   List<Directory> dir64List = List<Directory>.from(getDirsFromFileIndex(
       packPath, SceneComplete.values[index], extractedSzs)[0]);
+
   List<Directory> dir32List = List<Directory>.from(getDirsFromFileIndex(
       packPath, SceneComplete.values[index], extractedSzs)[1]);
   if (dir64List.isEmpty) return;
@@ -190,8 +191,17 @@ patchSzsWithImages(String packPath, Directory extractedSzs,
       for (Directory dir64 in dir64List) {
         String filenameTpl = getOriginalFileNameForCharacter(i, false);
 
-        await icon64.copy(path.join(dir64.path, "$filenameTpl.png"));
-
+        try {
+          await icon64.copy(path.join(dir64.path, "$filenameTpl.png"));
+        } on Exception catch (_) {
+          logString(LogType.ERROR,
+              "custom character $relFolder: Cannot copy icon64.png to ${path.join(dir64.path, "$filenameTpl.png")}");
+          throw CtdmError(
+              errorCode: "7001",
+              description:
+                  "custom character $relFolder: Cannot copy icon32.png to ${path.join(dir64.path, "$filenameTpl.png")}",
+              type: "custom characters");
+        }
         await Process.run(
             'wimgt',
             [
@@ -211,8 +221,17 @@ patchSzsWithImages(String packPath, Directory extractedSzs,
       for (Directory dir32 in dir32List) {
         String filenameTpl = getOriginalFileNameForCharacter(i, true);
         //print(path.join(dir32.path, "$filenameTpl.png"));
-        await icon32.copy(path.join(dir32.path, "$filenameTpl.png"));
-
+        try {
+          await icon32.copy(path.join(dir32.path, "$filenameTpl.png"));
+        } on Exception catch (_) {
+          logString(LogType.ERROR,
+              "custom character $relFolder: Cannot copy icon32.png to ${path.join(dir32.path, "$filenameTpl.png")}");
+          throw CtdmError(
+              errorCode: "7001",
+              description:
+                  "custom character $relFolder: Cannot copy icon32.png to ${path.join(dir32.path, "$filenameTpl.png")}",
+              type: "custom characters");
+        }
         await Process.run(
             'wimgt',
             [
