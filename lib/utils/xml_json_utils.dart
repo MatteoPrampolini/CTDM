@@ -335,9 +335,11 @@ void createXmlFile(String xmlPath) {
   String contents = xmlFile.readAsStringSync();
 
   String packId = contents.split(RegExp(r'patch id='))[1];
+
   packId =
       packId.replaceRange(packId.indexOf(r'/'), null, '').replaceAll('"', '');
-  return (path.basename(packPath), packId);
+
+  return (path.basename(packPath), packId.trim());
 }
 
 void replaceParamsInXml(
@@ -354,6 +356,7 @@ void replaceParamsInXml(
   // oldId = oldId.replaceRange(oldId.indexOf(r'/'), null, '').replaceAll('"', '');
   String oldName, oldId;
   (oldName, oldId) = getPackNameAndId(path.dirname(xmlFile.path));
+
   //contents = contents.replaceAll(versionRegex, '-$isoVersion.bin');
   contents = contents.replaceAll('PACKNAME', chosenName);
   contents = contents.replaceAll(oldName, chosenName);

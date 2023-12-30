@@ -65,13 +65,9 @@ class _RenamePackState extends State<RenamePack> {
       if (!xmlFile.existsSync()) {
         createXmlFile(xmlPath);
       }
-
-      String contents = xmlFile.readAsStringSync();
-      packIdChosen = contents.split(RegExp(r'patch id='))[1];
-
-      packIdChosen = packIdChosen
-          .replaceRange(packIdChosen.indexOf(r'/'), null, '')
-          .replaceAll('"', '');
+      var packStrings = getPackNameAndId(widget.packPath);
+      packNameChosen = packStrings.$1;
+      packIdChosen = packStrings.$2;
     }
     _chosenNameController = TextEditingController.fromValue(
       TextEditingValue(
