@@ -1,5 +1,10 @@
 {
+    
     "errors": {
+      "1001": {
+        "description": "Cannot extract game file to ORIGINAL DISC",
+        "type": "wit error"
+      },
       "2001": {
         "description": "Invalid config.txt",
         "type": "config error"

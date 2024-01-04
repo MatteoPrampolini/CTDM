@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:ctdm/pack_editor.dart';
+import 'package:ctdm/utils/exceptions_utils.dart';
+import 'package:ctdm/utils/log_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
@@ -20,10 +22,14 @@ Future<int> extractIso(String source, String dest) async {
   final process =
       await Process.start('wit', ['EXTRACT', source, dest], runInShell: true);
   final exitCode = await process.exitCode;
+  if (exitCode != 0) {
+    logString(LogType.ERROR, "ERROR 1001: cannot extract $source to $dest");
+    throw CtdmException("Cannot extract $source to ORIGINAL DISC folder",
+        StackTrace.current, "1001");
+  }
   ProcessResult checkKoreanIso = await Process.run(
       'wit', ['dump', source, '--show', 'D-ID'],
       runInShell: true);
-
   if (checkKoreanIso.stdout.toString().contains('RMCK01')) {
     String originalDiscPath = dest;
     if (await Directory(path.join(originalDiscPath, 'DATA')).exists()) {
