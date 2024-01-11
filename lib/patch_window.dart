@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ctdm/utils/exceptions_utils.dart';
+import 'package:ctdm/utils/image_utils.dart';
 import 'package:ctdm/utils/xml_json_utils.dart';
 import 'dart:ui' as ui;
 import 'package:ctdm/drawer_options/cup_icons.dart';
@@ -308,18 +310,21 @@ Future<File> createBigImage(Directory iconDir, int nCups) async {
   for (File icon in iconFileList) {
     imageList.add(await ImagesMergeHelper.loadImageFromFile(icon));
     var decodedImage = await decodeImageFromList(icon.readAsBytesSync());
+
     if (decodedImage.width != 128 || decodedImage.height != 128) {
       throw CtdmException(
           "'Icons/${path.basename(icon.path)}' isn't 128x128.'", null, '2501');
     }
   }
 
-  ui.Image image = await ImagesMergeHelper.margeImages(imageList,
-      fit: true, direction: Axis.vertical, backgroundColor: Colors.transparent);
+  ui.Image image = margeImages(imageList,
+      fit: false,
+      direction: Axis.vertical,
+      backgroundColor: Colors.transparent);
 
-  final data = await image.toByteData(
-    format: ui.ImageByteFormat.png,
-  );
+  ByteData? data = await image.toByteData(
+      //format: ui.ImageByteFormat.png,
+      );
 
   final bytes = data!.buffer.asUint8List();
 

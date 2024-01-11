@@ -37,6 +37,10 @@
         "description": "BRSTM not found",
         "type": "custom music"
       },
+      "5503": {
+        "description": "Cannot parse ffmpeg",
+        "type": "custom music"
+      },
       "7001": {
         "description": "Cannot copy icon to extracted folder",
         "type": "custom characters"

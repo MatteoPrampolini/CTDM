@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:ctdm/utils/exceptions_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -354,31 +355,36 @@ Future<double> getMaxVolumePeak(File input) async {
 
 Future<File> _runCommandToNormalize(
     File inputFile, File outputFile, String inputString) async {
-  Map<String, dynamic> data = json.decode(inputString);
+  try {
+    Map<String, dynamic> data = json.decode(inputString);
 
-  String measuredI = data["input_i"];
-  String measuredTP = data["input_tp"];
-  String measuredLRA = data["input_lra"];
-  double targetOffset = 0.0; // Imposta l'offset su 0.0 come valore predefinito
+    String measuredI = data["input_i"];
+    String measuredTP = data["input_tp"];
+    String measuredLRA = data["input_lra"];
+    double targetOffset =
+        0.0; // Imposta l'offset su 0.0 come valore predefinito
 
-  // Calcola il valore della soglia di loudness
-  String measuredThreshold =
-      (double.parse(measuredI) - double.parse(measuredLRA)).toString();
-  String inputFilePath = inputFile.path;
-  String outputFilePath = outputFile.path;
+    // Calcola il valore della soglia di loudness
+    String measuredThreshold =
+        (double.parse(measuredI) - double.parse(measuredLRA)).toString();
+    String inputFilePath = inputFile.path;
+    String outputFilePath = outputFile.path;
 
-  List<String> ffmpegArgs = [
-    '-i',
-    inputFilePath,
-    '-af',
-    'loudnorm=I=-5.0:lra=1:tp=-0.0'
-        ':measured_I=$measuredI:measured_LRA=$measuredLRA:measured_TP=$measuredTP'
-        ':measured_thresh=$measuredThreshold:offset=${targetOffset.toStringAsFixed(2)}:linear=true',
-    outputFilePath,
-  ];
+    List<String> ffmpegArgs = [
+      '-i',
+      inputFilePath,
+      '-af',
+      'loudnorm=I=-5.0:lra=1:tp=-0.0'
+          ':measured_I=$measuredI:measured_LRA=$measuredLRA:measured_TP=$measuredTP'
+          ':measured_thresh=$measuredThreshold:offset=${targetOffset.toStringAsFixed(2)}:linear=true',
+      outputFilePath,
+    ];
 
-  await Process.run('ffmpeg', ffmpegArgs, runInShell: true);
-
+    await Process.run('ffmpeg', ffmpegArgs, runInShell: true);
+  } catch (_) {
+    logString(LogType.ERROR, "ERROR 5503: Cannot parse ffmpeg.");
+    throw CtdmException(inputString, StackTrace.current, "5503");
+  }
   return outputFile;
 }
 
