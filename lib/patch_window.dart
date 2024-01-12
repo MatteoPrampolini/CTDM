@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:ctdm/utils/exceptions_utils.dart';
 import 'package:ctdm/utils/image_utils.dart';
@@ -22,7 +21,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:merge_images/merge_images.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:image/image.dart' as img;
 import 'drawer_options/custom_files.dart';
 
 class PatchWindow extends StatefulWidget {
@@ -307,7 +306,7 @@ Future<File> createBigImage(Directory iconDir, int nCups) async {
   List<ui.Image> imageList = [];
   List<File> iconFileList = iconDir.listSync().whereType<File>().toList();
   iconFileList.sort((a, b) => compareAlphamagically(a, b));
-  for (File icon in iconFileList) {
+  for (File icon in iconFileList.skip(0)) {
     imageList.add(await ImagesMergeHelper.loadImageFromFile(icon));
     var decodedImage = await decodeImageFromList(icon.readAsBytesSync());
 
@@ -316,20 +315,10 @@ Future<File> createBigImage(Directory iconDir, int nCups) async {
           "'Icons/${path.basename(icon.path)}' isn't 128x128.'", null, '2501');
     }
   }
-
-  ui.Image image = margeImages(imageList,
-      fit: false,
-      direction: Axis.vertical,
-      backgroundColor: Colors.transparent);
-
-  ByteData? data = await image.toByteData(
-      //format: ui.ImageByteFormat.png,
-      );
-
-  final bytes = data!.buffer.asUint8List();
-
   File mergedFile = File(path.join(iconDir.path, 'merged.png'));
-  mergedFile = await mergedFile.writeAsBytes(bytes, flush: true);
+  img.Image mergedImage = await newMergeImages(iconFileList);
+
+  await mergedFile.writeAsBytes(img.encodePng(mergedImage));
 
   return mergedFile;
 }
@@ -980,6 +969,7 @@ class _PatchWindowState extends State<PatchWindow> {
     packJsonContents = addPatchJson('My Stuff', packId, packJsonContents);
     await jsonFile.writeAsString(const JsonEncoder.withIndent(' ')
         .convert(json.decode(packJsonContents)));
+
     await File(path.join(packPath, 'Icons', 'merged.png')).delete();
 
     setState(() {
