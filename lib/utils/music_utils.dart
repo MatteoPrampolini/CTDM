@@ -356,7 +356,10 @@ Future<double> getMaxVolumePeak(File input) async {
 Future<File> _runCommandToNormalize(
     File inputFile, File outputFile, String inputString) async {
   try {
-    Map<String, dynamic> data = json.decode(inputString);
+    String parsedString =
+        "{${(RegExp(r'\{([^}]+)\}').firstMatch(inputString)!.group(1))}}";
+
+    Map<String, dynamic> data = json.decode(parsedString);
 
     String measuredI = data["input_i"];
     String measuredTP = data["input_tp"];
@@ -381,8 +384,9 @@ Future<File> _runCommandToNormalize(
     ];
 
     await Process.run('ffmpeg', ffmpegArgs, runInShell: true);
-  } catch (_) {
-    logString(LogType.ERROR, "ERROR 5503: Cannot parse ffmpeg.");
+  } catch (e) {
+    logString(
+        LogType.ERROR, "ERROR 5503: Cannot parse ffmpeg.\n${e.toString()}");
     throw CtdmException(inputString, StackTrace.current, "5503");
   }
   return outputFile;

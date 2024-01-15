@@ -101,14 +101,9 @@ class _PackEditorState extends State<PackEditor> {
         0) {
       checks[5] = true;
     }
-    if (File(path.join(widget.packPath, 'misc.txt')).existsSync()) {
-      checks[6] = getNofCustomUiSelected(widget.packPath) > 0 ||
-          File(path.join(widget.packPath, 'misc.txt'))
-              .readAsLinesSync()
-              .isNotEmpty;
-    } else {
-      checks[6] = getNofCustomUiSelected(widget.packPath) > 0;
-    }
+
+    checks[6] = getNofCustomUiSelected(widget.packPath) > 0 ||
+        getNofMiscFiles(widget.packPath) > 0;
 
     String regionContent = readRegionFile(widget.packPath);
     if (regionContent != "") {

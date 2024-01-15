@@ -52,12 +52,15 @@ int getNofCustomUiSelected(String packPath) {
       .trim()
       .split(',')
       .toList();
+  return a.where((element) => element.toLowerCase() == "true").length;
+}
 
-  return a
-      .map((string) => string.toLowerCase() == "true")
-      .toList()
-      .takeWhile((value) => value == true)
-      .length;
+int getNofMiscFiles(String packPath) {
+  File miscFile = File(path.join(packPath, 'misc.txt'));
+  if (!miscFile.existsSync()) {
+    return 0;
+  }
+  return miscFile.readAsLinesSync().length;
 }
 
 void saveUIConfig(File uiFile, List<bool> values) {
