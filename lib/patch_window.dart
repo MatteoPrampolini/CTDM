@@ -726,10 +726,17 @@ class _PatchWindowState extends State<PatchWindow> {
           path.basename(sceneSzs.path));
 
       String commonTxtContents = await commonTxtFile.readAsString();
+
       commonTxtContents = replaceCharacterNameInCommonTxt(
           packPath, commonTxtContents, customFileTxtContents);
-
+      if (commonTxtContents.contains("#--- [6800:6c01] LE-CODE: cup names")) {
+        commonTxtContents = commonTxtContents.replaceRange(
+            commonTxtContents.indexOf("#--- [6800:6c01] LE-CODE: cup names"),
+            null,
+            "");
+      }
       String completeBmgContents = commonTxtContents + trackBmgTxtContents;
+
       completeBmgContents = replaceCharacterNameInCommonTxt(
           packPath, completeBmgContents, customFileTxtContents);
       completeBmgContents = replaceCommonBmgTextWithVanillaNames(
