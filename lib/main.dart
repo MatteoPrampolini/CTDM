@@ -231,29 +231,22 @@ class NotifyErrorWidget extends StatelessWidget {
 }
 
 Future<String?> checkForUpdates(String version) async {
-  // Ottieni le informazioni sulla versione corrente dell'app
-
   String currentVersion = version;
 
-  // Costruisci l'URL per ottenere le release da GitHub
   String owner = 'MatteoPrampolini';
   String repository = 'CTDM';
   String apiUrl = 'https://api.github.com/repos/$owner/$repository/releases';
 
   try {
-    // Effettua la richiesta HTTP alle release di GitHub
     http.Response response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
-      // Parsa la risposta JSON
       List<dynamic> releases = json.decode(response.body);
 
-      // Trova l'ultima versione tra le release
       String latestVersion =
           releases.isNotEmpty ? releases[0]['tag_name'] : null;
 
-      // Confronta la versione corrente con l'ultima versione disponibile
-      if (latestVersion.compareTo(currentVersion) > 0) {
+      if (compareVersions(latestVersion, currentVersion) > 0) {
         return latestVersion;
       }
     } else {
@@ -270,7 +263,7 @@ Future<void> _main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  await prefs.setString('version', 'v0.9.9c');
+  await prefs.setString('version', 'v0.9.10');
   await prefs.setBool('download_already_check', false);
 
   try {
@@ -429,6 +422,7 @@ class _MyHomePageState extends State<MyHomePage> {
       witFound = prefs.getBool('wit')!;
     });
     String version = prefs.getString('version')!;
+
     String? newVersion = await checkForUpdates(version);
     bool alreadyAsked = prefs.getBool('download_already_check')!;
     if (newVersion != null && !alreadyAsked) {
@@ -640,4 +634,47 @@ String addNewLinesEveryNCharacters(String input, int n) {
   }
 
   return output.toString();
+}
+
+int compareVersions(String version1, String version2) {
+  List<String> v1Components = version1.split('.');
+  List<String> v2Components = version2.split('.');
+
+  for (int i = 0; i < v1Components.length && i < v2Components.length; i++) {
+    String v1 = v1Components[i];
+    String v2 = v2Components[i];
+
+    int numericComparison = _compareNumericComponents(v1, v2);
+    if (numericComparison != 0) {
+      return numericComparison;
+    }
+
+    int alphaComparison = _compareAlphaComponents(v1, v2);
+    if (alphaComparison != 0) {
+      return alphaComparison;
+    }
+  }
+
+  return v1Components.length - v2Components.length;
+}
+
+int _compareNumericComponents(String v1, String v2) {
+  int numeric1 = int.tryParse(v1) ?? 0;
+  int numeric2 = int.tryParse(v2) ?? 0;
+
+  if (numeric1 < numeric2) {
+    return -1;
+  } else if (numeric1 > numeric2) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+int _compareAlphaComponents(String v1, String v2) {
+  // // Estrai la parte alfanumerica da entrambe le componenti
+  // String alpha1 = v1.replaceAll(RegExp(r'[0-9]'), '');
+  // String alpha2 = v2.replaceAll(RegExp(r'[0-9]'), '');
+
+  return v1.compareTo(v2);
 }
