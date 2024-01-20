@@ -402,7 +402,15 @@ class CustomCharacter {
           Size.values[int.parse(configFile.readAsLinesSync()[0].split(';')[1])];
       name = configFile.readAsLinesSync()[1].split(';')[1];
     } else {
-      configFile.writeAsStringSync("size;2\nname; ", mode: FileMode.writeOnly);
+      try {
+        configFile.writeAsStringSync("size;2\nname; ",
+            mode: FileMode.writeOnly);
+      } on FileSystemException catch (e) {
+        throw CtdmException(
+            "Cannot write ${configFile.path} for custom character.",
+            StackTrace.current,
+            "7002");
+      }
       size = Size.small;
       name = " ";
     }

@@ -44,6 +44,10 @@
       "7001": {
         "description": "Cannot copy icon to extracted folder",
         "type": "custom characters"
+      },
+      "7002": {
+        "description": "Cannot write ctdm_settings.txt for custom character.",
+        "type": "custom characters"
       }
 
     }
