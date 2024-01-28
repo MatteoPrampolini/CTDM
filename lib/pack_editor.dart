@@ -334,8 +334,10 @@ class _PackEditorState extends State<PackEditor> {
                                 child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.green),
-                                    onPressed: () =>
-                                        {exportToExcel(widget.packPath)},
+                                    onPressed: () => {
+                                          exportToExcel(
+                                              widget.packPath, context)
+                                        },
                                     child: const Text("EXPORT XLSX")),
                               ),
                             ),
@@ -470,4 +472,28 @@ class _PackEditorState extends State<PackEditor> {
           )),
     );
   }
+}
+
+void showResultModal(BuildContext context, String title, String result) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(
+          title,
+          style: const TextStyle(color: Colors.amberAccent),
+        ),
+        content:
+            FittedBox(fit: BoxFit.fitWidth, child: Text(result, maxLines: 2)),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Close"),
+          ),
+        ],
+      );
+    },
+  );
 }

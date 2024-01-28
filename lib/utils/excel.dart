@@ -3,7 +3,9 @@ import 'package:ctdm/drawer_options/track_config_gui.dart';
 import 'package:ctdm/gui_elements/types.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:excel/excel.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:ctdm/pack_editor.dart';
 
 void createExcelFromTextFile(String textFilePath, String excelFilePath) {
   final textFile = File(textFilePath);
@@ -43,12 +45,11 @@ void createExcelFromTextFile(String textFilePath, String excelFilePath) {
 //     ..writeAsBytesSync(fileBytes!);
 //   print('Exel created!');
 // }
-void exportToExcel(String packPath) {
+void exportToExcel(String packPath, BuildContext context) {
   File configFile = File(path.join(packPath, 'config.txt'));
-  String excelPath = path.join(packPath, 'config.xlsx');
-  List<Cup> cups = parseConfig(configFile);
+  String excelPath = path.join(packPath, '${path.basename(packPath)}.xlsx');
+  List<Cup> cups = parseConfig(configFile.path);
   for (var i = 0; i < cups.length; i++) {
-    // print("|${cups[i].cupName}|,${cups[i].cupName.isEmpty}");
     if (cups[i].cupName.isEmpty) {
       cups[i].cupName = "Cup #${i + 1}";
     }
@@ -59,14 +60,53 @@ void exportToExcel(String packPath) {
     File(excelPath)
       ..createSync(recursive: true)
       ..writeAsBytesSync(fileBytes!);
+    showResultModal(context, "Done",
+        "${path.basename(packPath)}.xlsx created succesfully.");
   } on Exception catch (_) {
     logString(LogType.ERROR, _.toString());
+    showResultModal(
+        context, "Done", "Cannot create ${path.basename(packPath)}.xlsx");
   }
 }
 
-List<Cup> parseConfig(File configFile) {
+// List<Cup> parseConfig(File configFile) {
+//   List<Cup> cups = [];
+//   String contents = configFile.readAsStringSync();
+//   List<String> cupList = contents
+//       .split(r"N$F_WII")[1]
+//       .split(RegExp(r'^C.*[0-9]?', multiLine: true));
+
+//   List<String> cupNames = contents
+//       .split(r"N$F_WII")[1]
+//       .split("\n")
+//       .where((element) => element.startsWith('C'))
+//       .toList();
+//   cupList.removeAt(0);
+
+//   int i = 0;
+//   String tmpName = "";
+//   for (String cupString in cupList) {
+//     if (cupNames[i].length > 1) {
+//       tmpName = cupNames[i].replaceRange(0, 2, '');
+//     } else {
+//       tmpName = "";
+//     }
+//     cups.add(Cup(tmpName, splitCupListsFromText(cupString.trim())));
+//     i++;
+//   }
+//   return cups;
+// }
+
+List<Cup> parseConfig(String configPath) {
+  //List<List<Track>> cups = [];
   List<Cup> cups = [];
+  File configFile = File(configPath);
   String contents = configFile.readAsStringSync();
+  String arenaTxt = "";
+  if (contents.contains('[SETUP-ARENA]')) {
+    arenaTxt = contents.split('[SETUP-ARENA]').last;
+    contents = contents.split('[SETUP-ARENA]').first;
+  }
   List<String> cupList = contents
       .split(r"N$F_WII")[1]
       .split(RegExp(r'^C.*[0-9]?', multiLine: true));
@@ -76,6 +116,7 @@ List<Cup> parseConfig(File configFile) {
       .split("\n")
       .where((element) => element.startsWith('C'))
       .toList();
+
   cupList.removeAt(0);
 
   int i = 0;
@@ -89,6 +130,7 @@ List<Cup> parseConfig(File configFile) {
     cups.add(Cup(tmpName, splitCupListsFromText(cupString.trim())));
     i++;
   }
+  cups.addAll(parseArenaTxt(arenaTxt));
   return cups;
 }
 

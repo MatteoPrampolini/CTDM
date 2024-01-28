@@ -152,13 +152,14 @@ class _CustomUIState extends State<CustomUI> {
   @override
   void initState() {
     values = loadUIconfig(widget.packPath);
-
     if (!miscTxt.existsSync()) {
       saveMiscFile(miscTxt, miscList);
     } else {
       miscList = readMiscTxt(miscList, miscTxt);
     }
     super.initState();
+    createFilesUi();
+    createFilesMisc(miscList);
   }
 
   Future<void> createFilesUi() async {
