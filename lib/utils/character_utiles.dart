@@ -405,7 +405,7 @@ class CustomCharacter {
       try {
         configFile.writeAsStringSync("size;2\nname; ",
             mode: FileMode.writeOnly);
-      } on FileSystemException catch (e) {
+      } on FileSystemException catch (_) {
         throw CtdmException(
             "Cannot write ${configFile.path} for custom character.",
             StackTrace.current,

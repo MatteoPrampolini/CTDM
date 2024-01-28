@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:ctdm/gui_elements/cup_table.dart';
+import 'package:ctdm/utils/exceptions_utils.dart';
+import 'package:ctdm/utils/log_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -91,6 +93,13 @@ Track parseTrackLine(String trackLine) {
             ''); //int.parse(RegExp('[0-9]+').stringMatch(param)!);
         break;
       case 1:
+        if (RegExp('[0-9]+').stringMatch(param) == null) {
+          logString(LogType.ERROR,
+              "Cannot parse ([0-9]+) config.txt at line: $param");
+          throw CtdmException("Cannot parse slot id at line: $param",
+              StackTrace.current, "2002");
+        }
+
         tmp.slotId = RegExp('[0-9]+').stringMatch(param)!;
         break;
       case 2:

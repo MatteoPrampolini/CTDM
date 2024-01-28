@@ -17,6 +17,7 @@ class RenamePack extends StatefulWidget {
 
 bool checkValidTextfield(String name, String id) {
   if (name == id) return false;
+  if (name.length < 3 || id.length < 3) return false;
   final validCharactersName = RegExp(r'^[a-zA-Z0-9_ ]+$');
   final validCharactersId = RegExp(r'^[a-zA-Z0-9_]+$');
 

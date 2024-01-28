@@ -9,9 +9,21 @@
         "description": "Invalid config.txt",
         "type": "config error"
       },
+      "2002": {
+        "description": "Cannot line in config.txt",
+        "type": "config error"
+      },
       "2101": {
         "description": "Invalid lpar.txt",
         "type": "lpar error"
+      },
+      "2201": {
+        "description": "Cannot parse packID in XML",
+        "type": "xml error"
+      },
+      "2202": {
+        "description": "Cannot find XML file",
+        "type": "xml error"
       },
       "3001": {
         "description": "Gecko code contains an invalid character",

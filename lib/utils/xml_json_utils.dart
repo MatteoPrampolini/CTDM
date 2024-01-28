@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:ctdm/drawer_options/custom_files.dart';
 import 'package:ctdm/utils/character_utiles.dart';
+import 'package:ctdm/utils/exceptions_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:ctdm/utils/gecko_utils.dart';
 import 'dart:convert';
@@ -331,9 +332,17 @@ void createXmlFile(String xmlPath) {
 
 (String, String) getPackNameAndId(String packPath) {
   File xmlFile = File(path.join(packPath, '${path.basename(packPath)}.xml'));
-
+  if (!xmlFile.existsSync()) {
+    throw CtdmException("${path.basename(packPath)}.xml does not exist.",
+        StackTrace.current, "2202");
+  }
   String contents = xmlFile.readAsStringSync();
-
+  if (contents.split(RegExp(r'patch id=')).isEmpty) {
+    throw CtdmException(
+        "Cannot find pack ID inside ${path.basename(packPath)}.xml",
+        StackTrace.current,
+        "2201");
+  }
   String packId = contents.split(RegExp(r'patch id='))[1];
 
   packId =

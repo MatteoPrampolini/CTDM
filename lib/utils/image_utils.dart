@@ -19,7 +19,7 @@ Future<img.Image> newMergeImages(List<File> imageList) async {
         images.add(decodedImage);
       }
     } catch (e) {
-      print('Error decoding image: $e');
+      //print('Error decoding image: $e');
     }
   }
 
