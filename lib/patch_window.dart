@@ -430,22 +430,6 @@ class _PatchWindowState extends State<PatchWindow> {
       String destPath =
           path.join(packPath, 'Scene', 'UI', path.basename(f.path));
       await f.copy(destPath);
-      //since we are here, we can patch the icons
-      await Process.run(
-          'wszst',
-          [
-            'patch',
-            '--le-menu',
-            //'--9laps',
-            '--cup-icons',
-            path.join(packPath, 'Icons', 'merged.png'),
-            '--links',
-            destPath,
-            '--overwrite',
-            '--dest',
-            destPath
-          ],
-          runInShell: true);
     }
 
     setState(() {
@@ -679,6 +663,20 @@ class _PatchWindowState extends State<PatchWindow> {
               extractedSzs.path
             ],
             runInShell: true);
+        if (await File(
+                path.join(extractedSzs.path, 'button', 'timg', 'ct_icons.tpl'))
+            .exists()) {
+          await File(path.join(
+                  extractedSzs.path, 'button', 'timg', 'ct_icons.tpl'))
+              .delete();
+        }
+        if (await File(
+                path.join(extractedSzs.path, 'control', 'timg', 'ct_icons.tpl'))
+            .exists()) {
+          await File(path.join(
+                  extractedSzs.path, 'control', 'timg', 'ct_icons.tpl'))
+              .delete();
+        }
 
         await patchSzsWithImages(
             packPath,
@@ -687,6 +685,22 @@ class _PatchWindowState extends State<PatchWindow> {
             ),
             customTxtContent,
             scene.index);
+
+        //since we are here, we can patch the icons
+        await Process.run(
+            'wszst',
+            [
+              'patch',
+              '--le-menu',
+              '--cup-icons',
+              path.join(packPath, 'Icons', 'merged.png'),
+              '--links',
+              path.join(packPath, 'Scene', 'UI', baseName),
+              '--overwrite',
+              '--dest',
+              path.join(packPath, 'Scene', 'UI', baseName),
+            ],
+            runInShell: true);
       }
     }
     //edit the Common.bmg of some Scenes
