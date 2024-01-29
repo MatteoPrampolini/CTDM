@@ -42,15 +42,19 @@
         "type": "gecko error"
       },
       "5501": {
-        "description": "BRSTM not found",
+        "description": "Normal BRSTM not found",
         "type": "custom music"
       },
       "5502": {
-        "description": "BRSTM not found",
+        "description": "Fast BRSTM not found",
         "type": "custom music"
       },
       "5503": {
         "description": "Cannot parse ffmpeg",
+        "type": "custom music"
+      },
+      "5504": {
+        "description": "BRSTM folder does not exist",
         "type": "custom music"
       },
       "7001": {

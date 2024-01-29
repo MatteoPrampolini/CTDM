@@ -1030,17 +1030,22 @@ class _PatchWindowState extends State<PatchWindow> {
       }
       if (filepath.endsWith(".brstm")) {
         //if brstm file pair
-
+        Directory folder =
+            Directory(path.join(workspace, 'myMusic', path.dirname(filepath)));
+        if (!folder.existsSync()) {
+          throw CtdmException(
+              '"${folder.path}" does not exist.', StackTrace.current, "5504");
+        }
         try {
-          File normalFile = Directory(path.join(
-                  path.join(workspace, 'myMusic', path.dirname(filepath))))
-              .listSync()
-              .whereType<File>()
-              .firstWhere((element) =>
-                  !isFastBrstm(element.path) &&
-                  element.path.contains(path
-                      .basename(filepath)
-                      .replaceFirst(RegExp(r'_+[a-zA-Z]?\.brstm$'), '')));
+          File normalFile =
+              Directory(path.join(workspace, 'myMusic', path.dirname(filepath)))
+                  .listSync()
+                  .whereType<File>()
+                  .firstWhere((element) =>
+                      !isFastBrstm(element.path) &&
+                      element.path.contains(path
+                          .basename(filepath)
+                          .replaceFirst(RegExp(r'_+[a-zA-Z]?\.brstm$'), '')));
           await normalFile.copy(path.join(musicDir.path, '$id.brstm'));
         } on StateError catch (stateError) {
           logString(LogType.ERROR,
