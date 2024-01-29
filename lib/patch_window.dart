@@ -626,7 +626,7 @@ class _PatchWindowState extends State<PatchWindow> {
           : "skipping music (FAST PATCHING)";
     });
     if (widget.fastPatch != true) {
-      await copyMusic(workspace, packPath);
+      await copyMusic(workspace, packPath, arenaCups.isNotEmpty);
     } else {
       Directory musicDir = Directory(path.join(packPath, 'Music'));
       if (await musicDir.exists()) {
@@ -1000,7 +1000,8 @@ class _PatchWindowState extends State<PatchWindow> {
   }
 
   ///Reads music.txt and copies both music files in mDir from myMusic/mDir to Pack/Music
-  Future<void> copyMusic(workspace, packPath) async {
+  Future<void> copyMusic(
+      String workspace, String packPath, bool hasArena) async {
     if (Platform.isLinux) {
       await giveExecPermissionToBrstmConverter();
     }
@@ -1020,6 +1021,41 @@ class _PatchWindowState extends State<PatchWindow> {
 
     for (String line in await musicTxt.readAsLines()) {
       String id = line.substring(0, 3);
+      int hexValue = int.parse(id, radix: 16);
+      if (hasArena && (hexValue >= 0x20 && hexValue <= 0x29)) {
+        switch (hexValue) {
+          case 0x20:
+            id = "021";
+            break;
+          case 0x21:
+            id = "020";
+            break;
+          case 0x22:
+            id = "023";
+            break;
+          case 0x23:
+            id = "022";
+            break;
+          case 0x24:
+            id = "024";
+            break;
+          case 0x25:
+            id = "027";
+            break;
+          case 0x26:
+            id = "028";
+            break;
+          case 0x27:
+            id = "029";
+            break;
+          case 0x28:
+            id = "025";
+            break;
+          case 0x29:
+            id = "026";
+            break;
+        }
+      }
       tracksIdHex.add(id); //get id of track and add it
 
       String filepath = line.substring(4);
