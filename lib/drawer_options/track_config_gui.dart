@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../gui_elements/types.dart';
+import 'package:flutter/services.dart';
 
 const String debugTrack = 'Short Way Beta 2 (old_koopa_gba)';
 const String debugSlot = '73';
@@ -260,11 +261,12 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   final List<Cup> nintendoCups = getNintendoCups();
   List<Cup> arenaCups = getArenaCups();
   bool debugMode = false;
+  late FocusNode _focusNode;
   @override
   void initState() {
     super.initState();
     createConfigFile(widget.packPath);
-
+    _focusNode = FocusNode();
     loadMusic(widget.packPath);
     loadPrefs();
     // setState(() {
@@ -273,6 +275,12 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     // });
 
     //print(cups);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 
   void loadMusic(String packPath) {
@@ -511,7 +519,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     (context as Element).visitChildren(rebuild);
   }
 
-  void saveConfig() {
+  void saveConfig(BuildContext context) {
     File configTxt = File(path.join(widget.packPath, 'config.txt'));
     File musicTxt = File(path.join(widget.packPath, 'music.txt'));
     //configTxt.deleteSync();
@@ -519,6 +527,25 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
     updateConfigContent(cups, configTxt, keepNintendo, wiimsCup);
     updateMusicConfig(configTxt, musicTxt, keepNintendo, editArena);
+    showDialog(
+        context: context,
+        builder: (context) {
+          Future.delayed(const Duration(milliseconds: 500), () {
+            Navigator.of(context).pop(true);
+          });
+          return const AlertDialog(
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Saved"),
+                Padding(
+                  padding: EdgeInsets.only(left: 8.0),
+                  child: Icon(Icons.thumb_up),
+                ),
+              ],
+            ),
+          );
+        });
   }
 
   void updateMusicConfig(
@@ -721,335 +748,356 @@ N N$nintendoTracksString | """
   Widget build(BuildContext context) {
     //rebuildAllChildren(context);
 
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "Track config GUI",
-            style: TextStyle(color: Colors.black),
+    return RawKeyboardListener(
+      focusNode: _focusNode,
+      autofocus: true,
+      onKey: (RawKeyEvent event) {
+        if (event.isKeyPressed(LogicalKeyboardKey.keyS) &&
+            event.isControlPressed) {
+          // Ctrl + S is pressed, call the saveConfig function
+          saveConfig(context);
+          _focusNode.requestFocus();
+        }
+      },
+      child: Scaffold(
+          appBar: AppBar(
+            title: const Text(
+              "Track config GUI",
+              style: TextStyle(color: Colors.black),
+            ),
+            backgroundColor: Colors.amber,
+            iconTheme: IconThemeData(color: Colors.red.shade700),
           ),
-          backgroundColor: Colors.amber,
-          iconTheme: IconThemeData(color: Colors.red.shade700),
-        ),
-        body: Stack(
-          children: [
-            Visibility(
-                visible: cups.isEmpty && !keepNintendo && !editArena,
-                child: Center(
-                    child: ElevatedButton(
-                        style: const ButtonStyle(
-                            fixedSize: MaterialStatePropertyAll(Size(200, 100)),
-                            backgroundColor:
-                                MaterialStatePropertyAll(Colors.amber)),
-                        onPressed: () => {bulkImport()},
-                        child: const Text(
-                          "Import all myTracks",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20, color: Colors.black87),
-                        )))),
-            SingleChildScrollView(
-              controller: AdjustableScrollController(80),
-              child: NotificationListener<CupAskedToBeMoved>(
-                onNotification: cupShouldMove,
-                child: NotificationListener<RowChangedValue>(
-                  onNotification: rowChangedValue,
-                  child: NotificationListener<DeleteModeUpdated>(
-                    onNotification: deleteHeaderPressed,
-                    child: NotificationListener<AddTrackRequest>(
-                      onNotification: addEmptyRow,
-                      child: NotificationListener<CupNameChangedValue>(
-                        onNotification: updateCupName,
-                        child: NotificationListener<RowDeletePressed>(
-                          onNotification: rowAskedForDeletionNotification,
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(top: 8, right: 50),
-                                  child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        SizedBox(
-                                            height: 30,
-                                            width: 115,
-                                            child: ElevatedButton(
-                                              onPressed: () {
-                                                // Chiamare la funzione sortAlpha() quando il pulsante viene premuto
-                                                //sortAlpha();
-                                                sortCups();
-                                                setState(() {});
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                side: const BorderSide(
-                                                    color: Colors.white70,
-                                                    width: 1.0), // Bordo bianco
-                                                // Colore di sfondo del pulsante
-                                                elevation:
-                                                    2.0, // Elevazione del pulsante
-                                              ),
-                                              child: const Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  // Icona
-                                                  SizedBox(
-                                                      width:
-                                                          8.0), // Spazio tra l'icona e il testo
-                                                  Text(
-                                                    "A-Z Sort", // Testo del pulsante
-                                                    style: TextStyle(
-                                                        fontSize: 16.0),
-                                                  ),
-                                                ],
-                                              ),
-                                            )),
-                                        Container(
-                                          margin: const EdgeInsets.only(
-                                              left: 20,
-                                              right:
-                                                  20), // Margine a sinistra di 40 pixel
-                                          width:
-                                              2, // Larghezza della linea verticale
-                                          height:
-                                              30, // Altezza desiderata della linea verticale
-                                          color: Colors
-                                              .grey, // Colore della linea verticale
-                                        ),
-                                        SizedBox(
-                                          height: 50,
-                                          width: 280,
-                                          child: CheckboxListTile(
-                                            value: keepNintendo,
-                                            activeColor: Colors.red,
-                                            title: const Text(
-                                                "Keep Nintendo tracks"),
-                                            onChanged: (value) => {
-                                              keepNintendo = value!,
-                                              setState(() {})
-                                            },
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 50,
-                                          width: 200,
-                                          child: CheckboxListTile(
-                                            value: wiimsCup,
-                                            activeColor: Colors.red,
-                                            title: const Text("Wiimm's cup"),
-                                            onChanged: (value) => {
-                                              wiimsCup = value!,
-                                              if (wiimsCup)
-                                                {keepNintendo = true},
-                                              setState(() {})
-                                            },
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 50,
-                                          width: 200,
-                                          child: CheckboxListTile(
-                                            value: editArena,
-                                            activeColor: Colors.red,
-                                            title: const Text("Change Arena"),
-                                            onChanged: (value) => {
-                                              editArena = value!,
-                                              setState(() {})
-                                            },
-                                          ),
-                                        ),
-                                      ]),
-                                ),
-                                Visibility(
-                                  visible: debugMode,
-                                  child: SizedBox(
-                                      height: 30,
-                                      width: 100,
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          _debugReplace();
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          side: const BorderSide(
-                                              color: Colors.white70,
-                                              width: 1.0), // Bordo bianco
-                                          // Colore di sfondo del pulsante
-                                          elevation:
-                                              2.0, // Elevazione del pulsante
-                                        ),
-                                        child: const Text(
-                                          "DEBUG MODE", // Testo del pulsante
-                                          style: TextStyle(fontSize: 16.0),
-                                        ),
-                                      )),
-                                ),
-                                const Divider(),
-                                Visibility(
-                                    visible: editArena,
-                                    child: Column(
-                                      children: [
-                                        for (int i = 0;
-                                            i < arenaCups.length;
-                                            i++)
-                                          CupTable(
-                                              i - 2,
-                                              arenaCups[i].cupName,
-                                              arenaCups[i].tracks,
-                                              widget.packPath,
-                                              i - 2,
-                                              isDisabled: false),
-                                      ],
-                                    )),
-                                keepNintendo
-                                    ? IgnorePointer(
-                                        ignoring: true,
-                                        child: Column(
-                                          children: [
-                                            for (int i = 0;
-                                                i < nintendoCups.length;
-                                                i++)
-                                              CupTable(
-                                                  i + 1,
-                                                  nintendoCups[i].cupName,
-                                                  nintendoCups[i].tracks,
-                                                  widget.packPath,
-                                                  i + 1,
-                                                  isDisabled: true),
-                                            wiimsCup
-                                                ? CupTable(
-                                                    9,
-                                                    'Wiimms Cup',
-                                                    [
-                                                      Track(
-                                                          'All Tracks',
-                                                          '0',
-                                                          '0',
-                                                          'Random',
-                                                          TrackType.base),
-                                                      Track(
-                                                          'Original Tracks',
-                                                          '0',
-                                                          '0',
-                                                          'Random',
-                                                          TrackType.base),
-                                                      Track(
-                                                          "Custom Tracks",
-                                                          '0',
-                                                          '0',
-                                                          'Random',
-                                                          TrackType.base),
-                                                      Track(
-                                                          'New Tracks',
-                                                          '0',
-                                                          '0',
-                                                          'Random',
-                                                          TrackType.base)
-                                                    ],
-                                                    widget.packPath,
-                                                    9,
-                                                    isDisabled: true,
-                                                  )
-                                                : const Text(''),
-                                          ],
-                                        ),
-                                      )
-                                    : const Text(''),
-                                for (int i = 0; i < cups.length; i++)
-                                  CupTable(
-                                    i + 1,
-                                    cups[i].cupName,
-                                    cups[i].tracks,
-                                    widget.packPath,
-                                    keepNintendo
-                                        ? i + 9 + (wiimsCup ? 1 : 0)
-                                        : i + 1,
-                                  ),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      left: MediaQuery.of(context).size.width /
-                                              2 -
-                                          140,
-                                      right: MediaQuery.of(context).size.width /
-                                              2 -
-                                          140,
-                                      bottom: 60),
-                                  child: SizedBox(
-                                    height: 60,
+          body: Stack(
+            children: [
+              Visibility(
+                  visible: cups.isEmpty && !keepNintendo && !editArena,
+                  child: Center(
+                      child: ElevatedButton(
+                          style: const ButtonStyle(
+                              fixedSize:
+                                  MaterialStatePropertyAll(Size(200, 100)),
+                              backgroundColor:
+                                  MaterialStatePropertyAll(Colors.amber)),
+                          onPressed: () => {bulkImport()},
+                          child: const Text(
+                            "Import all myTracks",
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(fontSize: 20, color: Colors.black87),
+                          )))),
+              SingleChildScrollView(
+                controller: AdjustableScrollController(80),
+                child: NotificationListener<CupAskedToBeMoved>(
+                  onNotification: cupShouldMove,
+                  child: NotificationListener<RowChangedValue>(
+                    onNotification: rowChangedValue,
+                    child: NotificationListener<DeleteModeUpdated>(
+                      onNotification: deleteHeaderPressed,
+                      child: NotificationListener<AddTrackRequest>(
+                        onNotification: addEmptyRow,
+                        child: NotificationListener<CupNameChangedValue>(
+                          onNotification: updateCupName,
+                          child: NotificationListener<RowDeletePressed>(
+                            onNotification: rowAskedForDeletionNotification,
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 8, right: 50),
                                     child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ElevatedButton(
-                                          child: const Text("Add cup"),
-                                          onPressed: () => {
-                                            setState(() => cups.add(Cup(
-                                                '"Cup #${cups.length + 1}"',
-                                                [])))
-                                          },
-                                        ),
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 8.0),
-                                            child: ElevatedButton(
-                                              style: const ButtonStyle(
-                                                  backgroundColor:
-                                                      MaterialStatePropertyAll(
-                                                          Colors.amberAccent)),
-                                              child: const Text(
-                                                "Save config",
-                                                style: TextStyle(
-                                                    color: Colors.black87),
-                                              ),
-                                              onPressed: () => {
-                                                saveConfig(),
-                                                showDialog(
-                                                    context: context,
-                                                    builder: (context) {
-                                                      Future.delayed(
-                                                          const Duration(
-                                                              milliseconds:
-                                                                  500), () {
-                                                        Navigator.of(context)
-                                                            .pop(true);
-                                                      });
-                                                      return const AlertDialog(
-                                                        content: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Text("Saved"),
-                                                            Padding(
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      left:
-                                                                          8.0),
-                                                              child: Icon(Icons
-                                                                  .thumb_up),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      );
-                                                    })
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          SizedBox(
+                                              height: 30,
+                                              width: 115,
+                                              child: ElevatedButton(
+                                                onPressed: () {
+                                                  // Chiamare la funzione sortAlpha() quando il pulsante viene premuto
+                                                  //sortAlpha();
+                                                  sortCups();
+                                                  setState(() {});
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  side: const BorderSide(
+                                                      color: Colors.white70,
+                                                      width:
+                                                          1.0), // Bordo bianco
+                                                  // Colore di sfondo del pulsante
+                                                  elevation:
+                                                      2.0, // Elevazione del pulsante
+                                                ),
+                                                child: const Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    // Icona
+                                                    SizedBox(
+                                                        width:
+                                                            8.0), // Spazio tra l'icona e il testo
+                                                    Text(
+                                                      "A-Z Sort", // Testo del pulsante
+                                                      style: TextStyle(
+                                                          fontSize: 16.0),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )),
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                                left: 20,
+                                                right:
+                                                    20), // Margine a sinistra di 40 pixel
+                                            width:
+                                                2, // Larghezza della linea verticale
+                                            height:
+                                                30, // Altezza desiderata della linea verticale
+                                            color: Colors
+                                                .grey, // Colore della linea verticale
+                                          ),
+                                          SizedBox(
+                                            height: 50,
+                                            width: 280,
+                                            child: CheckboxListTile(
+                                              value: keepNintendo,
+                                              activeColor: Colors.red,
+                                              title: const Text(
+                                                  "Keep Nintendo tracks"),
+                                              onChanged: (value) => {
+                                                keepNintendo = value!,
+                                                setState(() {})
                                               },
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
+                                          SizedBox(
+                                            height: 50,
+                                            width: 200,
+                                            child: CheckboxListTile(
+                                              value: wiimsCup,
+                                              activeColor: Colors.red,
+                                              title: const Text("Wiimm's cup"),
+                                              onChanged: (value) => {
+                                                wiimsCup = value!,
+                                                if (wiimsCup)
+                                                  {keepNintendo = true},
+                                                setState(() {})
+                                              },
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 50,
+                                            width: 200,
+                                            child: CheckboxListTile(
+                                              value: editArena,
+                                              activeColor: Colors.red,
+                                              title: const Text("Change Arena"),
+                                              onChanged: (value) => {
+                                                editArena = value!,
+                                                setState(() {})
+                                              },
+                                            ),
+                                          ),
+                                        ]),
                                   ),
-                                )
-                              ]),
+                                  Visibility(
+                                    visible: debugMode,
+                                    child: SizedBox(
+                                        height: 30,
+                                        width: 100,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            _debugReplace();
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            side: const BorderSide(
+                                                color: Colors.white70,
+                                                width: 1.0), // Bordo bianco
+                                            // Colore di sfondo del pulsante
+                                            elevation:
+                                                2.0, // Elevazione del pulsante
+                                          ),
+                                          child: const Text(
+                                            "DEBUG MODE", // Testo del pulsante
+                                            style: TextStyle(fontSize: 16.0),
+                                          ),
+                                        )),
+                                  ),
+                                  const Divider(),
+                                  Visibility(
+                                      visible: editArena,
+                                      child: Column(
+                                        children: [
+                                          for (int i = 0;
+                                              i < arenaCups.length;
+                                              i++)
+                                            CupTable(
+                                                i - 2,
+                                                arenaCups[i].cupName,
+                                                arenaCups[i].tracks,
+                                                widget.packPath,
+                                                i - 2,
+                                                isDisabled: false),
+                                        ],
+                                      )),
+                                  keepNintendo
+                                      ? IgnorePointer(
+                                          ignoring: true,
+                                          child: Column(
+                                            children: [
+                                              for (int i = 0;
+                                                  i < nintendoCups.length;
+                                                  i++)
+                                                CupTable(
+                                                    i + 1,
+                                                    nintendoCups[i].cupName,
+                                                    nintendoCups[i].tracks,
+                                                    widget.packPath,
+                                                    i + 1,
+                                                    isDisabled: true),
+                                              wiimsCup
+                                                  ? CupTable(
+                                                      9,
+                                                      'Wiimms Cup',
+                                                      [
+                                                        Track(
+                                                            'All Tracks',
+                                                            '0',
+                                                            '0',
+                                                            'Random',
+                                                            TrackType.base),
+                                                        Track(
+                                                            'Original Tracks',
+                                                            '0',
+                                                            '0',
+                                                            'Random',
+                                                            TrackType.base),
+                                                        Track(
+                                                            "Custom Tracks",
+                                                            '0',
+                                                            '0',
+                                                            'Random',
+                                                            TrackType.base),
+                                                        Track(
+                                                            'New Tracks',
+                                                            '0',
+                                                            '0',
+                                                            'Random',
+                                                            TrackType.base)
+                                                      ],
+                                                      widget.packPath,
+                                                      9,
+                                                      isDisabled: true,
+                                                    )
+                                                  : const Text(''),
+                                            ],
+                                          ),
+                                        )
+                                      : const Text(''),
+                                  for (int i = 0; i < cups.length; i++)
+                                    CupTable(
+                                      i + 1,
+                                      cups[i].cupName,
+                                      cups[i].tracks,
+                                      widget.packPath,
+                                      keepNintendo
+                                          ? i + 9 + (wiimsCup ? 1 : 0)
+                                          : i + 1,
+                                    ),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        left: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                2 -
+                                            140,
+                                        right:
+                                            MediaQuery.of(context).size.width /
+                                                    2 -
+                                                140,
+                                        bottom: 60),
+                                    child: SizedBox(
+                                      height: 60,
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ElevatedButton(
+                                            child: const Text("Add cup"),
+                                            onPressed: () => {
+                                              setState(() => cups.add(Cup(
+                                                  '"Cup #${cups.length + 1}"',
+                                                  [])))
+                                            },
+                                          ),
+                                          Expanded(
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 8.0),
+                                              child: ElevatedButton(
+                                                style: const ButtonStyle(
+                                                    backgroundColor:
+                                                        MaterialStatePropertyAll(
+                                                            Colors
+                                                                .amberAccent)),
+                                                child: const Text(
+                                                  "Save config",
+                                                  style: TextStyle(
+                                                      color: Colors.black87),
+                                                ),
+                                                onPressed: () => {
+                                                  saveConfig(context),
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        Future.delayed(
+                                                            const Duration(
+                                                                milliseconds:
+                                                                    500), () {
+                                                          Navigator.of(context)
+                                                              .pop(true);
+                                                        });
+                                                        return const AlertDialog(
+                                                          content: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Text("Saved"),
+                                                              Padding(
+                                                                padding: EdgeInsets
+                                                                    .only(
+                                                                        left:
+                                                                            8.0),
+                                                                child: Icon(Icons
+                                                                    .thumb_up),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      })
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                ]),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ));
+            ],
+          )),
+    );
   }
 }

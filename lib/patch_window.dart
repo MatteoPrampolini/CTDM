@@ -635,74 +635,78 @@ class _PatchWindowState extends State<PatchWindow> {
       await Future.delayed(const Duration(seconds: 1));
     }
 
+    await Future.delayed(const Duration(seconds: 1));
+    //add icon64 e icon32 to the some Scenes
+    List<SceneComplete> filesWith2dCharacters = [
+      SceneComplete.award,
+      SceneComplete.race,
+      SceneComplete.menuSingle,
+      SceneComplete.menuMulti,
+    ];
     if (enableCustomChar) {
       setState(() {
         progressText = "swapping characters icons";
       });
-
-      await Future.delayed(const Duration(seconds: 1));
-      //add icon64 e icon32 to the some Scenes
-      List<SceneComplete> filesWith2dCharacters = [
-        SceneComplete.award,
-        SceneComplete.race,
-        SceneComplete.menuSingle,
-        SceneComplete.menuMulti,
-      ];
-
-      for (SceneComplete scene in filesWith2dCharacters) {
-        String baseName =
-            path.basename(getFileFromIndex(packPath, scene.index).path);
-        Directory extractedSzs =
-            Directory("${path.join(packPath, 'Scene', 'UI', baseName)}.d");
-        await Process.run(
-            'wszst',
-            [
-              'extract',
-              path.join(packPath, 'Scene', 'UI', baseName),
-              '--dest',
-              extractedSzs.path
-            ],
-            runInShell: true);
-        if (await File(
-                path.join(extractedSzs.path, 'button', 'timg', 'ct_icons.tpl'))
-            .exists()) {
-          await File(path.join(
-                  extractedSzs.path, 'button', 'timg', 'ct_icons.tpl'))
-              .delete();
-        }
-        if (await File(
-                path.join(extractedSzs.path, 'control', 'timg', 'ct_icons.tpl'))
-            .exists()) {
-          await File(path.join(
-                  extractedSzs.path, 'control', 'timg', 'ct_icons.tpl'))
-              .delete();
-        }
-
-        await patchSzsWithImages(
-            packPath,
-            Directory(
-              extractedSzs.path,
-            ),
-            customTxtContent,
-            scene.index);
-
-        //since we are here, we can patch the icons
-        await Process.run(
-            'wszst',
-            [
-              'patch',
-              '--le-menu',
-              '--cup-icons',
-              path.join(packPath, 'Icons', 'merged.png'),
-              '--links',
-              path.join(packPath, 'Scene', 'UI', baseName),
-              '--overwrite',
-              '--dest',
-              path.join(packPath, 'Scene', 'UI', baseName),
-            ],
-            runInShell: true);
-      }
+    } else {
+      setState(() {
+        progressText = "replacing menu icons";
+      });
     }
+    for (SceneComplete scene in filesWith2dCharacters) {
+      String baseName =
+          path.basename(getFileFromIndex(packPath, scene.index).path);
+      Directory extractedSzs =
+          Directory("${path.join(packPath, 'Scene', 'UI', baseName)}.d");
+      await Process.run(
+          'wszst',
+          [
+            'extract',
+            path.join(packPath, 'Scene', 'UI', baseName),
+            '--dest',
+            extractedSzs.path
+          ],
+          runInShell: true);
+      if (await File(
+              path.join(extractedSzs.path, 'button', 'timg', 'ct_icons.tpl'))
+          .exists()) {
+        await File(
+                path.join(extractedSzs.path, 'button', 'timg', 'ct_icons.tpl'))
+            .delete();
+      }
+      if (await File(
+              path.join(extractedSzs.path, 'control', 'timg', 'ct_icons.tpl'))
+          .exists()) {
+        await File(
+                path.join(extractedSzs.path, 'control', 'timg', 'ct_icons.tpl'))
+            .delete();
+      }
+
+      await patchSzsWithImages(
+          packPath,
+          Directory(
+            extractedSzs.path,
+          ),
+          customTxtContent,
+          scene.index);
+
+      //since we are here, we can patch the icons
+
+      await Process.run(
+          'wszst',
+          [
+            'patch',
+            '--le-menu',
+            '--cup-icons',
+            path.join(packPath, 'Icons', 'merged.png'),
+            '--links',
+            path.join(packPath, 'Scene', 'UI', baseName),
+            '--overwrite',
+            '--dest',
+            path.join(packPath, 'Scene', 'UI', baseName),
+          ],
+          runInShell: true);
+    }
+
     //edit the Common.bmg of some Scenes
     List<SceneComplete> filesWithCommonBmg = [
       SceneComplete.menuSingle_,
