@@ -75,28 +75,38 @@ void createEmptyGtcFiles(String codesPath) {
 }
 
 void copyGeckoAssetsToPack(String packPath) {
-  Directory codesFolder = Directory(path.join(packPath, "..", "..", 'myCodes'));
+  Directory codesFolder =
+      Directory(path.join(path.dirname(path.dirname(packPath)), 'myCodes'));
   if (!codesFolder.existsSync()) {
     codesFolder.createSync();
   }
   String assetPath = path.join(path.dirname(Platform.resolvedExecutable),
       "data", "flutter_assets", "assets");
-  File musicCheat1 =
-      File(path.join(assetPath, 'gecko', 'trackMusicExpander.json'));
-  File musicCheat2 =
-      File(path.join(assetPath, 'gecko', 'automaticBrsarPatching.json'));
-  if (!File(
-          path.join(packPath, "..", "..", 'myCodes', 'trackMusicExpander.json'))
-      .existsSync()) {
-    musicCheat1.copySync(
-        path.join(packPath, "..", "..", 'myCodes', 'trackMusicExpander.json'));
+  File musicCheat1 = File(path
+      .join(assetPath, 'gecko', 'Track Music Expander.json')
+      .replaceAll(" ", "%20")); //flutter XD
+  File musicCheat2 = File(path
+      .join(assetPath, 'gecko', 'Automatic BRSAR Patching.json')
+      .replaceAll(" ", "%20")); //flutter XD
+
+  for (String elem in [
+    "trackMusicExpander",
+    "Track Music Expander",
+    "automaticBrsarPatching",
+    "Automatic BRSAR Patching"
+  ]) {
+    File f = File(path.join(
+        path.dirname(path.dirname(packPath)), 'myCodes', '$elem.json'));
+    if (f.existsSync()) {
+      f.deleteSync();
+    }
   }
-  if (!File(path.join(
-          packPath, "..", "..", 'myCodes', 'automaticBrsarPatching.json'))
-      .existsSync()) {
-    musicCheat2.copySync(path.join(
-        packPath, "..", "..", 'myCodes', 'automaticBrsarPatching.json'));
-  }
+
+  musicCheat1.copySync(path.join(path.dirname(path.dirname(packPath)),
+      'myCodes', 'Track Music Expander.json'));
+
+  musicCheat2.copySync(path.join(path.dirname(path.dirname(packPath)),
+      'myCodes', 'Automatic BRSAR Patching.json'));
 }
 
 /// This function reads the JSON files from myCodes and generates 4 .gct files, one per region, within [packPath].
@@ -108,8 +118,8 @@ void updateGtcFiles(String packPath, File geckoTxt) {
 
   List<String> cheatsFiles = geckoTxt.readAsLinesSync();
   for (String filepath in cheatsFiles) {
-    File tmp = File(path.join(
-        packPath, "..", "..", "myCodes", filepath.replaceAll(";toggle", "")));
+    File tmp = File(path.join(path.dirname(path.dirname(packPath)), "myCodes",
+        filepath.replaceAll(";toggle", "")));
     if (tmp.existsSync()) {
       myGeckoFiles.add(tmp);
     } else {
@@ -189,8 +199,9 @@ Gecko fileToGeckoCode(File jsonFile) {
       json['author'],
       json['desc'],
       path.basename(jsonFile.path.replaceAll(";toggle", "")),
-      json['name'] == "Automatic BRSAR Patching" ||
-          json['name'] == "Track Music Expander");
+      false);
+  // json['name'] == "Automatic BRSAR Patching" ||
+  //     json['name'] == "Track Music Expander");
 }
 
 Uint8List geckoToHex(Gecko gecko, GameVersion version) {
@@ -231,8 +242,8 @@ Uint8List hexToUint8List(String hex) {
 
 int compareGecko(Gecko a, Gecko b) {
   final specialStrings = [
-    "automaticBrsarPatching.json",
-    "trackMusicExpander.json"
+    "Automatic Brsar Patching.json",
+    "Track Music Expander.json"
   ];
   final isASpecial = specialStrings.contains(a.baseName);
   final isBSpecial = specialStrings.contains(b.baseName);
@@ -254,8 +265,8 @@ File createGeckoTxt(String packPath) {
   File geckoTxt = File(path.join(packPath, "gecko.txt"));
   if (!geckoTxt.existsSync()) {
     geckoTxt.createSync();
-    String contents = "automaticBrsarPatching.json\ntrackMusicExpander.json\n";
-    geckoTxt.writeAsStringSync(contents);
+    //String contents = "automaticBrsarPatching.json\ntrackMusicExpander.json\n";
+    //geckoTxt.writeAsStringSync(contents);
   }
   return geckoTxt;
 }
@@ -284,8 +295,8 @@ List<Gecko> parseGeckoTxt(String packPath, File geckoTxt) {
 
   List<String> cheatsFiles = geckoTxt.readAsLinesSync();
   for (String filepath in cheatsFiles) {
-    File tmp = File(path.join(
-        packPath, "..", "..", "myCodes", filepath.replaceAll(";toggle", "")));
+    File tmp = File(path.join(path.dirname(path.dirname(packPath)), "myCodes",
+        filepath.replaceAll(";toggle", "")));
     if (tmp.existsSync()) {
       //print(tmp);
       list.add(fileToGeckoCode(tmp));

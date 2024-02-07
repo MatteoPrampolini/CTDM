@@ -527,6 +527,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
 
     updateConfigContent(cups, configTxt, keepNintendo, wiimsCup);
     updateMusicConfig(configTxt, musicTxt, keepNintendo, editArena);
+
     showDialog(
         context: context,
         builder: (context) {

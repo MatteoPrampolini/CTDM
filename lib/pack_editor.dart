@@ -57,7 +57,7 @@ class _PackEditorState extends State<PackEditor> {
   bool canRunOnDolphin = false;
   late SharedPreferences prefs;
   List<bool> checks = [false, false, false, false, false, false, false, false];
-  final int optIndex = 4;
+  final int optIndex = 5;
   final List<String> steps = [
     "valid pack name",
     'track config',
@@ -90,10 +90,10 @@ class _PackEditorState extends State<PackEditor> {
           getNumberOfIconsFromConfig(widget.packPath);
     }
     if (!widget.packPath.contains("tmp_pack_")) {
-      checks[4] = parseGeckoTxt(widget.packPath,
-                  File(path.join(widget.packPath, 'gecko.txt')))
-              .length >
-          2;
+      checks[4] = File(path.join(widget.packPath, 'gecko.txt')).existsSync();
+      // checks[4] = parseGeckoTxt(
+      //         widget.packPath, File(path.join(widget.packPath, 'gecko.txt')))
+      //     .isNotEmpty;
     }
 
     if (getNumberOfCustomCharacters(
@@ -146,7 +146,7 @@ class _PackEditorState extends State<PackEditor> {
     if (!Directory(path.join(widget.packPath, "..", "..", 'myCodes'))
         .existsSync()) {
       Directory(path.join(widget.packPath, "..", "..", 'myCodes')).createSync();
-      copyGeckoAssetsToPack(widget.packPath);
+      //copyGeckoAssetsToPack(widget.packPath);
     }
 
     if (!await Directory(path.join(widget.packPath, 'Scene')).exists()) {

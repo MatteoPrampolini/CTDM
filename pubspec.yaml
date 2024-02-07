@@ -129,8 +129,8 @@ flutter:
       - assets/statics/P.rel
       - assets/statics/E.rel
       - assets/gecko/
-      - assets/gecko/trackMusicExpander.json
-      - assets/gecko/automaticBrsarPatching.json
+      - assets/gecko/Track Music Expander.json
+      - assets/gecko/Automatic BRSAR Patching.json
       - assets/executables/
       - assets/executables/brstm_converter-amd64-linux
       - assets/executables/brstm_converter-amd64-windows.exe

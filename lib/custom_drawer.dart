@@ -113,7 +113,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
             // ...
           },
         ),
-        const Divider(),
         ListTile(
           enabled: widget.xmlExist,
           title: const Text('Gecko codes'),
@@ -129,6 +128,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             // ...
           },
         ),
+        const Divider(),
         ListTile(
           enabled: widget.xmlExist,
           title: const Text('Custom characters'),

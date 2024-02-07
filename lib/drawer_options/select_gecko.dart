@@ -68,6 +68,7 @@ class _SelectGeckoState extends State<SelectGecko> {
   void initState() {
     super.initState();
     copyGeckoAssetsToPack(widget.packPath);
+    createGeckoTxt(widget.packPath);
   }
 
   List<Gecko> getCodes() {
@@ -106,8 +107,8 @@ class _SelectGeckoState extends State<SelectGecko> {
     List<Gecko> geckoSelectedFromTxt = parseGeckoTxt(
         widget.packPath, File(path.join(widget.packPath, 'gecko.txt')));
 
-    _selectedOptions[0] = true;
-    _selectedOptions[1] = true;
+    // _selectedOptions[0] = true;
+    // _selectedOptions[1] = true;
     _selectedOptions =
         readSelectedOptionsForPack(geckoListAll, geckoSelectedFromTxt);
 
@@ -216,33 +217,23 @@ class _SelectGeckoState extends State<SelectGecko> {
                                           side: const BorderSide(
                                               color: Colors.black87),
                                           value: _selectedOptions[index],
-                                          onChanged: index < 2
-                                              ? null
-                                              : (value) => {
-                                                    if (index > 1)
-                                                      {
-                                                        _selectedOptions[
-                                                            index] = value!,
-                                                        for (i = 0;
-                                                            i <
-                                                                geckoListAll
-                                                                    .length;
-                                                            i++)
-                                                          {
-                                                            geckoListAll[i]
-                                                                    .canBeToggled =
-                                                                _optionalList[i]
-                                                          },
-                                                        writeGeckoTxt(
-                                                            updateGeckoListSelected(
-                                                                geckoListAll,
-                                                                _selectedOptions),
-                                                            File(path.join(
-                                                                widget.packPath,
-                                                                'gecko.txt'))),
-                                                        setState(() {})
-                                                      }
-                                                  },
+                                          onChanged: (value) => {
+                                            _selectedOptions[index] = value!,
+                                            for (i = 0;
+                                                i < geckoListAll.length;
+                                                i++)
+                                              {
+                                                geckoListAll[i].canBeToggled =
+                                                    _optionalList[i]
+                                              },
+                                            writeGeckoTxt(
+                                                updateGeckoListSelected(
+                                                    geckoListAll,
+                                                    _selectedOptions),
+                                                File(path.join(widget.packPath,
+                                                    'gecko.txt'))),
+                                            setState(() {})
+                                          },
                                         ),
                                         Checkbox(
                                           fillColor:
@@ -263,37 +254,27 @@ class _SelectGeckoState extends State<SelectGecko> {
                                           side: const BorderSide(
                                               color: Colors.black87),
                                           value: _optionalList[index],
-                                          onChanged: index < 2
-                                              ? null
-                                              : (value) => {
-                                                    if (index > 1)
-                                                      {
-                                                        _optionalList[index] =
-                                                            value!,
-                                                        for (i = 0;
-                                                            i <
-                                                                geckoListAll
-                                                                    .length;
-                                                            i++)
-                                                          {
-                                                            geckoListAll[i]
-                                                                    .canBeToggled =
-                                                                _optionalList[i]
-                                                          },
-                                                        geckoSelectedFromTxt =
-                                                            updateGeckoListSelected(
-                                                                geckoListAll,
-                                                                _selectedOptions),
-                                                        writeGeckoTxt(
-                                                            updateGeckoListSelected(
-                                                                geckoListAll,
-                                                                _selectedOptions),
-                                                            File(path.join(
-                                                                widget.packPath,
-                                                                'gecko.txt'))),
-                                                        setState(() {})
-                                                      }
-                                                  },
+                                          onChanged: (value) => {
+                                            _optionalList[index] = value!,
+                                            for (i = 0;
+                                                i < geckoListAll.length;
+                                                i++)
+                                              {
+                                                geckoListAll[i].canBeToggled =
+                                                    _optionalList[i]
+                                              },
+                                            geckoSelectedFromTxt =
+                                                updateGeckoListSelected(
+                                                    geckoListAll,
+                                                    _selectedOptions),
+                                            writeGeckoTxt(
+                                                updateGeckoListSelected(
+                                                    geckoListAll,
+                                                    _selectedOptions),
+                                                File(path.join(widget.packPath,
+                                                    'gecko.txt'))),
+                                            setState(() {})
+                                          },
                                         )
                                       ],
                                     ),
