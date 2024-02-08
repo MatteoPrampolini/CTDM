@@ -111,7 +111,7 @@ class _GeckoCodesState extends State<GeckoCodes> {
         widget.packPath, "..", "..", 'myCodes', codes[selectedCode].baseName));
 
     selectedFile.writeAsStringSync(content, mode: FileMode.write);
-    writeGeckoTxt(codes, File(path.join(widget.packPath, 'gecko.txt')));
+    //writeGeckoTxt(codes, File(path.join(widget.packPath, 'gecko.txt')));
 
     loadCodes();
     codes.sort(compareGecko);

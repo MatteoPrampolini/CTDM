@@ -1104,21 +1104,21 @@ class _PatchWindowState extends State<PatchWindow> {
               .firstWhere((element) => isFastBrstm(element.path));
 
           await fastFile.copy(path.join(musicDir.path, '${id}_f.brstm'));
-        } on StateError catch (stateError) {
-          logString(LogType.ERROR,
+        } on StateError catch (_) {
+          logString(LogType.WARNING,
               "myMusic/${path.dirname(filepath)} is missing the fast .brstm file.");
-          throw CtdmException(
-              "myMusic/${path.dirname(filepath)} is missing the fast .brstm file.",
-              stateError.stackTrace,
-              '5502');
+          // throw CtdmException(
+          //     "myMusic/${path.dirname(filepath)} is missing the fast .brstm file.",
+          //     stateError.stackTrace,
+          //     '5502');
         }
       } else {
         //deprecated
-        await fileToBrstm(
-            path.join(workspace, "myMusic", filepath),
-            path.join(packPath, "Music", "tmp"),
-            path.join(packPath, "Music"),
-            id);
+        // await fileToBrstm(
+        //     path.join(workspace, "myMusic", filepath),
+        //     path.join(packPath, "Music", "tmp"),
+        //     path.join(packPath, "Music"),
+        //     id);
       }
     }
     await tmpDir.delete(recursive: true);
