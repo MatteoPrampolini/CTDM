@@ -141,6 +141,19 @@ class _GeckoCodesState extends State<GeckoCodes> {
 
   @override
   Widget build(BuildContext context) {
+    if (codes.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            "Gecko Codes",
+            style: TextStyle(color: Colors.black),
+          ),
+          backgroundColor: Colors.amber,
+          iconTheme: IconThemeData(color: Colors.red.shade700),
+        ),
+        body: const Text("Error"),
+      );
+    }
     rebuildAllChildren(context);
     _nameController.text = codes[selectedCode].name;
     _authorController.text = codes[selectedCode].author;

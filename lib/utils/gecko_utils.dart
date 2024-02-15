@@ -82,13 +82,13 @@ void copyGeckoAssetsToPack(String packPath) {
   }
   String assetPath = path.join(path.dirname(Platform.resolvedExecutable),
       "data", "flutter_assets", "assets");
-  File musicCheat1 = File(path
-      .join(assetPath, 'gecko', 'Track Music Expander.json')
-      .replaceAll(" ", "%20")); //flutter XD
-  File musicCheat2 = File(path
-      .join(assetPath, 'gecko', 'Automatic BRSAR Patching.json')
-      .replaceAll(" ", "%20")); //flutter XD
 
+  File musicCheat1 =
+      File(path.join(assetPath, 'gecko', 'Track%20Music%20Expander.json'));
+
+  File musicCheat2 =
+      File(path.join(assetPath, 'gecko', 'Automatic%20BRSAR%20Patching.json'));
+  if (!musicCheat1.existsSync()) {}
   for (String elem in [
     "trackMusicExpander",
     "Track Music Expander",
@@ -102,11 +102,21 @@ void copyGeckoAssetsToPack(String packPath) {
     }
   }
 
-  musicCheat1.copySync(path.join(path.dirname(path.dirname(packPath)),
-      'myCodes', 'Track Music Expander.json'));
+  try {
+    musicCheat1.copySync(path.join(path.dirname(path.dirname(packPath)),
+        'myCodes', 'Track Music Expander.json'));
+  } catch (e) {
+    logString(LogType.ERROR,
+        "error while copying ${musicCheat1.path} to ${path.join(path.dirname(path.dirname(packPath)), 'myCodes', 'Track Music Expander.json')}");
+  }
 
-  musicCheat2.copySync(path.join(path.dirname(path.dirname(packPath)),
-      'myCodes', 'Automatic BRSAR Patching.json'));
+  try {
+    musicCheat2.copySync(path.join(path.dirname(path.dirname(packPath)),
+        'myCodes', 'Automatic BRSAR Patching.json'));
+  } catch (e) {
+    logString(LogType.ERROR,
+        "error while copying ${musicCheat1.path} to ${path.join(path.dirname(path.dirname(packPath)), 'myCodes', 'Track Music Expander.json')}");
+  }
 }
 
 /// This function reads the JSON files from myCodes and generates 4 .gct files, one per region, within [packPath].

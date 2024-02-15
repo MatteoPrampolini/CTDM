@@ -6,7 +6,6 @@ import 'package:ctdm/drawer_options/custom_files.dart';
 import 'package:ctdm/patch_window.dart';
 import 'package:ctdm/utils/character_utiles.dart';
 import 'package:ctdm/utils/excel.dart';
-import 'package:ctdm/utils/gecko_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:ctdm/utils/output_utils.dart';
 import 'package:flutter/material.dart';
