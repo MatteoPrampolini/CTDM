@@ -5,6 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:url_launcher/url_launcher_string.dart';
 
+Future<int?> getCupIconSizeFromLpar(File lpar) async {
+  if (!(await lpar.exists())) {
+    return null;
+  }
+  List<String> lines = await lpar.readAsLines();
+  for (String line in lines) {
+    if (line.contains('CUP-ICON-SIZE')) {
+      return int.tryParse(line.split('=')[1].trim());
+    }
+  }
+  return null;
+}
+
 int compareAlphamagically(File a, File b) {
   if (int.tryParse(path.basenameWithoutExtension(a.path)) == null &&
       int.tryParse(path.basenameWithoutExtension(a.path)) == null) {
@@ -59,6 +72,7 @@ int getNumberOfIconsFromConfig(String packPath) {
 
 class _CupIconsWindowState extends State<CupIconsWindow> {
   int nCups = -99;
+  int imageSize = -1;
   @override
   void initState() {
     setup();
@@ -67,6 +81,9 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
 
   void setup() async {
     nCups = getNumberOfIconsFromConfig(widget.packPath);
+    File lpar = File(path.join(widget.packPath, "lpar.txt"));
+    int? readSize = await getCupIconSizeFromLpar(lpar);
+    imageSize = readSize ?? 128;
     createFolder(widget.packPath);
     setState(() {});
   }
@@ -165,7 +182,7 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
                     Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: Text(
-                        "The images has to be 128x128 and be named from 1.png to $nCups.png",
+                        "The images has to be ${imageSize}x$imageSize and be named from 1.png to $nCups.png",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Colors.white54,

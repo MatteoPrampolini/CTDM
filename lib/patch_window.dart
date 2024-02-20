@@ -302,7 +302,9 @@ int compareAlphamagically(File a, File b) {
 }
 
 /// Combines all the icons located in [iconDir] directory and generates a new image file called "merged.png" that contains all the icons merged into a single image.
-Future<File> createBigImage(Directory iconDir, int nCups) async {
+Future<File> createBigImage(Directory iconDir, int nCups,
+    {int? imageSize}) async {
+  int size = imageSize ?? 128;
   List<ui.Image> imageList = [];
   List<File> iconFileList = iconDir.listSync().whereType<File>().toList();
   iconFileList.sort((a, b) => compareAlphamagically(a, b));
@@ -310,13 +312,15 @@ Future<File> createBigImage(Directory iconDir, int nCups) async {
     imageList.add(await ImagesMergeHelper.loadImageFromFile(icon));
     var decodedImage = await decodeImageFromList(icon.readAsBytesSync());
 
-    if (decodedImage.width != 128 || decodedImage.height != 128) {
+    if (decodedImage.width != size || decodedImage.height != size) {
       throw CtdmException(
-          "'Icons/${path.basename(icon.path)}' isn't 128x128.'", null, '2501');
+          "'Icons/${path.basename(icon.path)}' isn't ${size}x$size.'",
+          null,
+          '2501');
     }
   }
   File mergedFile = File(path.join(iconDir.path, 'merged.png'));
-  img.Image mergedImage = await newMergeImages(iconFileList);
+  img.Image mergedImage = await newMergeImages(iconFileList, size: imageSize);
 
   await mergedFile.writeAsBytes(img.encodePng(mergedImage));
 
@@ -412,8 +416,9 @@ class _PatchWindowState extends State<PatchWindow> {
     setState(() {
       progressText = "setting up cup icons";
     });
-
-    await createBigImage(iconDir, nCups);
+    File lpar = File(path.join(widget.packPath, "lpar.txt"));
+    int? imageSize = await getCupIconSizeFromLpar(lpar);
+    await createBigImage(iconDir, nCups, imageSize: imageSize);
 
     setState(() {
       progressText = "copying ui files";

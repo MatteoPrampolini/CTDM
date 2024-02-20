@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:image/image.dart' as img;
 import 'dart:typed_data';
 
-Future<img.Image> newMergeImages(List<File> imageList) async {
+Future<img.Image> newMergeImages(List<File> imageList, {int? size}) async {
   // Ensure the imageList is not empty
   if (imageList.isEmpty) {
     throw Exception('Image list is empty');
@@ -33,9 +33,10 @@ Future<img.Image> newMergeImages(List<File> imageList) async {
   //int totalHeight = images.length * images.first.height;
 
   // Create a new image with the same width as the first image and the calculated height
+  int width = size ?? 128;
   img.Image resultImage = img.Image(
-      width: 128,
-      height: 128 * images.length,
+      width: width,
+      height: width * images.length,
       numChannels: 4,
       backgroundColor: img.ColorRgba8.from(img.ColorUint8.rgba(0, 0, 0, 0)));
 
