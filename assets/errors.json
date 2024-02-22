@@ -13,6 +13,10 @@
         "description": "Cannot line in config.txt",
         "type": "config error"
       },
+      "2003": {
+        "description": "Wctct failed",
+        "type": "config error"
+      },
       "2101": {
         "description": "Invalid lpar.txt",
         "type": "lpar error"

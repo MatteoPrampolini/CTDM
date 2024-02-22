@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:random_string/random_string.dart';
 
 import 'package:ctdm/gui_elements/cup_table.dart';
 import 'package:ctdm/utils/exceptions_utils.dart';
@@ -263,6 +264,8 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   bool debugMode = false;
   late FocusNode _focusNode;
   final ScrollController _controller = ScrollController();
+  final TextEditingController cupsController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -493,7 +496,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   }
 
   bool updateCupName(CupNameChangedValue n) {
-    cups[n.cupIndex - 1].cupName = r'"' + n.cupName.replaceAll(r'"', '') + r'"';
+    cups[n.cupIndex].cupName = r'"' + n.cupName.replaceAll(r'"', '') + r'"';
     return true;
   }
 
@@ -878,21 +881,69 @@ N N$nintendoTracksString | """
     Widget buildDebugModeButton() {
       return Visibility(
         visible: debugMode,
-        child: SizedBox(
-          height: 30,
-          width: 100,
-          child: ElevatedButton(
-            onPressed: () {
-              _debugReplace();
-            },
-            style: ElevatedButton.styleFrom(
-              side: const BorderSide(color: Colors.white70, width: 1.0),
-              elevation: 2.0,
-            ),
-            child: const Text(
-              "DEBUG MODE",
-              style: TextStyle(fontSize: 16.0),
-            ),
+        child: Container(
+          decoration:
+              BoxDecoration(border: Border.all(color: Colors.deepPurpleAccent)),
+          width: 800,
+          height: 35,
+          child: Row(
+            children: [
+              SizedBox(
+                width: 200,
+                height: 30,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _debugReplace();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white70, width: 1.0),
+                    elevation: 2.0,
+                  ),
+                  child: const Text(
+                    "Replace tracks",
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 100.0),
+                child: SizedBox(
+                  width: 200,
+                  height: 30,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      print(cupsController.text);
+                      int cupsValue = int.tryParse(cupsController.text) ?? -1;
+                      setCupsDebug(cupsValue);
+                      setState(() {});
+                    },
+                    style: ElevatedButton.styleFrom(
+                      side: const BorderSide(color: Colors.white70, width: 1.0),
+                      elevation: 2.0,
+                    ),
+                    child: const Text(
+                      "Set cups to ->",
+                      style: TextStyle(fontSize: 16.0),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 200,
+                height: 30,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16.0, bottom: 5),
+                  child: TextField(
+                    controller: cupsController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    decoration: const InputDecoration(hintText: "Number"),
+                  ),
+                ),
+              )
+            ],
           ),
         ),
       );
@@ -1126,5 +1177,29 @@ N N$nintendoTracksString | """
         ),
       ),
     );
+  }
+
+  void setCupsDebug(int cupsValue) {
+    if (cupsValue < 0) {
+      return;
+    }
+    cups.clear();
+
+    for (int i = 0; i < cupsValue; i++) {
+      List<Track> tmp = [
+        Track(
+            'default track', debugSlot, debugSlot, debugTrack, TrackType.base),
+        Track(
+            'default track', debugSlot, debugSlot, debugTrack, TrackType.base),
+        Track(
+            'default track', debugSlot, debugSlot, debugTrack, TrackType.base),
+        Track(
+            'default track', debugSlot, debugSlot, debugTrack, TrackType.base),
+      ];
+      for (Track t in tmp) {
+        t.name = randomAlpha(10);
+      }
+      cups.add(Cup('"Cup #${i + 1}"', tmp));
+    }
   }
 }

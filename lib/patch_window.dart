@@ -266,7 +266,7 @@ Future<String> createBMGList(String packPath) async {
     await trackFile.delete();
   }
   // try {
-  await Process.run(
+  ProcessResult p = await Process.run(
       'wctct',
       [
         'create',
@@ -278,6 +278,12 @@ Future<String> createBMGList(String packPath) async {
         path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt')
       ],
       runInShell: true);
+
+  if (p.exitCode != 0) {
+    logString(LogType.ERROR, "PATCH ERROR:\n${p.stderr}");
+
+    throw CtdmException(p.stderr, null, '2003');
+  }
   return path.join(packPath, 'Scene', 'UI', 'tracks.bmg.txt');
 }
 
@@ -725,6 +731,7 @@ class _PatchWindowState extends State<PatchWindow> {
     await Future.delayed(const Duration(seconds: 1));
 
     final File trackBmgTxt = File(await createBMGList(packPath));
+
     String trackBmgTxtContents = await trackBmgTxt.readAsString();
     trackBmgTxtContents =
         replaceCommonBmgTextWithVanillaNames(trackBmgTxtContents, keepNintendo);
