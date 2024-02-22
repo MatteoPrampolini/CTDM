@@ -262,6 +262,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   List<Cup> arenaCups = getArenaCups();
   bool debugMode = false;
   late FocusNode _focusNode;
+  final ScrollController _controller = ScrollController();
   @override
   void initState() {
     super.initState();
@@ -277,9 +278,26 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     //print(cups);
   }
 
+  void _scrollDown() {
+    _controller.animateTo(
+      _controller.position.maxScrollExtent + 500,
+      duration: const Duration(milliseconds: 1500),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
+  void _scrollUp() {
+    _controller.animateTo(
+      _controller.position.maxScrollExtent - 500,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
   @override
   void dispose() {
     _focusNode.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -429,29 +447,47 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     } else {
       nChildren = n.nChildren!;
     }
+
+    int realIndex = n.cupIndex - (wiimsCup ? 1 : 0) - (keepNintendo ? 8 : 0);
+
     for (int i = 0; i < nChildren; i++) {
-      deleteRow(n.cupIndex, n.rowIndex);
+      deleteRow(realIndex, n.rowIndex);
     }
     return true;
   }
 
   bool cupShouldMove(CupAskedToBeMoved n) {
-    print("mi hanno chiesto di spostarmi");
-    if (n.cupIndex == 1 && n.up) {
+    int realIndex =
+        n.cupIndex + 1; // - (wiimsCup ? 1 : 0) - (keepNintendo ? 8 : 0);
+
+    if (realIndex == 1 && n.up) {
       return true;
     }
-    if (n.cupIndex == cups.length && !n.up) {
+    if (realIndex == cups.length && !n.up) {
       return true;
     }
-    Cup tmp = cups[n.cupIndex - 1]; //current
+
+    Cup tmp = cups[realIndex - 1]; //current
     if (n.up) {
-      cups[n.cupIndex - 1] = cups[n.cupIndex - 2];
-      cups[n.cupIndex - 2] = tmp;
+      if (wiimsCup && realIndex == 10) {
+        cups[realIndex - 1] = cups[realIndex - 3];
+        cups[realIndex - 3] = tmp;
+      } else {
+        cups[realIndex - 1] = cups[realIndex - 2];
+        cups[realIndex - 2] = tmp;
+      }
     }
+
     if (!n.up) {
-      cups[n.cupIndex - 1] = cups[n.cupIndex];
-      cups[n.cupIndex] = tmp;
+      if (wiimsCup && realIndex == 8) {
+        cups[realIndex - 1] = cups[realIndex + 1];
+        cups[realIndex + 1] = tmp;
+      } else {
+        cups[realIndex - 1] = cups[realIndex];
+        cups[realIndex] = tmp;
+      }
     }
+
     setState(() {});
     return true;
   }
@@ -462,14 +498,15 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   }
 
   bool rowChangedValue(RowChangedValue n) {
-    if (n.cupIndex < 0) {
-      //arena stuff
+    int realIndex = n.cupIndex + 1;
 
-      arenaCups[n.cupIndex + 2].tracks[n.rowIndex - 1] = n.track;
+    if (realIndex < 0) {
+      //arena stuff
+      arenaCups[realIndex + 2].tracks[realIndex - 1] = n.track;
       return true;
     }
 
-    cups[n.cupIndex - 1].tracks[n.rowIndex - 1] = n.track;
+    cups[realIndex - 1].tracks[n.rowIndex - 1] = n.track;
     return true;
   }
 
@@ -502,11 +539,16 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   }
 
   bool deleteHeaderPressed(DeleteModeUpdated n) {
-    if (n.destroyCupIndex! > 0 &&
-        cups[n.destroyCupIndex! - 1].tracks.isEmpty &&
+    int realIndex =
+        n.destroyCupIndex! - (wiimsCup ? 1 : 0) - (keepNintendo ? 8 : 0);
+
+    if (realIndex > 0 &&
+        cups[realIndex - 1].tracks.isEmpty &&
         n.shouldDelete == true) {
-      cups.removeAt(n.destroyCupIndex! - 1);
+      cups.removeAt(realIndex - 1);
     }
+    _scrollUp();
+
     setState(() {});
     return true;
   }
@@ -913,7 +955,7 @@ N N$nintendoTracksString | """
                             buildDebugModeButton(),
                             Expanded(
                               child: ListView.builder(
-                                  //controller: AdjustableScrollController(80),
+                                  controller: _controller,
                                   prototypeItem: CupTable(
                                     0,
                                     arenaCups[0].cupName,
@@ -923,17 +965,16 @@ N N$nintendoTracksString | """
                                   ),
                                   itemCount: cups.length +
                                       (editArena ? arenaCups.length : 0) +
-                                      (keepNintendo
-                                          ? nintendoCups.length +
-                                              (wiimsCup ? 1 : 0)
-                                          : 0),
+                                      (keepNintendo ? nintendoCups.length : 0) +
+                                      (wiimsCup ? 1 : 0),
                                   itemBuilder: (context, index) {
                                     int cupIndex = index -
                                         (editArena ? arenaCups.length : 0);
                                     if (index < 2 && editArena) {
                                       // Arena Cups
+
                                       return CupTable(
-                                        index,
+                                        index - 2,
                                         arenaCups[index].cupName,
                                         arenaCups[index].tracks,
                                         widget.packPath,
@@ -954,65 +995,125 @@ N N$nintendoTracksString | """
                                             isDisabled: true),
                                       );
                                     } else if (wiimsCup && cupIndex == 8) {
-                                      return CupTable(
-                                        9,
-                                        'Wiimms Cup',
-                                        [
-                                          Track('All Tracks', '0', '0',
-                                              'Random', TrackType.base),
-                                          Track('Original Tracks', '0', '0',
-                                              'Random', TrackType.base),
-                                          Track("Custom Tracks", '0', '0',
-                                              'Random', TrackType.base),
-                                          Track('New Tracks', '0', '0',
-                                              'Random', TrackType.base)
-                                        ],
-                                        widget.packPath,
-                                        9,
-                                        isDisabled: true,
+                                      return IgnorePointer(
+                                        ignoring: true,
+                                        child: CupTable(
+                                          9,
+                                          'Wiimms Cup',
+                                          [
+                                            Track('All Tracks', '0', '0',
+                                                'Random', TrackType.base),
+                                            Track('Original Tracks', '0', '0',
+                                                'Random', TrackType.base),
+                                            Track("Custom Tracks", '0', '0',
+                                                'Random', TrackType.base),
+                                            Track('New Tracks', '0', '0',
+                                                'Random', TrackType.base)
+                                          ],
+                                          widget.packPath,
+                                          9,
+                                          isDisabled: true,
+                                        ),
                                       );
                                     }
+
+                                    if (cupIndex -
+                                            (keepNintendo
+                                                ? nintendoCups.length
+                                                : 0) <
+                                        0) {
+                                      return const SizedBox.shrink();
+                                    }
+
                                     cupIndex = cupIndex -
                                         (keepNintendo
                                             ? nintendoCups.length
-                                            : 0) -
-                                        (wiimsCup ? 1 : 0);
-                                    if (cupIndex < 0) {
+                                            : 0);
+                                    if (keepNintendo && wiimsCup) {
+                                      cupIndex = cupIndex - 1;
+                                    }
+
+                                    if (cupIndex >= cups.length) {
                                       return const SizedBox.shrink();
                                     }
                                     return CupTable(
-                                      index +
-                                          1 -
-                                          (editArena ? arenaCups.length : 0),
-                                      cups[cupIndex].cupName,
-                                      cups[cupIndex].tracks,
-                                      widget.packPath,
-                                      index +
-                                          1 -
-                                          (editArena ? arenaCups.length : 0),
-                                    );
+                                        cupIndex,
+                                        cups[cupIndex].cupName,
+                                        cups[cupIndex].tracks,
+                                        widget.packPath,
+                                        cupIndex +
+                                            1 +
+                                            (keepNintendo
+                                                ? nintendoCups.length
+                                                : 0) +
+                                            (wiimsCup ? 1 : 0) -
+                                            (!keepNintendo && wiimsCup
+                                                ? 1
+                                                : 0));
                                   }),
                             ),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                left:
-                                    MediaQuery.of(context).size.width / 2 - 140,
-                                right:
-                                    MediaQuery.of(context).size.width / 2 - 140,
-                                bottom: 8,
+                            const Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 140,
                               ),
+                              child: Divider(),
+                            ),
+                            SizedBox(
+                              width: 380,
+                              height: 40,
                               child: ElevatedButton(
                                 child: const Text("Add cup"),
                                 onPressed: () {
                                   setState(() {
-                                    print(cups.length);
                                     cups.add(
                                         Cup('"Cup #${cups.length + 1}"', []));
                                   });
+                                  _scrollDown();
                                 },
                               ),
                             ),
-                            // Place the debug mode button as a sibling
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: SizedBox(
+                                  width: 400,
+                                  height: 40,
+                                  child: ElevatedButton(
+                                    style: const ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStatePropertyAll(
+                                                Colors.amberAccent)),
+                                    child: const Text(
+                                      "Save config",
+                                      style: TextStyle(color: Colors.black87),
+                                    ),
+                                    onPressed: () => {
+                                      saveConfig(context),
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            Future.delayed(
+                                                const Duration(
+                                                    milliseconds: 500), () {
+                                              Navigator.of(context).pop(true);
+                                            });
+                                            return const AlertDialog(
+                                              content: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text("Saved"),
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 8.0),
+                                                    child: Icon(Icons.thumb_up),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          })
+                                    },
+                                  )),
+                            )
                           ],
                         ),
                       ),

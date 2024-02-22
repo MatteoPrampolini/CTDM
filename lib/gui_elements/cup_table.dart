@@ -79,7 +79,7 @@ class _CupTableState extends State<CupTable> {
         child: Stack(
           children: [
             Visibility(
-              visible: widget.isDisabled != true,
+              visible: widget.isDisabled != true && widget.cupIndex >= 0,
               child: Positioned(
                 top: 200,
                 left: 40,
@@ -94,7 +94,7 @@ class _CupTableState extends State<CupTable> {
               ),
             ),
             Visibility(
-              visible: widget.isDisabled != true,
+              visible: widget.isDisabled != true && widget.cupIndex >= 0,
               child: Positioned(
                 top: 240,
                 left: 40,
