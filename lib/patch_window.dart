@@ -499,8 +499,8 @@ class _PatchWindowState extends State<PatchWindow> {
         path.join(packPath, 'rel', "lecode-$isoVersion.bin"),
         '--le-define',
         path.join(packPath, 'config.txt'),
-        '--lpar', //added
-        path.join(packPath, 'lpar.txt'), //added
+        '--lpar',
+        path.join(packPath, 'lpar.txt')
       ];
 
       if (isoVersion == "PAL") {
@@ -513,6 +513,7 @@ class _PatchWindowState extends State<PatchWindow> {
       }
 
       //  wlect patch lecode-PAL.bin -od lecode-PAL.bin --le-define config.txt --track-dir .
+
       ProcessResult p = await Process.run('wlect', wlectArgs, runInShell: true);
 
       if (p.exitCode != 0 || p.stderr.toString().contains('! wlect')) {
@@ -1036,7 +1037,7 @@ class _PatchWindowState extends State<PatchWindow> {
     List<String> tracksIdHex = [];
 
     for (String line in await musicTxt.readAsLines()) {
-      String id = line.substring(0, 3);
+      String id = line.split(';')[0];
       int hexValue = int.parse(id, radix: 16);
       if (hasArena && (hexValue >= 0x20 && hexValue <= 0x29)) {
         switch (hexValue) {
@@ -1074,7 +1075,7 @@ class _PatchWindowState extends State<PatchWindow> {
       }
       tracksIdHex.add(id); //get id of track and add it
 
-      String filepath = line.substring(4);
+      String filepath = line.split(';')[1];
 
       //deprecated
       if (!filepath.endsWith("brstm") && Platform.isMacOS) {

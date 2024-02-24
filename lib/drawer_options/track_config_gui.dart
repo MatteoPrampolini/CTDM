@@ -311,13 +311,13 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
     List<String> musicLines = musicTxt.readAsLinesSync();
 
     for (String line in musicLines) {
-      String hex = line.substring(0, 3);
+      String hex = line.split(';')[0];
       int dec = int.parse(hex, radix: 16);
       if (dec >= 32 && dec < 42) {
         int cupIndex = dec > 36 ? 1 : 0;
 
         arenaCups[cupIndex].tracks[(dec - 32) % 5].musicFolder =
-            line.substring(4);
+            line.split(';')[1];
         continue;
       }
 
@@ -336,7 +336,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
           }
 
           if (dec == i) {
-            track.musicFolder = line.substring(4);
+            track.musicFolder = line.split(';')[1];
           }
 
           i++;
@@ -912,7 +912,6 @@ N N$nintendoTracksString | """
                   height: 30,
                   child: ElevatedButton(
                     onPressed: () {
-                      print(cupsController.text);
                       int cupsValue = int.tryParse(cupsController.text) ?? -1;
                       setCupsDebug(cupsValue);
                       setState(() {});
