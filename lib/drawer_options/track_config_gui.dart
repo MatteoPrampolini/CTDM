@@ -550,7 +550,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
         n.shouldDelete == true) {
       cups.removeAt(realIndex - 1);
     }
-    _scrollUp();
+    //_scrollUp();
 
     setState(() {});
     return true;
@@ -1118,7 +1118,7 @@ N N$nintendoTracksString | """
                                     cups.add(
                                         Cup('"Cup #${cups.length + 1}"', []));
                                   });
-                                  _scrollDown();
+                                  //_scrollDown();
                                 },
                               ),
                             ),

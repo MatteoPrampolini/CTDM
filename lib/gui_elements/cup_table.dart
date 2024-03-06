@@ -163,40 +163,6 @@ class _CupTableState extends State<CupTable> {
                               i = i + 1,
                               widget.packPath,
                               canDelete)
-
-                          // CupTableSubMenu(
-                          //     widget.cup
-                          //                 .getRange(
-                          //                     widget.cup.indexOf(track),
-                          //                     getLastHiddenIndexPlus1(
-                          //                         widget.cup, track))
-                          //                 .toList()
-                          //                 .isEmpty ==
-                          //             true
-                          //         ? List.of([track])
-                          //         : widget.cup
-                          //             .getRange(
-                          //                 widget.cup.indexOf(track),
-                          //                 getLastHiddenIndexPlus1(
-                          //                     widget.cup, track))
-                          //             .toList(),
-                          //     widget.cupIndex,
-                          //     increaseCounter(
-                          //         i,
-                          //         widget.cup
-                          //             .getRange(
-                          //                 widget.cup.indexOf(track),
-                          //                 widget.cup.indexOf(widget.cup
-                          //                     .sublist(widget.cup.indexOf(track))
-                          //                     .firstWhere(
-                          //                         (element) =>
-                          //                             element.type ==
-                          //                             TrackType.base,
-                          //                         orElse: () => track)))
-                          //             .toList()
-                          //             .length),
-                          //     widget.packPath,
-                          //     canDelete)
                           : Container(
                               child: (i = i + 1) > 0 ? null : Container(),
                             ),
