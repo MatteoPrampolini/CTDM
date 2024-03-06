@@ -5,6 +5,9 @@ import 'package:ctdm/utils/exceptions_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:path/path.dart' as path;
 
+String ffmpegPath = "ffmpeg";
+String mpvPath = "mpv";
+
 bool isFastBrstm(String path) {
   return path.endsWith('_f.brstm') ||
       path.endsWith('_F.brstm') ||
@@ -14,8 +17,21 @@ bool isFastBrstm(String path) {
 
 bool isFfmpegInstalled() {
   try {
+    if (Platform.isWindows) {
+      String executablesFolder = File(path.join(
+            path.dirname(Platform.resolvedExecutable),
+            "data",
+            "flutter_assets",
+            "assets",
+            "executables"))
+        .path;
+      if (File("$executablesFolder/ffmpeg.exe").existsSync()) {
+        ffmpegPath = "$executablesFolder/ffmpeg.exe";
+      }
+      logString(LogType.INFO, "bundled ffmpeg found [$ffmpegPath]");
+    }
     ProcessResult res =
-        Process.runSync('ffmpeg', ['-version'], runInShell: false);
+        Process.runSync(ffmpegPath, ['-version'], runInShell: false);
     return res.exitCode == 0;
   } on Exception catch (_) {
     logString(LogType.ERROR,
@@ -26,8 +42,21 @@ bool isFfmpegInstalled() {
 
 bool isMpvInstalled() {
   try {
+    if (Platform.isWindows) {
+      String executablesFolder = File(path.join(
+            path.dirname(Platform.resolvedExecutable),
+            "data",
+            "flutter_assets",
+            "assets",
+            "executables"))
+        .path;
+      if (File("$executablesFolder/mpv.exe").existsSync()) {
+        mpvPath = "$executablesFolder/mpv.exe";
+      }
+      logString(LogType.INFO, "bundled mpv found [$mpvPath]");
+    }
     ProcessResult res =
-        Process.runSync('mpv', ['--version'], runInShell: false);
+        Process.runSync(mpvPath, ['--version'], runInShell: false);
     return res.exitCode == 0;
   } on Exception catch (_) {
     logString(LogType.ERROR,
@@ -135,7 +164,7 @@ Future<File> audioToWavAdpcm(
   double dbIncrease = (targetDb - maxVolume);
   //print(dbIncrease);
   await Process.run(
-      'ffmpeg',
+      ffmpegPath,
       [
         '-y',
         '-i',
@@ -152,7 +181,7 @@ Future<File> audioToWavAdpcm(
 
 Future<File> createFastCopy(String tmpFilePath, String tmpFilePathFast) async {
   await Process.run(
-      'ffmpeg',
+      ffmpegPath,
       [
         '-y',
         '-i',
@@ -272,7 +301,7 @@ Future<String> getLoopPoint(File input) async {
           "executables"))
       .path;
   // ProcessResult p = await Process.run(
-  //     'ffmpeg',
+  //     ffmpegPath,
   //     [
   //       '-i',
   //       input.path,
@@ -332,7 +361,7 @@ Future<String> getLoopPoint(File input) async {
 
 Future<double> getMaxVolumePeak(File input) async {
   ProcessResult p = await Process.run(
-      'ffmpeg',
+      ffmpegPath,
       [
         '-i',
         input.path,
@@ -383,7 +412,7 @@ Future<File> _runCommandToNormalize(
       outputFilePath,
     ];
 
-    await Process.run('ffmpeg', ffmpegArgs, runInShell: true);
+    await Process.run(ffmpegPath, ffmpegArgs, runInShell: true);
   } catch (e) {
     logString(
         LogType.ERROR, "ERROR 5503: Cannot parse ffmpeg.\n${e.toString()}");
@@ -394,7 +423,7 @@ Future<File> _runCommandToNormalize(
 
 Future<File> normalize(File inputFile, File output) async {
   ProcessResult p = await Process.run(
-    'ffmpeg',
+    ffmpegPath,
     [
       '-i',
       inputFile.path,
