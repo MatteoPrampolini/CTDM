@@ -34,3 +34,8 @@ jobs:
           # Cache the Flutter SDK
           cache: true
       - run: flutter build windows --release
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: windows_64
+          path: build/windows/runner/Release/
