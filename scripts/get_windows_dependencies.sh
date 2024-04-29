@@ -3,7 +3,6 @@
 set -e
 
 mkdir deps
-cd deps
 
 MPV_SHA1="44dbdf260b3bb2f2db70b0fa3e22d1138714dd75"
 MPV_MD5="9844e3279dca2cd946388abe7742498f"
