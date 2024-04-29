@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:brstm_player/brstm.dart';
 import 'package:brstm_player/brstm_player.dart';
 import 'package:ctdm/drawer_options/brstm_player.dart/audio_timeline.dart';
+import 'package:ctdm/utils/music_utils.dart' as bundled_paths;
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'loop_point_timeline.dart';
@@ -68,7 +69,7 @@ class BrstmPlayerState extends State<BrstmPlayer> {
   void initState() {
     file = widget.file;
     mpv.updateInterval = 300;
-    mpv.binary = "mpv";
+    mpv.binary = bundled_paths.mpvPath;
     final String suffix =
         widget.file.getFilePath()!.contains(RegExp(r"_[fF]\.brstm$"))
             ? "_fast"
