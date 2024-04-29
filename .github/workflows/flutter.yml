@@ -9,11 +9,7 @@ env:
   flutter-version: 3.19.6
   channel: stable
 
-on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+on: [ create, workflow_dispatch ]
 
 jobs:
     build-windows-target:
