@@ -50,8 +50,8 @@ bool isMpvInstalled() {
             "assets",
             "executables"))
         .path;
-      if (File("$executablesFolder/mpv.exe").existsSync()) {
-        mpvPath = "$executablesFolder/mpv.exe";
+      if (File("$executablesFolder/mpv.exe").existsSync() && File("$executablesFolder/mpv.com").existsSync()) {
+        mpvPath = "$executablesFolder/mpv.com";
       }
       logString(LogType.INFO, "bundled mpv found [$mpvPath]");
     }
