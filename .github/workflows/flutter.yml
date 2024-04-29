@@ -43,7 +43,7 @@ jobs:
       - name: Extract ffmpeg and mpv
         shell: pwsh
         run: |
-          7z.exe e -odeps .\mpv.7z d3dcompiler_43.dll mpv.exe
+          7z.exe e -odeps .\mpv.7z d3dcompiler_43.dll mpv.com mpv.exe
           7z.exe e -odeps .\ffmpeg.7z ffmpeg.exe -r
 
       - name: Move dependencies
