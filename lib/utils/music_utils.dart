@@ -26,7 +26,7 @@ bool isFfmpegInstalled() {
             "executables"))
         .path;
       if (File("$executablesFolder/ffmpeg.exe").existsSync()) {
-        ffmpegPath = "$executablesFolder/ffmpeg.exe";
+        ffmpegPath = "$executablesFolder\\ffmpeg.exe";
       }
       logString(LogType.INFO, "bundled ffmpeg found [$ffmpegPath]");
     }
@@ -51,7 +51,7 @@ bool isMpvInstalled() {
             "executables"))
         .path;
       if (File("$executablesFolder/mpv.exe").existsSync() && File("$executablesFolder/mpv.com").existsSync()) {
-        mpvPath = "$executablesFolder/mpv.com";
+        mpvPath = "$executablesFolder\\mpv.com";
       }
       logString(LogType.INFO, "bundled mpv found [$mpvPath]");
     }
