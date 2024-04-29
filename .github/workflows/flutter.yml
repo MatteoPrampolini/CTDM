@@ -34,6 +34,13 @@ jobs:
           # Cache the Flutter SDK
           cache: true
       - run: flutter build windows --release
+      
+      - name: Download additional dependencies
+        shell: bash
+        run: |
+          ./scripts/get_windows_dependencies.sh
+          mv deps/* build/windows/x64/runner/Release/data/flutter_assets/assets/executables
+      
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v4.3.3
         with:
