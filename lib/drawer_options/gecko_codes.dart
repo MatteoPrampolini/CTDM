@@ -191,6 +191,7 @@ class _GeckoCodesState extends State<GeckoCodes> {
                   ListTile(
                     leading: const Icon(Icons.chevron_right),
                     selected: i == selectedCode,
+                    selectedColor: Colors.redAccent,
                     title: Text(
                       codes[i].name,
                       overflow: TextOverflow.ellipsis,
@@ -321,10 +322,13 @@ class _GeckoCodesState extends State<GeckoCodes> {
                             child: Padding(
                               padding: const EdgeInsets.only(left: 8.0),
                               child: ElevatedButton(
+                                  style: TextButton.styleFrom(
+                                      backgroundColor: Colors.red),
                                   onPressed: codes[selectedCode].mandatory
                                       ? null
                                       : () => {deleteCode()},
-                                  child: const Text("Delete")),
+                                  child: const Text("Delete",
+                                      style: TextStyle(color: Colors.white))),
                             ),
                           ),
                         ],

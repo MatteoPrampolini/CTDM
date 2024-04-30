@@ -141,6 +141,8 @@ class _CustomCharactersState extends State<CustomCharacters> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 TextButton(
+                                    style: TextButton.styleFrom(
+                                        backgroundColor: Colors.red),
                                     onPressed: () => {
                                           Navigator.push(
                                                   context,
@@ -151,10 +153,13 @@ class _CustomCharactersState extends State<CustomCharacters> {
                                               .then(
                                                   (value) => setState(() => {}))
                                         },
-                                    child: const Text("Character Editor")),
+                                    child: const Text("Character Editor",
+                                        style: TextStyle(color: Colors.white))),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 15.0),
                                   child: TextButton(
+                                      style: TextButton.styleFrom(
+                                          backgroundColor: Colors.red),
                                       onPressed: () async => {
                                             if (!Directory(path.join(path.join(
                                                     path.dirname(path.dirname(
@@ -193,7 +198,9 @@ class _CustomCharactersState extends State<CustomCharacters> {
                                                 //await
                                               }
                                           },
-                                      child: const Text("Import")),
+                                      child: const Text("Import",
+                                          style:
+                                              TextStyle(color: Colors.white))),
                                 ),
                               ],
                             ),

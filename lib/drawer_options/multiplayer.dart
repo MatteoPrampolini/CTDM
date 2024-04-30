@@ -128,10 +128,11 @@ class _MultiplayerState extends State<Multiplayer> {
                                     Flexible(
                                       flex: 1,
                                       child: CheckboxListTile(
+                                        checkColor: Colors.white,
                                         activeColor: Colors.redAccent,
                                         title: const Text(
                                           "Enable",
-                                          style: TextStyle(fontSize: 25),
+                                          style: TextStyle(fontSize: 22),
                                         ),
                                         controlAffinity:
                                             ListTileControlAffinity.leading,

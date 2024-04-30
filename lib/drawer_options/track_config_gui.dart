@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 import 'package:random_string/random_string.dart';
 
@@ -803,7 +805,7 @@ N N$nintendoTracksString | """
           children: [
             SizedBox(
               height: 30,
-              width: 115,
+              width: 130,
               child: ElevatedButton(
                 onPressed: () {
                   sortCups();
@@ -816,10 +818,9 @@ N N$nintendoTracksString | """
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(width: 8.0),
                     Text(
                       "A-Z Sort",
-                      style: TextStyle(fontSize: 16.0),
+                      style: TextStyle(fontSize: 16.0, color: Colors.white),
                     ),
                   ],
                 ),
@@ -837,6 +838,7 @@ N N$nintendoTracksString | """
               child: CheckboxListTile(
                 value: keepNintendo,
                 activeColor: Colors.red,
+                checkColor: Colors.white,
                 title: const Text("Keep Nintendo tracks"),
                 onChanged: (value) {
                   keepNintendo = value!;
@@ -850,6 +852,7 @@ N N$nintendoTracksString | """
               child: CheckboxListTile(
                 value: wiimsCup,
                 activeColor: Colors.red,
+                checkColor: Colors.white,
                 title: const Text("Wiimm's cup"),
                 onChanged: (value) {
                   wiimsCup = value!;
@@ -866,6 +869,7 @@ N N$nintendoTracksString | """
               child: CheckboxListTile(
                 value: editArena,
                 activeColor: Colors.red,
+                checkColor: Colors.white,
                 title: const Text("Change Arena"),
                 onChanged: (value) {
                   editArena = value!;
@@ -1112,7 +1116,12 @@ N N$nintendoTracksString | """
                               width: 380,
                               height: 40,
                               child: ElevatedButton(
-                                child: const Text("Add cup"),
+                                style: TextButton.styleFrom(
+                                    backgroundColor: Colors.red),
+                                child: const Text(
+                                  "Add cup",
+                                  style: TextStyle(color: Colors.white),
+                                ),
                                 onPressed: () {
                                   setState(() {
                                     cups.add(

@@ -74,6 +74,8 @@ class _LparConfigState extends State<LparConfig> {
                   Padding(
                     padding: const EdgeInsets.only(top: 12.0),
                     child: ElevatedButton(
+                        style:
+                            TextButton.styleFrom(backgroundColor: Colors.red),
                         onPressed: () async => {
                               if (!Platform.isLinux)
                                 {launchUrlString(widget.packPath)},
@@ -85,11 +87,14 @@ class _LparConfigState extends State<LparConfig> {
                                   //await
                                 }
                             },
-                        child: const Text("open folder")),
+                        child: const Text("open folder",
+                            style: TextStyle(color: Colors.white))),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 60.0),
                     child: ElevatedButton(
+                        style:
+                            TextButton.styleFrom(backgroundColor: Colors.red),
                         onPressed: () => {
                               showDialog(
                                   context: context,
@@ -124,7 +129,8 @@ class _LparConfigState extends State<LparConfig> {
                                     );
                                   }),
                             },
-                        child: const Text("reset to default")),
+                        child: const Text("reset to default",
+                            style: TextStyle(color: Colors.white))),
                   )
                 ],
               ),

@@ -180,13 +180,19 @@ class _CupTableState extends State<CupTable> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ElevatedButton(
-                            child: const Text("Add track"),
+                            style: TextButton.styleFrom(
+                                backgroundColor: Colors.red),
+                            child: const Text("Add track",
+                                style: TextStyle(color: Colors.white)),
                             onPressed: () =>
                                 AddTrackRequest(TrackType.base, widget.cupIndex)
                                     .dispatch(context),
                           ),
                           ElevatedButton(
-                            child: const Text("Add menu"),
+                            style: TextButton.styleFrom(
+                                backgroundColor: Colors.red),
+                            child: const Text("Add menu",
+                                style: TextStyle(color: Colors.white)),
                             onPressed: () =>
                                 AddTrackRequest(TrackType.menu, widget.cupIndex)
                                     .dispatch(context),

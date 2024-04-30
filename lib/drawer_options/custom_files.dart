@@ -249,6 +249,7 @@ class _CustomUIState extends State<CustomUI> {
                           ),
                           CheckboxListTile(
                               activeColor: Colors.red,
+                              checkColor: Colors.white,
                               title: FittedBox(
                                 child: Text(
                                   "${Scene.values.elementAt(index).name.toCapitalized()}.szs",
@@ -268,6 +269,7 @@ class _CustomUIState extends State<CustomUI> {
                               value: values[index * 2]),
                           CheckboxListTile(
                               activeColor: Colors.red,
+                              checkColor: Colors.white,
                               title: FittedBox(
                                 child: Text(
                                   "${Scene.values.elementAt(index).name.toCapitalized()}_U.szs",
@@ -307,7 +309,7 @@ class _CustomUIState extends State<CustomUI> {
                     itemCount: miscList.length,
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
-                      childAspectRatio: (1 / 0.4),
+                      childAspectRatio: (1 / 0.42),
                       maxCrossAxisExtent: 220,
                     ),
                     itemBuilder: (BuildContext context, int index) {
@@ -318,9 +320,10 @@ class _CustomUIState extends State<CustomUI> {
                           Text(
                             miscList[index].name,
                             style: const TextStyle(
-                                fontSize: 20, color: Colors.redAccent),
+                                fontSize: 19, color: Colors.redAccent),
                           ),
                           CheckboxListTile(
+                              checkColor: Colors.white,
                               activeColor: Colors.red,
                               title: FittedBox(
                                 child: Text(
@@ -350,17 +353,19 @@ class _CustomUIState extends State<CustomUI> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ElevatedButton(
-                            child: const Text(
-                              "Create files",
-                              textAlign: TextAlign.center,
-                            ),
+                            style: TextButton.styleFrom(
+                                backgroundColor: Colors.red),
+                            child: const Text("Create files",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.white)),
                             onPressed: () async =>
                                 {createFilesUi(), createFilesMisc(miscList)}),
                         ElevatedButton(
-                          child: const Text(
-                            "Open folder",
-                            textAlign: TextAlign.center,
-                          ),
+                          style:
+                              TextButton.styleFrom(backgroundColor: Colors.red),
+                          child: const Text("Open folder",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white)),
                           onPressed: () async => {
                             if (!Directory(path.join(widget.packPath, 'myUI'))
                                 .existsSync())

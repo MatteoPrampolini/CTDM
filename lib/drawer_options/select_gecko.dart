@@ -199,6 +199,7 @@ class _SelectGeckoState extends State<SelectGecko> {
                                           MainAxisAlignment.spaceAround,
                                       children: [
                                         Checkbox(
+                                          checkColor: Colors.white,
                                           fillColor:
                                               MaterialStateColor.resolveWith(
                                             (Set<MaterialState> states) {
@@ -236,6 +237,7 @@ class _SelectGeckoState extends State<SelectGecko> {
                                           },
                                         ),
                                         Checkbox(
+                                          checkColor: Colors.white,
                                           fillColor:
                                               MaterialStateColor.resolveWith(
                                             (Set<MaterialState> states) {
@@ -306,7 +308,10 @@ class _SelectGeckoState extends State<SelectGecko> {
                       child: Align(
                         alignment: Alignment.bottomCenter,
                         child: TextButton(
-                            child: const Text("Code Manager"),
+                            style: TextButton.styleFrom(
+                                backgroundColor: Colors.red),
+                            child: const Text("Code Manager",
+                                style: TextStyle(color: Colors.white)),
                             onPressed: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(

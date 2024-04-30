@@ -69,6 +69,7 @@ class _CharEditorState extends State<CharEditor> {
                   ListTile(
                     leading: const Icon(Icons.chevron_right),
                     selected: i == selectedChar,
+                    selectedColor: Colors.redAccent,
                     title: Text(
                       charList[i].dirBasename,
                       maxLines: 3,
@@ -76,25 +77,24 @@ class _CharEditorState extends State<CharEditor> {
                     ),
                     onTap: () => {
                       setState(
-                        () => {
-                          selectedChar = i,
+                        () {
+                          selectedChar = i;
                           _textEditingController.text =
-                              charList[selectedChar].name
+                              charList[selectedChar].name;
                         },
                       )
                     },
                   ),
                 IconButton(
                     onPressed: () => {
-                          setState(() => {
-                                createCustomCharacter(widget.packPath),
-                                charList =
-                                    createListOfCharacter(widget.packPath),
-                                selectedSizeIndex =
-                                    charList[selectedChar].size.index,
-                                _textEditingController.text =
-                                    charList[selectedChar].name
-                              }),
+                          setState(() {
+                            createCustomCharacter(widget.packPath);
+                            charList = createListOfCharacter(widget.packPath);
+                            selectedSizeIndex =
+                                charList[selectedChar].size.index;
+                            _textEditingController.text =
+                                charList[selectedChar].name;
+                          }),
                         },
                     icon: const Icon(
                       Icons.add,
@@ -239,7 +239,10 @@ class _CharEditorState extends State<CharEditor> {
                                                       .validate(value);
                                             });
                                           },
+                                          cursorColor:
+                                              Colors.redAccent.shade200,
                                           decoration: InputDecoration(
+                                            focusColor: Colors.white,
                                             border: const OutlineInputBorder(),
                                             hintText: 'Insert character name',
                                             labelText: 'Character name',
@@ -326,6 +329,8 @@ class _CharEditorState extends State<CharEditor> {
                                     MainAxisAlignment.spaceAround,
                                 children: [
                                   ElevatedButton(
+                                      style: TextButton.styleFrom(
+                                          backgroundColor: Colors.red),
                                       onPressed: () async => {
                                             if (!Platform.isLinux)
                                               {
@@ -346,7 +351,9 @@ class _CharEditorState extends State<CharEditor> {
                                                 //await
                                               }
                                           },
-                                      child: const Text("open folder")),
+                                      child: const Text("open folder",
+                                          style:
+                                              TextStyle(color: Colors.white))),
                                   SizedBox(
                                     height: 28,
                                     width: 200,
@@ -377,6 +384,8 @@ class _CharEditorState extends State<CharEditor> {
                                         )),
                                   ),
                                   ElevatedButton(
+                                      style: TextButton.styleFrom(
+                                          backgroundColor: Colors.red),
                                       onPressed: () => setState(() {
                                             charList = createListOfCharacter(
                                                 widget.packPath);
@@ -387,7 +396,9 @@ class _CharEditorState extends State<CharEditor> {
                                             _textEditingController.text =
                                                 charList[selectedChar].name;
                                           }),
-                                      child: const Text("refresh")),
+                                      child: const Text("refresh",
+                                          style:
+                                              TextStyle(color: Colors.white))),
                                 ],
                               ),
                             ),

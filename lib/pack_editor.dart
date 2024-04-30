@@ -273,6 +273,10 @@ class _PackEditorState extends State<PackEditor> {
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: ElevatedButton(
+                                    style: const ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStatePropertyAll<Color>(
+                                                Colors.red)),
                                     onPressed: () => {
                                           checkResultVisibility = true,
                                           //_scaffoldKey.currentState?.openDrawer(),
@@ -294,7 +298,10 @@ class _PackEditorState extends State<PackEditor> {
                                               })
                                             }
                                         },
-                                    child: const Text("CHECK")),
+                                    child: const Text(
+                                      "CHECK",
+                                      style: TextStyle(color: Colors.white),
+                                    )),
                               ),
                             ),
                             Expanded(
@@ -337,7 +344,10 @@ class _PackEditorState extends State<PackEditor> {
                                           exportToExcel(
                                               widget.packPath, context)
                                         },
-                                    child: const Text("EXPORT XLSX")),
+                                    child: const Text(
+                                      "EXPORT XLSX",
+                                      style: TextStyle(color: Colors.white),
+                                    )),
                               ),
                             ),
                             Expanded(

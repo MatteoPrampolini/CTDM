@@ -197,10 +197,11 @@ class _CupIconsWindowState extends State<CupIconsWindow> {
                             horizontal:
                                 MediaQuery.of(context).size.width / 2.5),
                         child: ElevatedButton(
-                          child: const Text(
-                            "open Icons folder",
-                            textAlign: TextAlign.center,
-                          ),
+                          style:
+                              TextButton.styleFrom(backgroundColor: Colors.red),
+                          child: const Text("open Icons folder",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white)),
                           onPressed: () async => {
                             if (Directory(path.join(widget.packPath, 'Icons'))
                                 .existsSync())

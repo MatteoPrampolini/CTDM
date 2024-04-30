@@ -225,6 +225,8 @@ class _RenamePackState extends State<RenamePack> {
                     padding: const EdgeInsets.only(top: 40.0),
                     child: ElevatedButton(
                         style: ButtonStyle(
+                            backgroundColor:
+                                const MaterialStatePropertyAll(Colors.red),
                             fixedSize:
                                 MaterialStateProperty.all(const Size(150, 50))),
                         onPressed: enableSaveBtn
@@ -249,7 +251,10 @@ class _RenamePackState extends State<RenamePack> {
                                               const MyHomePage()))
                                 }
                             : null,
-                        child: const Text("SAVE")),
+                        child: const Text(
+                          "SAVE",
+                          style: TextStyle(color: Colors.white),
+                        )),
                   )
                 ],
               ),

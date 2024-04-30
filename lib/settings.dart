@@ -75,7 +75,6 @@ class _SettingsState extends State<Settings> {
         ),
         backgroundColor: Colors.amber,
         actionsIconTheme: IconThemeData(color: Colors.red.shade700, size: 40),
-        
         title: const Text(
           'Settings',
           style: TextStyle(color: Colors.black),
@@ -127,6 +126,7 @@ class _SettingsState extends State<Settings> {
                     width: 320,
                     height: 50,
                     child: ElevatedButton(
+                      style: TextButton.styleFrom(backgroundColor: Colors.red),
                       onPressed: () => {
                         prefs.setString('workspace', ''),
                         setState(() {
@@ -135,7 +135,7 @@ class _SettingsState extends State<Settings> {
                       },
                       child: const Text(
                         "reset settings",
-                        style: TextStyle(fontSize: 24),
+                        style: TextStyle(fontSize: 24, color: Colors.white),
                       ),
                     )),
               ),
@@ -282,6 +282,7 @@ class _SettingOptionFolderState extends State<SettingOptionFolder> {
               flex: 4,
               child: ElevatedButton(
                   style: TextButton.styleFrom(
+                      backgroundColor: Colors.red,
                       fixedSize: const Size.fromHeight(36)),
                   onPressed: () async => {
                         if (widget.isFile)
@@ -317,6 +318,7 @@ class _SettingOptionFolderState extends State<SettingOptionFolder> {
                     child: Text(
                       "Select",
                       textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white),
                     ),
                   ))),
           Expanded(

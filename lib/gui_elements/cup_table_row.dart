@@ -176,7 +176,7 @@ class _CupTableRowState extends State<CupTableRow> {
                                 icon: Icon(Icons.grade,
                                     color: isNew
                                         ? Colors.redAccent
-                                        : Colors.white54))),
+                                        : Colors.white70))),
                       )
                     ],
                   ),
@@ -287,7 +287,8 @@ class _CupTableRowState extends State<CupTableRow> {
                               borderRadius: BorderRadius.circular(3),
                               border: Border.all(color: Colors.red)),
                           child: ToggleButtons(
-                            fillColor: Colors.amber[200],
+                            fillColor: Colors.amberAccent[100],
+                            selectedColor: Colors.redAccent[200],
                             color: Colors.red[400],
                             isSelected: [
                               widget.track.musicFolder != null,
