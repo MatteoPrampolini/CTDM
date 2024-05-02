@@ -52,10 +52,10 @@ jobs:
             path: build/windows/x64/runner/Release
             
     build-linux-target:
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-20.04
       steps:
         - uses: actions/checkout@v4
-              
+
         - name: Build Linux target
           # You may pin to the exact commit or the version.
           # uses: subosito/flutter-action@1c5eb12d812966ca84680edc38353a0851c8fd56
