@@ -58,6 +58,10 @@ jobs:
 
         - name: Print GLIBCXX strings
           run: strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
+        - name: Print libstdc++6 version
+          run: |
+            apt show libstdc++6
+            apt show libstdc++6:amd64
               
         - name: Build Linux target
           # You may pin to the exact commit or the version.
