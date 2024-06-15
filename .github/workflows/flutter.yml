@@ -33,13 +33,13 @@ jobs:
             dart --disable-analytics
         - name: Build Windows target (minimal)
           run: flutter build windows --release --dart-define=profile=minimal
-        - name: Build Windows target (full)
-          run: flutter build windows --release --dart-define=profile=full
         - name: 'Upload "Minimal" Artifact'
           uses: actions/upload-artifact@v4.3.3
           with:
             name: windows_64_minimal
             path: build/windows/x64/runner/Release
+        - name: Build Windows target (full)
+          run: flutter build windows --release --dart-define=profile=full
         - name: Download additional dependencies
           shell: bash
           run: ./scripts/get_windows_dependencies.sh
