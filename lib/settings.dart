@@ -18,6 +18,7 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   late SharedPreferences prefs;
   String workspace = "";
+  late String profile = "";
   late String version = "";
   String riivolution = "";
   String dolphin = "";
@@ -36,7 +37,11 @@ class _SettingsState extends State<Settings> {
     prefs = await SharedPreferences.getInstance();
 
     setState(() {
-      version = prefs.getString("version")!;
+      version = prefs.getString('version')!;
+      profile = prefs.getString('profile')!;
+      if (profile.isNotEmpty) {
+        version = '$version-$profile';
+      }
       workspace = prefs.getString('workspace')!;
       riivolution = prefs.getString('Riivolution')!;
       dolphin = prefs.getString('dolphin')!;
