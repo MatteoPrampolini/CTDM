@@ -27,6 +27,10 @@ jobs:
             channel: ${{ env.channel }}
             # Cache the Flutter SDK
             cache: true
+        - name: Disable Flutter telemetry
+          run: |
+            flutter --disable-analytics
+            dart --disable-analytics
         - name: Build Windows target (minimal)
           run: flutter build windows --release --dart-define=profile=minimal
         - name: 'Upload "Minimal" Artifact'
@@ -70,6 +74,10 @@ jobs:
             channel: ${{ env.channel }}
             # Cache the Flutter SDK
             cache: true
+        - name: Disable Flutter telemetry
+          run: |
+            flutter --disable-analytics
+            dart --disable-analytics
         - name: Install build dependencies
           run: |
             sudo apt-get update -y
