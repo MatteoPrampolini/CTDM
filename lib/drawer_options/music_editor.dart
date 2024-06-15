@@ -24,6 +24,8 @@ class _MusicEditorState extends State<MusicEditor> {
   List<Directory> folderList = [];
   int selectedFolder = 0;
   late String myMusicFolder;
+  late String errorString;
+  late String profile;
   GlobalKey<DoubleBrstmPlayerState> doublePlayerKey = GlobalKey();
   FilePickerResult? musicFileResult;
   bool addFileVisibile = false;
@@ -35,6 +37,15 @@ class _MusicEditorState extends State<MusicEditor> {
     super.initState();
     myMusicFolder =
         path.join(path.dirname(path.dirname(widget.packPath)), 'myMusic');
+    errorString = "Install and add the executables to PATH";
+    profile = const String.fromEnvironment('profile');
+    if (Platform.isWindows) {
+      if (profile != "full") {
+        errorString = "$errorString or switch to CTDM full";
+      } else {
+        errorString = "This installation of CTDM full is very likely to be broken. Please, do a clean reinstall and try again.";
+      }
+    }
   }
 
   Future<void> createBrstmFromAudioSource(File? audiofile) async {
@@ -78,10 +89,10 @@ class _MusicEditorState extends State<MusicEditor> {
                   isMpvInstalled()
                       ? const Text("")
                       : const Text(
-                          "ERROR: MPV NOT INSTALLED",
+                          "ERROR: MPV NOT FOUND",
                           style: TextStyle(color: Colors.white54, fontSize: 30),
                         ),
-                  isMpvInstalled()
+                  isMpvInstalled() || profile == "full"
                       ? const Text("")
                       : TextButton(
                           onPressed: () => {
@@ -101,12 +112,12 @@ class _MusicEditorState extends State<MusicEditor> {
                     child: isFfmpegInstalled()
                         ? const Text("")
                         : const Text(
-                            "ERROR: FFMPEG NOT INSTALLED",
+                            "ERROR: FFMPEG NOT FOUND",
                             style:
                                 TextStyle(color: Colors.white54, fontSize: 30),
                           ),
                   ),
-                  isFfmpegInstalled()
+                  isFfmpegInstalled() || profile == "full"
                       ? const Text("")
                       : TextButton(
                           onPressed: () => {
@@ -122,11 +133,11 @@ class _MusicEditorState extends State<MusicEditor> {
                             ),
                           ),
                         ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 20.0),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
                     child: Text(
-                      "After installing add the executables to path",
-                      style: TextStyle(color: Colors.white70),
+                      errorString,
+                      style: const TextStyle(color: Colors.white70),
                     ),
                   ),
                   Padding(
