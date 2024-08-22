@@ -448,7 +448,7 @@ class _PatchWindowState extends State<PatchWindow> {
     });
     await Directory(path.join(packPath, 'Race', 'Course', 'tmp')).create();
 
-    //copy vaninlla tracks in tmp
+    //copy vanilla tracks in tmp
     final ogRaceDir =
         Directory(path.join(originalDiscPath, 'files', 'Race', 'Course'));
     final originalTracksSzs =

@@ -8,6 +8,7 @@ import 'package:ctdm/utils/exceptions_utils.dart';
 import 'package:ctdm/utils/log_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../gui_elements/types.dart';
 import 'package:flutter/services.dart';
@@ -267,6 +268,7 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   late FocusNode _focusNode;
   final ScrollController _controller = ScrollController();
   final TextEditingController cupsController = TextEditingController();
+  final ItemScrollController itemScrollController = ItemScrollController();
 
   @override
   void initState() {
@@ -870,7 +872,7 @@ N N$nintendoTracksString | """
                 value: editArena,
                 activeColor: Colors.red,
                 checkColor: Colors.white,
-                title: const Text("Change Arena"),
+                title: const FittedBox(child: Text("Change Arena")),
                 onChanged: (value) {
                   editArena = value!;
                   setState(() {});
@@ -1008,103 +1010,113 @@ N N$nintendoTracksString | """
                             buildSortingAndFilterButtons(),
                             buildDebugModeButton(),
                             Expanded(
-                              child: ListView.builder(
-                                  controller: _controller,
-                                  prototypeItem: CupTable(
-                                    0,
-                                    arenaCups[0].cupName,
-                                    arenaCups[0].tracks,
-                                    widget.packPath,
-                                    0,
-                                  ),
-                                  itemCount: cups.length +
-                                      (editArena ? arenaCups.length : 0) +
-                                      (keepNintendo ? nintendoCups.length : 0) +
-                                      (wiimsCup ? 1 : 0),
-                                  itemBuilder: (context, index) {
-                                    int cupIndex = index -
-                                        (editArena ? arenaCups.length : 0);
-                                    if (index < 2 && editArena) {
-                                      // Arena Cups
+                              child: ScrollConfiguration(
+                                behavior: ScrollConfiguration.of(context)
+                                    .copyWith(scrollbars: false),
+                                child: ScrollablePositionedList.builder(
+                                    itemScrollController: itemScrollController,
 
-                                      return CupTable(
-                                        index - 2,
-                                        arenaCups[index].cupName,
-                                        arenaCups[index].tracks,
-                                        widget.packPath,
-                                        index - 2,
-                                        isDisabled: false,
-                                      );
-                                    } else if (keepNintendo &&
-                                        cupIndex >= 0 &&
-                                        cupIndex < 8) {
-                                      return IgnorePointer(
-                                        ignoring: true,
-                                        child: CupTable(
-                                            cupIndex + 1,
-                                            nintendoCups[cupIndex].cupName,
-                                            nintendoCups[cupIndex].tracks,
-                                            widget.packPath,
-                                            cupIndex + 1,
-                                            isDisabled: true),
-                                      );
-                                    } else if (wiimsCup && cupIndex == 8) {
-                                      return IgnorePointer(
-                                        ignoring: true,
-                                        child: CupTable(
-                                          9,
-                                          'Wiimms Cup',
-                                          [
-                                            Track('All Tracks', '0', '0',
-                                                'Random', TrackType.base),
-                                            Track('Original Tracks', '0', '0',
-                                                'Random', TrackType.base),
-                                            Track("Custom Tracks", '0', '0',
-                                                'Random', TrackType.base),
-                                            Track('New Tracks', '0', '0',
-                                                'Random', TrackType.base)
-                                          ],
-                                          widget.packPath,
-                                          9,
-                                          isDisabled: true,
-                                        ),
-                                      );
-                                    }
-
-                                    if (cupIndex -
-                                            (keepNintendo
-                                                ? nintendoCups.length
-                                                : 0) <
-                                        0) {
-                                      return const SizedBox.shrink();
-                                    }
-
-                                    cupIndex = cupIndex -
+                                    //controller: _controller,
+                                    // prototypeItem: CupTable(
+                                    //   0,
+                                    //   arenaCups[0].cupName,
+                                    //   arenaCups[0].tracks,
+                                    //   widget.packPath,
+                                    //   0,
+                                    // ),
+                                    itemCount: cups.length +
+                                        (editArena ? arenaCups.length : 0) +
                                         (keepNintendo
                                             ? nintendoCups.length
-                                            : 0);
-                                    if (keepNintendo && wiimsCup) {
-                                      cupIndex = cupIndex - 1;
-                                    }
+                                            : 0) +
+                                        (wiimsCup ? 1 : 0),
+                                    itemBuilder: (context, index) {
+                                      int cupIndex = index -
+                                          (editArena ? arenaCups.length : 0);
+                                      if (index < 2 && editArena) {
+                                        // Arena Cups
 
-                                    if (cupIndex >= cups.length) {
-                                      return const SizedBox.shrink();
-                                    }
-                                    return CupTable(
-                                        cupIndex,
-                                        cups[cupIndex].cupName,
-                                        cups[cupIndex].tracks,
-                                        widget.packPath,
-                                        cupIndex +
-                                            1 +
-                                            (keepNintendo
-                                                ? nintendoCups.length
-                                                : 0) +
-                                            (wiimsCup ? 1 : 0) -
-                                            (!keepNintendo && wiimsCup
-                                                ? 1
-                                                : 0));
-                                  }),
+                                        return CupTable(
+                                          index - 2,
+                                          arenaCups[index].cupName,
+                                          arenaCups[index].tracks,
+                                          widget.packPath,
+                                          index - 2,
+                                          isDisabled: false,
+                                        );
+                                      } else if (keepNintendo &&
+                                          cupIndex >= 0 &&
+                                          cupIndex < 8) {
+                                        return IgnorePointer(
+                                          ignoring: true,
+                                          child: CupTable(
+                                              cupIndex + 1,
+                                              nintendoCups[cupIndex].cupName,
+                                              nintendoCups[cupIndex].tracks,
+                                              widget.packPath,
+                                              cupIndex + 1,
+                                              isDisabled: true),
+                                        );
+                                      } else if (wiimsCup && cupIndex == 8) {
+                                        return IgnorePointer(
+                                          ignoring: true,
+                                          child: CupTable(
+                                            9,
+                                            'Wiimms Cup',
+                                            [
+                                              Track('All Tracks', '0', '0',
+                                                  'Random', TrackType.base),
+                                              Track('Original Tracks', '0', '0',
+                                                  'Random', TrackType.base),
+                                              Track("Custom Tracks", '0', '0',
+                                                  'Random', TrackType.base),
+                                              Track('New Tracks', '0', '0',
+                                                  'Random', TrackType.base)
+                                            ],
+                                            widget.packPath,
+                                            9,
+                                            isDisabled: true,
+                                          ),
+                                        );
+                                      }
+
+                                      if (cupIndex -
+                                              (keepNintendo
+                                                  ? nintendoCups.length
+                                                  : 0) <
+                                          0) {
+                                        return const SizedBox.shrink();
+                                      }
+
+                                      cupIndex = cupIndex -
+                                          (keepNintendo
+                                              ? nintendoCups.length
+                                              : 0);
+                                      if (keepNintendo && wiimsCup) {
+                                        cupIndex = cupIndex - 1;
+                                      }
+
+                                      if (cupIndex >= cups.length) {
+                                        return const SizedBox.shrink();
+                                      }
+                                      return RepaintBoundary(
+                                        child: CupTable(
+                                            cupIndex,
+                                            cups[cupIndex].cupName,
+                                            cups[cupIndex].tracks,
+                                            widget.packPath,
+                                            cupIndex +
+                                                1 +
+                                                (keepNintendo
+                                                    ? nintendoCups.length
+                                                    : 0) +
+                                                (wiimsCup ? 1 : 0) -
+                                                (!keepNintendo && wiimsCup
+                                                    ? 1
+                                                    : 0)),
+                                      );
+                                    }),
+                              ),
                             ),
                             const Padding(
                               padding: EdgeInsets.symmetric(
@@ -1123,6 +1135,8 @@ N N$nintendoTracksString | """
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 onPressed: () {
+                                  //itemScrollController.jumpTo(index: 150);
+
                                   setState(() {
                                     cups.add(
                                         Cup('"Cup #${cups.length + 1}"', []));
@@ -1210,4 +1224,15 @@ N N$nintendoTracksString | """
       cups.add(Cup('"Cup #${i + 1}"', tmp));
     }
   }
+//   void _handleScrollWheel(ScrollNotification notification) {
+//   if (notification is ScrollUpdateNotification) {
+//     final double delta = notification.scrollDelta!;
+//     final int currentIndex = // Ottieni l'indice corrente in qualche modo;
+//     final int newIndex = (delta > 0) ? currentIndex + 1 : currentIndex - 1;
+
+//     // Usa `jumpTo` per saltare direttamente all'indice target
+//     if (newIndex >= 0 && newIndex < 9999) {
+//       itemScrollController.jumpTo(index: newIndex);
+//     }
+//   }
 }

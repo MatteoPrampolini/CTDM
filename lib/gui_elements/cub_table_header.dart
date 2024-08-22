@@ -122,18 +122,42 @@ class _CupTableHeaderState extends State<CupTableHeader> {
             ),
           ),
           Expanded(
-              flex: 1,
-              child: Center(
-                  child: File(path.join(widget.packPath, 'Icons',
-                              '${widget.iconIndex}.png'))
-                          .existsSync()
-                      ? Image.file(File(path.join(
-                          widget.packPath, 'Icons', '${widget.iconIndex}.png')))
-                      : widget.iconIndex > 0
-                          ? Text("${widget.iconIndex}.png")
-                          : const Text(""))),
+            flex: 1,
+            child: Center(
+              child: FutureBuilder<bool>(
+                future:
+                    _checkFileExists(), // Metodo asincrono che controlla l'esistenza del file
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    // Mostra un indicatore di caricamento mentre l'operazione è in corso
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    // Gestisci eventuali errori durante il caricamento
+                    return const Text("Error loading image");
+                  } else if (snapshot.hasData && snapshot.data == true) {
+                    // Se il file esiste, carica e mostra l'immagine
+                    return Image.file(
+                      File(path.join(
+                          widget.packPath, 'Icons', '${widget.iconIndex}.png')),
+                    );
+                  } else {
+                    // Se il file non esiste, mostra un testo o un'icona di fallback
+                    return widget.iconIndex > 0
+                        ? Text("${widget.iconIndex}.png")
+                        : const Text("");
+                  }
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Future<bool> _checkFileExists() async {
+    final filePath =
+        path.join(widget.packPath, 'Icons', '${widget.iconIndex}.png');
+    return File(filePath).exists();
   }
 }
