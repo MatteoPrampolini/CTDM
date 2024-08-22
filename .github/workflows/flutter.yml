@@ -16,7 +16,7 @@ jobs:
       runs-on: windows-latest
       steps:
         - uses: actions/checkout@v4
-        - name: Build Windows target
+        - name: Flutter Setup
           # You may pin to the exact commit or the version.
           # uses: subosito/flutter-action@1c5eb12d812966ca84680edc38353a0851c8fd56
           uses: subosito/flutter-action@v2.14.0
@@ -27,12 +27,19 @@ jobs:
             channel: ${{ env.channel }}
             # Cache the Flutter SDK
             cache: true
-        - run: flutter build windows --release
-        - name: 'Upload Standard Artifact'
+        - name: Disable Flutter telemetry
+          run: |
+            flutter --disable-analytics
+            dart --disable-analytics
+        - name: Build Windows target (minimal)
+          run: flutter build windows --release --dart-define=profile=minimal
+        - name: 'Upload "Minimal" Artifact'
           uses: actions/upload-artifact@v4.3.3
           with:
-            name: windows_64_standard
+            name: windows_64_minimal
             path: build/windows/x64/runner/Release
+        - name: Build Windows target (full)
+          run: flutter build windows --release --dart-define=profile=full
         - name: Download additional dependencies
           shell: bash
           run: ./scripts/get_windows_dependencies.sh
@@ -45,18 +52,18 @@ jobs:
         - name: Move dependencies
           shell: pwsh
           run: mv deps/* build/windows/x64/runner/Release/data/flutter_assets/assets/executables
-        - name: 'Upload Bundle Artifact'
+        - name: 'Upload "Full" Artifact'
           uses: actions/upload-artifact@v4.3.3
           with:
-            name: windows_64_bundle
+            name: windows_64_full
             path: build/windows/x64/runner/Release
             
     build-linux-target:
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-20.04
       steps:
         - uses: actions/checkout@v4
-              
-        - name: Build Linux target
+
+        - name: Flutter Setup
           # You may pin to the exact commit or the version.
           # uses: subosito/flutter-action@1c5eb12d812966ca84680edc38353a0851c8fd56
           uses: subosito/flutter-action@v2.14.0
@@ -67,10 +74,16 @@ jobs:
             channel: ${{ env.channel }}
             # Cache the Flutter SDK
             cache: true
-        - run: |
+        - name: Disable Flutter telemetry
+          run: |
+            flutter --disable-analytics
+            dart --disable-analytics
+        - name: Install build dependencies
+          run: |
             sudo apt-get update -y
             sudo apt-get install -y ninja-build libgtk-3-dev
-        - run: flutter build linux --release
+        - name: Build Linux target
+          run: flutter build linux --release
         
         - name: 'Upload Artifact'
           uses: actions/upload-artifact@v4.3.3

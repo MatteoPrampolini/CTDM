@@ -16,8 +16,9 @@ bool isFastBrstm(String path) {
 }
 
 bool isFfmpegInstalled() {
+  const profile = String.fromEnvironment('profile');
   try {
-    if (Platform.isWindows) {
+    if (Platform.isWindows && profile == "full") {
       String executablesFolder = File(path.join(
             path.dirname(Platform.resolvedExecutable),
             "data",
@@ -27,22 +28,33 @@ bool isFfmpegInstalled() {
         .path;
       if (File("$executablesFolder/ffmpeg.exe").existsSync()) {
         ffmpegPath = "$executablesFolder\\ffmpeg.exe";
+        logString(LogType.INFO, "bundled ffmpeg found [$ffmpegPath]");
       }
-      logString(LogType.INFO, "bundled ffmpeg found [$ffmpegPath]");
     }
     ProcessResult res =
         Process.runSync(ffmpegPath, ['-version'], runInShell: false);
     return res.exitCode == 0;
   } on Exception catch (_) {
-    logString(LogType.ERROR,
-        "ffmpeg not found. please install it and add it to PATH https://ffmpeg.org/download.html");
+    if (profile != "full") {
+      if (Platform.isWindows) {
+        logString(LogType.ERROR,
+            "ffmpeg not found. Please install it and add it to PATH https://ffmpeg.org/download.html or install CTDM full instead");
+      } else {
+        logString(LogType.ERROR,
+            "ffmpeg not found. Please install it and add it to PATH https://ffmpeg.org/download.html");
+      }
+    } else {
+      logString(LogType.ERROR,
+          "Bundled ffmpeg not found. This CTDM full installation is very likely to be broken. Please, do a clean reinstall and try again.");
+    }
     return false;
   }
 }
 
 bool isMpvInstalled() {
+  const profile = String.fromEnvironment('profile');
   try {
-    if (Platform.isWindows) {
+    if (Platform.isWindows && profile == "full") {
       String executablesFolder = File(path.join(
             path.dirname(Platform.resolvedExecutable),
             "data",
@@ -52,15 +64,25 @@ bool isMpvInstalled() {
         .path;
       if (File("$executablesFolder/mpv.exe").existsSync() && File("$executablesFolder/mpv.com").existsSync()) {
         mpvPath = "$executablesFolder\\mpv.com";
+        logString(LogType.INFO, "bundled mpv found [$mpvPath]");
       }
-      logString(LogType.INFO, "bundled mpv found [$mpvPath]");
     }
     ProcessResult res =
         Process.runSync(mpvPath, ['--version'], runInShell: false);
     return res.exitCode == 0;
   } on Exception catch (_) {
-    logString(LogType.ERROR,
-        "mpv.io not found. please install it and add it to PATH https://mpv.io/installation/.");
+    if (profile != "full") {
+      if (Platform.isWindows) {
+        logString(LogType.ERROR,
+            "mpv not found. Please install it and add it to PATH https://mpv.io/installation or install CTDM full instead");
+      } else {
+        logString(LogType.ERROR,
+            "mpv not found. Please install it and add it to PATH https://mpv.io/installation");
+      }
+    } else {
+      logString(LogType.ERROR,
+          "Bundled mpv not found. This CTDM full installation is very likely to be broken. Please, do a clean reinstall and try again.");
+    }
     return false;
   }
 }

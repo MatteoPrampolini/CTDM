@@ -266,6 +266,9 @@ Future<void> _main() async {
   await prefs.setString('version', 'v0.9.15');
   await prefs.setBool('download_already_check', false);
 
+  const profile = String.fromEnvironment('profile');
+  await prefs.setString('profile', profile);
+
   try {
     ProcessResult p =
         await Process.run('wlect', ['--version'], runInShell: true);
