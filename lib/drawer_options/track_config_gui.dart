@@ -1,6 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 import 'package:random_string/random_string.dart';
 
 import 'package:ctdm/gui_elements/cup_table.dart';
@@ -265,18 +267,50 @@ class _TrackConfigGuiState extends State<TrackConfigGui> {
   final List<Cup> nintendoCups = getNintendoCups();
   List<Cup> arenaCups = getArenaCups();
   bool debugMode = false;
-  late FocusNode _focusNode;
+  final FocusNode _focusNode = FocusNode();
   final ScrollController _controller = ScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
   final TextEditingController cupsController = TextEditingController();
   final ItemScrollController itemScrollController = ItemScrollController();
+  final TextEditingController _cupSelectController = TextEditingController();
+  int currentVisibleIndex = 0;
+  //TODO idk but removing this breaks the focus
+  static final GlobalKey<FormFieldState<String>> _cupIndexTextfield =
+      GlobalKey<FormFieldState<String>>();
 
   @override
   void initState() {
     super.initState();
     createConfigFile(widget.packPath);
-    _focusNode = FocusNode();
+
     loadMusic(widget.packPath);
     loadPrefs();
+    // Listen to changes in the visible positions
+    itemPositionsListener.itemPositions.addListener(() {
+      final positions = itemPositionsListener.itemPositions.value;
+
+      if (positions.isNotEmpty) {
+        final firstVisibleItemIndex = positions
+            .where((ItemPosition position) => position.itemTrailingEdge > 0)
+            .reduce((ItemPosition min, ItemPosition position) =>
+                position.itemLeadingEdge < min.itemLeadingEdge ? position : min)
+            .index;
+        // Update the state with the new index
+        if (currentVisibleIndex != firstVisibleItemIndex) {
+          currentVisibleIndex = firstVisibleItemIndex;
+          setState(() {
+            //currentVisibleIndex++;
+
+            _cupSelectController.text = (currentVisibleIndex + 1).toString();
+          });
+        }
+        //print(FocusScope.of(context).focusedChild);
+        // if (FocusScope.of(context).focusedChild == null) {
+        //   _focusNode.requestFocus();
+        // }
+      }
+    });
     // setState(() {
     //   //parseConfig(path.join(widget.packPath, 'config.txt'));
     //   //print(cups.length);
@@ -798,7 +832,10 @@ N N$nintendoTracksString | """
   @override
   Widget build(BuildContext context) {
     //rebuildAllChildren(context);
-
+    int totalCups = cups.length +
+        (editArena ? arenaCups.length : 0) +
+        (keepNintendo ? nintendoCups.length : 0) +
+        (wiimsCup ? 1 : 0);
     Widget buildSortingAndFilterButtons() {
       return Padding(
         padding: const EdgeInsets.only(top: 8, right: 50),
@@ -954,249 +991,296 @@ N N$nintendoTracksString | """
       );
     }
 
-    return RawKeyboardListener(
-      focusNode: _focusNode,
-      autofocus: true,
-      onKey: (RawKeyEvent event) {
-        if (event.isKeyPressed(LogicalKeyboardKey.keyS) &&
-            event.isControlPressed) {
-          // Ctrl + S is pressed, call the saveConfig function
-          saveConfig(context);
-          _focusNode.requestFocus();
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "Track config GUI",
-            style: TextStyle(color: Colors.black),
-          ),
-          backgroundColor: Colors.amber,
-          iconTheme: IconThemeData(color: Colors.red.shade700),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Track config GUI",
+          style: TextStyle(color: Colors.black),
         ),
-        body: Stack(
-          children: [
-            Visibility(
-              visible: cups.isEmpty && !keepNintendo && !editArena,
-              child: Center(
-                child: ElevatedButton(
-                  style: const ButtonStyle(
-                    fixedSize: MaterialStatePropertyAll(Size(200, 100)),
-                    backgroundColor: MaterialStatePropertyAll(Colors.amber),
-                  ),
-                  onPressed: () => bulkImport(),
-                  child: const Text(
-                    "Import all myTracks",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, color: Colors.black87),
-                  ),
+        backgroundColor: Colors.amber,
+        iconTheme: IconThemeData(color: Colors.red.shade700),
+      ),
+      body: Stack(
+        children: [
+          Visibility(
+            visible: cups.isEmpty && !keepNintendo && !editArena,
+            child: Center(
+              child: ElevatedButton(
+                style: const ButtonStyle(
+                  fixedSize: MaterialStatePropertyAll(Size(200, 100)),
+                  backgroundColor: MaterialStatePropertyAll(Colors.amber),
+                ),
+                onPressed: () => bulkImport(),
+                child: const Text(
+                  "Import all myTracks",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, color: Colors.black87),
                 ),
               ),
             ),
-            NotificationListener<CupAskedToBeMoved>(
-              onNotification: cupShouldMove,
-              child: NotificationListener<RowChangedValue>(
-                onNotification: rowChangedValue,
-                child: NotificationListener<DeleteModeUpdated>(
-                  onNotification: deleteHeaderPressed,
-                  child: NotificationListener<AddTrackRequest>(
-                    onNotification: addEmptyRow,
-                    child: NotificationListener<CupNameChangedValue>(
-                      onNotification: updateCupName,
-                      child: NotificationListener<RowDeletePressed>(
-                        onNotification: rowAskedForDeletionNotification,
-                        child: Column(
-                          children: [
-                            buildSortingAndFilterButtons(),
-                            buildDebugModeButton(),
-                            Expanded(
-                              child: ScrollConfiguration(
-                                behavior: ScrollConfiguration.of(context)
-                                    .copyWith(scrollbars: false),
-                                child: ScrollablePositionedList.builder(
-                                    itemScrollController: itemScrollController,
-
-                                    //controller: _controller,
-                                    // prototypeItem: CupTable(
-                                    //   0,
-                                    //   arenaCups[0].cupName,
-                                    //   arenaCups[0].tracks,
-                                    //   widget.packPath,
-                                    //   0,
-                                    // ),
-                                    itemCount: cups.length +
-                                        (editArena ? arenaCups.length : 0) +
-                                        (keepNintendo
-                                            ? nintendoCups.length
-                                            : 0) +
-                                        (wiimsCup ? 1 : 0),
-                                    itemBuilder: (context, index) {
-                                      int cupIndex = index -
-                                          (editArena ? arenaCups.length : 0);
-                                      if (index < 2 && editArena) {
-                                        // Arena Cups
-
-                                        return CupTable(
-                                          index - 2,
-                                          arenaCups[index].cupName,
-                                          arenaCups[index].tracks,
-                                          widget.packPath,
-                                          index - 2,
-                                          isDisabled: false,
-                                        );
-                                      } else if (keepNintendo &&
-                                          cupIndex >= 0 &&
-                                          cupIndex < 8) {
-                                        return IgnorePointer(
-                                          ignoring: true,
-                                          child: CupTable(
-                                              cupIndex + 1,
-                                              nintendoCups[cupIndex].cupName,
-                                              nintendoCups[cupIndex].tracks,
-                                              widget.packPath,
-                                              cupIndex + 1,
-                                              isDisabled: true),
-                                        );
-                                      } else if (wiimsCup && cupIndex == 8) {
-                                        return IgnorePointer(
-                                          ignoring: true,
-                                          child: CupTable(
-                                            9,
-                                            'Wiimms Cup',
-                                            [
-                                              Track('All Tracks', '0', '0',
-                                                  'Random', TrackType.base),
-                                              Track('Original Tracks', '0', '0',
-                                                  'Random', TrackType.base),
-                                              Track("Custom Tracks", '0', '0',
-                                                  'Random', TrackType.base),
-                                              Track('New Tracks', '0', '0',
-                                                  'Random', TrackType.base)
-                                            ],
-                                            widget.packPath,
-                                            9,
-                                            isDisabled: true,
-                                          ),
-                                        );
-                                      }
-
-                                      if (cupIndex -
-                                              (keepNintendo
-                                                  ? nintendoCups.length
-                                                  : 0) <
-                                          0) {
-                                        return const SizedBox.shrink();
-                                      }
-
-                                      cupIndex = cupIndex -
+          ),
+          NotificationListener<CupAskedToBeMoved>(
+            onNotification: cupShouldMove,
+            child: NotificationListener<RowChangedValue>(
+              onNotification: rowChangedValue,
+              child: NotificationListener<DeleteModeUpdated>(
+                onNotification: deleteHeaderPressed,
+                child: NotificationListener<AddTrackRequest>(
+                  onNotification: addEmptyRow,
+                  child: NotificationListener<CupNameChangedValue>(
+                    onNotification: updateCupName,
+                    child: NotificationListener<RowDeletePressed>(
+                      onNotification: rowAskedForDeletionNotification,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Positioned(
+                            width: 80,
+                            height: 150,
+                            top: MediaQuery.of(context).size.height /
+                                6, // Centra verticalmente
+                            right: 0, // Posiziona a destra
+                            child: Container(
+                              width: 70,
+                              height: 140,
+                              margin: EdgeInsets.symmetric(horizontal: 10),
+                              padding: EdgeInsets.all(10),
+                              color: Colors.red,
+                              child: Column(
+                                children: [
+                                  TextField(
+                                    key: _cupIndexTextfield,
+                                    focusNode: _focusNode,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                    ),
+                                    decoration: InputDecoration(
+                                      border: const OutlineInputBorder(),
+                                      hintText: totalCups != 0 ? "1" : "0",
+                                    ),
+                                    controller: _cupSelectController,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(cups
+                                          .length
+                                          .toString()
+                                          .length), // Limita il numero di cifre
+                                      _NumberRangeFormatter(max: totalCups),
+                                    ],
+                                    onSubmitted: (String value) => {
+                                      itemScrollController.jumpTo(
+                                          index: int.parse(value) - 1)
+                                    },
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                  Text(
+                                    "/${totalCups}",
+                                    style: const TextStyle(fontSize: 10),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Column(
+                            children: [
+                              buildSortingAndFilterButtons(),
+                              buildDebugModeButton(),
+                              Expanded(
+                                child: ScrollConfiguration(
+                                  behavior: ScrollConfiguration.of(context)
+                                      .copyWith(scrollbars: false),
+                                  child: ScrollablePositionedList.builder(
+                                      itemScrollController:
+                                          itemScrollController,
+                                      itemPositionsListener:
+                                          itemPositionsListener,
+                                      //controller: _controller,
+                                      // prototypeItem: CupTable(
+                                      //   0,
+                                      //   arenaCups[0].cupName,
+                                      //   arenaCups[0].tracks,
+                                      //   widget.packPath,
+                                      //   0,
+                                      // ),
+                                      itemCount: cups.length +
+                                          (editArena ? arenaCups.length : 0) +
                                           (keepNintendo
                                               ? nintendoCups.length
-                                              : 0);
-                                      if (keepNintendo && wiimsCup) {
-                                        cupIndex = cupIndex - 1;
-                                      }
+                                              : 0) +
+                                          (wiimsCup ? 1 : 0),
+                                      itemBuilder: (context, index) {
+                                        int cupIndex = index -
+                                            (editArena ? arenaCups.length : 0);
+                                        if (index < 2 && editArena) {
+                                          // Arena Cups
 
-                                      if (cupIndex >= cups.length) {
-                                        return const SizedBox.shrink();
-                                      }
-                                      return RepaintBoundary(
-                                        child: CupTable(
-                                            cupIndex,
-                                            cups[cupIndex].cupName,
-                                            cups[cupIndex].tracks,
+                                          return CupTable(
+                                            index - 2,
+                                            arenaCups[index].cupName,
+                                            arenaCups[index].tracks,
                                             widget.packPath,
-                                            cupIndex +
-                                                1 +
+                                            index - 2,
+                                            isDisabled: false,
+                                          );
+                                        } else if (keepNintendo &&
+                                            cupIndex >= 0 &&
+                                            cupIndex < 8) {
+                                          return IgnorePointer(
+                                            ignoring: true,
+                                            child: CupTable(
+                                                cupIndex + 1,
+                                                nintendoCups[cupIndex].cupName,
+                                                nintendoCups[cupIndex].tracks,
+                                                widget.packPath,
+                                                cupIndex + 1,
+                                                isDisabled: true),
+                                          );
+                                        } else if (wiimsCup && cupIndex == 8) {
+                                          return IgnorePointer(
+                                            ignoring: true,
+                                            child: CupTable(
+                                              9,
+                                              'Wiimms Cup',
+                                              [
+                                                Track('All Tracks', '0', '0',
+                                                    'Random', TrackType.base),
+                                                Track(
+                                                    'Original Tracks',
+                                                    '0',
+                                                    '0',
+                                                    'Random',
+                                                    TrackType.base),
+                                                Track("Custom Tracks", '0', '0',
+                                                    'Random', TrackType.base),
+                                                Track('New Tracks', '0', '0',
+                                                    'Random', TrackType.base)
+                                              ],
+                                              widget.packPath,
+                                              9,
+                                              isDisabled: true,
+                                            ),
+                                          );
+                                        }
+
+                                        if (cupIndex -
                                                 (keepNintendo
                                                     ? nintendoCups.length
-                                                    : 0) +
-                                                (wiimsCup ? 1 : 0) -
-                                                (!keepNintendo && wiimsCup
-                                                    ? 1
-                                                    : 0)),
-                                      );
-                                    }),
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 140,
-                              ),
-                              child: Divider(),
-                            ),
-                            SizedBox(
-                              width: 380,
-                              height: 40,
-                              child: ElevatedButton(
-                                style: TextButton.styleFrom(
-                                    backgroundColor: Colors.red),
-                                child: const Text(
-                                  "Add cup",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                onPressed: () {
-                                  //itemScrollController.jumpTo(index: 150);
+                                                    : 0) <
+                                            0) {
+                                          return const SizedBox.shrink();
+                                        }
 
-                                  setState(() {
-                                    cups.add(
-                                        Cup('"Cup #${cups.length + 1}"', []));
-                                  });
-                                  //_scrollDown();
-                                },
+                                        cupIndex = cupIndex -
+                                            (keepNintendo
+                                                ? nintendoCups.length
+                                                : 0);
+                                        if (keepNintendo && wiimsCup) {
+                                          cupIndex = cupIndex - 1;
+                                        }
+
+                                        if (cupIndex >= cups.length) {
+                                          return const SizedBox.shrink();
+                                        }
+                                        return RepaintBoundary(
+                                          child: CupTable(
+                                              cupIndex,
+                                              cups[cupIndex].cupName,
+                                              cups[cupIndex].tracks,
+                                              widget.packPath,
+                                              cupIndex +
+                                                  1 +
+                                                  (keepNintendo
+                                                      ? nintendoCups.length
+                                                      : 0) +
+                                                  (wiimsCup ? 1 : 0) -
+                                                  (!keepNintendo && wiimsCup
+                                                      ? 1
+                                                      : 0)),
+                                        );
+                                      }),
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: SizedBox(
-                                  width: 400,
-                                  height: 40,
-                                  child: ElevatedButton(
-                                    style: const ButtonStyle(
-                                        backgroundColor:
-                                            MaterialStatePropertyAll(
-                                                Colors.amberAccent)),
-                                    child: const Text(
-                                      "Save config",
-                                      style: TextStyle(color: Colors.black87),
-                                    ),
-                                    onPressed: () => {
-                                      saveConfig(context),
-                                      showDialog(
-                                          context: context,
-                                          builder: (context) {
-                                            Future.delayed(
-                                                const Duration(
-                                                    milliseconds: 500), () {
-                                              Navigator.of(context).pop(true);
-                                            });
-                                            return const AlertDialog(
-                                              content: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Text("Saved"),
-                                                  Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: 8.0),
-                                                    child: Icon(Icons.thumb_up),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          })
-                                    },
-                                  )),
-                            )
-                          ],
-                        ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 140,
+                                ),
+                                child: Divider(),
+                              ),
+                              SizedBox(
+                                width: 380,
+                                height: 40,
+                                child: ElevatedButton(
+                                  style: TextButton.styleFrom(
+                                      backgroundColor: Colors.red),
+                                  child: const Text(
+                                    "Add cup",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  onPressed: () {
+                                    //itemScrollController.jumpTo(index: 150);
+
+                                    setState(() {
+                                      cups.add(
+                                          Cup('"Cup #${cups.length + 1}"', []));
+                                    });
+                                    //_scrollDown();
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: SizedBox(
+                                    width: 400,
+                                    height: 40,
+                                    child: ElevatedButton(
+                                      style: const ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStatePropertyAll(
+                                                  Colors.amberAccent)),
+                                      child: const Text(
+                                        "Save config",
+                                        style: TextStyle(color: Colors.black87),
+                                      ),
+                                      onPressed: () => {
+                                        saveConfig(context),
+                                        showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              Future.delayed(
+                                                  const Duration(
+                                                      milliseconds: 500), () {
+                                                Navigator.of(context).pop(true);
+                                              });
+                                              return const AlertDialog(
+                                                content: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text("Saved"),
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 8.0),
+                                                      child:
+                                                          Icon(Icons.thumb_up),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            })
+                                      },
+                                    )),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1235,4 +1319,25 @@ N N$nintendoTracksString | """
 //       itemScrollController.jumpTo(index: newIndex);
 //     }
 //   }
+}
+
+class _NumberRangeFormatter extends TextInputFormatter {
+  final int max;
+
+  _NumberRangeFormatter({required this.max});
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    final intValue = int.tryParse(newValue.text);
+    if (intValue == null || intValue < 1 || intValue > max) {
+      return oldValue; // Ritorna il vecchio valore se l'input non è valido
+    }
+
+    return newValue;
+  }
 }
