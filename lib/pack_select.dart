@@ -129,7 +129,10 @@ class _PackSelectState extends State<PackSelect> {
                     "it will be extracted into a folder and it will be used to get the files we want to mod."),
                 Padding(
                   padding: const EdgeInsets.only(top: 20.0),
-                  child: ElevatedButton(
+                    child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
                     onPressed: () async => {
                       result = await FilePicker.platform.pickFiles(
                           type: FileType.custom,
@@ -156,7 +159,7 @@ class _PackSelectState extends State<PackSelect> {
                     child: Text(
                       "Select File",
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Colors.white,
                         fontSize:
                             Theme.of(context).textTheme.headlineSmall?.fontSize,
                       ),
@@ -181,6 +184,19 @@ class _PackSelectState extends State<PackSelect> {
                                     .headlineSmall
                                     ?.fontSize),
                           ),
+                          
+                        ),     Padding(
+                          padding: const EdgeInsets.only(top: 12.0),
+                          child: Text(
+                            "This may take several minutes, don't exit the program.",
+                            style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium?.fontSize
+                                    ),
+                          ),
+                          
                         )
                       ],
                     ),

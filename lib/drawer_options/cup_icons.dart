@@ -11,7 +11,8 @@ Future<int?> getCupIconSizeFromLpar(File lpar) async {
   }
   List<String> lines = await lpar.readAsLines();
   for (String line in lines) {
-    if (line.contains('CUP-ICON-SIZE')) {
+    if (line.contains(RegExp(r'CUP-ICON-SIZE\s+='))) {
+      
       return int.tryParse(line.split('=')[1].trim());
     }
   }

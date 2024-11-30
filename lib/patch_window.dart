@@ -327,7 +327,7 @@ Future<File> createBigImage(Directory iconDir, int nCups,
   }
   File mergedFile = File(path.join(iconDir.path, 'merged.png'));
   img.Image mergedImage = await newMergeImages(iconFileList, size: imageSize);
-
+  
   await mergedFile.writeAsBytes(img.encodePng(mergedImage));
 
   return mergedFile;
